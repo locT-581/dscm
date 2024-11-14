@@ -8,6 +8,16 @@ export default interface Enviro {
   year: string;
 }
 
+export interface EnviroBlockchainType {
+  id: bigint;
+  assessType: string;
+  date: string;
+  account: string;
+  document: string; // JSON string
+  month: string;
+  year: string;
+}
+
 export interface ContractDocument {
   id: string;
   energy: string;
