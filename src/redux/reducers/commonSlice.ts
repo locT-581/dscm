@@ -1,10 +1,10 @@
-import Web3 from "web3";
 import { Contract } from "web3-eth-contract";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import OrderType from "@/types/order";
 import { LatLong, OriginAbi } from "@/types/common";
 import Shipment from "@/types/shipment";
+import Product from "@/types/product";
 
 interface InitState {
     error?:
@@ -15,12 +15,12 @@ interface InitState {
         | undefined;
     loading?: boolean;
     account: string | undefined;
-    web3instance: unknown;
 
     contract: Contract<OriginAbi> | undefined;
     orders: OrderType[] | undefined;
     latlong: LatLong[] | undefined;
     shipments: Shipment[] | undefined;
+    products: Product[] | undefined;
 }
 
 const initialState: InitState = {
@@ -28,13 +28,12 @@ const initialState: InitState = {
     loading: true,
 
     account: undefined,
-    web3instance: undefined,
-
     contract: undefined,
 
     orders: undefined,
     latlong: undefined,
     shipments: undefined,
+    products: undefined,
 };
 
 const commonSlice = createSlice({
@@ -50,9 +49,6 @@ const commonSlice = createSlice({
         setAccount(state, action: PayloadAction<string>) {
             state.account = action.payload;
         },
-        setWeb3Instance(state, action: PayloadAction<Web3>) {
-            state.web3instance = action.payload;
-        },
         setContract(state, action) {
             state.contract = action.payload;
         },
@@ -65,11 +61,14 @@ const commonSlice = createSlice({
         setShipments(state, action) {
             state.shipments = action.payload;
         },
+        setProducts(state, action) {
+            state.products = action.payload;
+        },
     },
     extraReducers: () => {},
 });
 
 const { actions, reducer } = commonSlice;
-export const { setError, setLoading, setAccount, setWeb3Instance, setContract, setOrders, setLatlong, setShipments } =
+export const { setError, setLoading, setAccount, setContract, setOrders, setLatlong, setShipments, setProducts } =
     actions;
 export default reducer;
