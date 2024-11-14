@@ -9,14 +9,18 @@ export default function Order({ orders }: IOrderProps) {
         <>
             <h3 className="table-title">Orders</h3>
             <table className="table">
-                <tr>
-                    <th className="ordernum">Order #</th>
-                    <th>Order Name</th>
-                    <th>Order Quantity</th>
-                    <th>Order Unit</th>
-                    <th>Date Time Added</th>
-                </tr>
-                <OrderList orders={orders} />
+                <thead>
+                    <tr>
+                        <th className="ordernum">Order #</th>
+                        <th>Order Name</th>
+                        <th>Order Quantity</th>
+                        <th>Order Unit</th>
+                        <th>Date Time Added</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <OrderList orders={orders} />
+                </tbody>
             </table>
         </>
     );
