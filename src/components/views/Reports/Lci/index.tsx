@@ -2,7 +2,7 @@
 
 import Web3 from "web3";
 import { Bar } from "react-chartjs-2";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   Chart,
@@ -18,7 +18,7 @@ import {
 import { Assessment } from "@/lib/abis";
 
 import Sidebar from "@/components/Sidebar";
-import LCI from "@/types/LCI";
+import LCI, { LCIBlockchain } from "@/types/LCI";
 
 Chart.register(BarElement, PointElement, BarController, LineController, PieController);
 
@@ -26,14 +26,16 @@ export default function LciReports() {
   const web3instance = useRef<Web3 | null>(null);
 
   const [LCIs, setLCIs] = useState<LCI[]>([]);
-  const [form, setForm] = useState([]);
-  const [product, setProduct] = useState([]);
+  const [form, setForm] = useState<LCI["document"][]>([]);
+  const [product, setProduct] = useState<LCI["product"][]>([]);
+
   const [month, setMonth] = useState<string[]>([]);
   const [year, setYear] = useState<string[]>([]);
+
   const [formProduct, setFormProduct] = useState("");
   const [formMonth, setFormMonth] = useState("");
   const [formYear, setFormYear] = useState("");
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<LCI[]>([]);
 
   // const chart = ["energyChartData", "waterChartData", "materialChartData"];
 
@@ -68,11 +70,16 @@ export default function LciReports() {
   const [optionsE, setOptionsE] = useState<ChartOptions<"bar">>({});
   const [optionsW, setOptionsW] = useState<ChartOptions<"bar">>({});
   const [optionsWa, setOptionsWa] = useState<ChartOptions<"bar">>({});
-  const [optionsG, setOptionsG] = useState<ChartOptions<"bar">>({});
+  const [optionsG, setOptionsG] = useState<ChartOptions<"bar">>({
+    responsive: true,
+    maintainAspectRatio: false,
+  });
   const [optionsM, setOptionsM] = useState<ChartOptions<"bar">>({});
   const [optionsL, setOptionsL] = useState<ChartOptions<"bar">>({});
 
-  const dataE = form.map((item, i) => Object.assign({}, item, LCIs[i]));
+  const dataE = useMemo(() => {
+    return form.map((item, i) => Object.assign({}, item, LCIs[i]));
+  }, [form, LCIs]);
 
   const unique = [...new Set(product.map((item) => item))];
   const uniqueMonth = [...new Set(month.map((item) => item))];
@@ -101,15 +108,18 @@ export default function LciReports() {
         const LCICount = await contract.methods.LCICount().call();
         //Load LCIs
         for (let i = 1; i <= LCICount; i++) {
-          const newLCI = await contract.methods.LCIs(i).call();
-          setLCIs((LCIs) => [...LCIs, newLCI]);
+          const newLCI: LCIBlockchain = await contract.methods.LCIs(i).call();
+
+          setLCIs((LCIs) => [
+            ...LCIs,
+            { ...newLCI, document: JSON.parse(newLCI.document), id: Number(newLCI.id).toString() } as unknown as LCI,
+          ]);
           setMonth((LCIs) => [...LCIs, newLCI.month]);
           setYear((LCIs) => [...LCIs, newLCI.year]);
-        }
-        for (let i = 1; i <= LCICount; i++) {
-          const newLCI = await contract.methods.LCIs(i).call();
+
           setForm((LCIs) => [...LCIs, JSON.parse(newLCI.document)]);
-          setProduct((LCIs) => [...LCIs, JSON.parse(newLCI.document).product]);
+
+          setProduct((products) => [...products, JSON.parse(newLCI.document).product]);
         }
       } else {
         window.alert("Assessment contract is not deployed to the detected network");
@@ -153,23 +163,23 @@ export default function LciReports() {
 
   useEffect(() => {
     const charts = async () => {
-      const energy = data.map((a) => parseInt(a.energy));
-      const renewenergy = data.map((a) => parseInt(a.renewenergy));
+      const energy = data.map((a) => parseInt(a.document.energy));
+      const renewenergy = data.map((a) => parseInt(a.document.renewenergy));
       const id = data.map((a) => a.process + " (" + a.month + " " + a.year + ")");
-      const water = data.map((a) => parseInt(a.water));
-      const waterrec = data.map((a) => parseInt(a.waterrec));
-      const material = data.map((a) => parseInt(a.material));
-      const materialrec = data.map((a) => parseInt(a.materialrec));
-      const ghg = data.map((a) => parseFloat(a.ghg));
-      const waterpol = data.map((a) => parseInt(a.waterpol));
-      const landpol = data.map((a) => parseInt(a.landpol));
-      const air = data.map((a) => parseFloat(a.air));
-      const hazmat = data.map((a) => parseInt(a.hazmat));
-      const solidwaste = data.map((a) => parseInt(a.solidwaste));
-      const waterwaste = data.map((a) => parseInt(a.waterwaste));
-      const hazwaste = data.map((a) => parseInt(a.hazwaste));
-      const solidwasterec = data.map((a) => parseInt(a.solidwasterec));
-      const waterwasterec = data.map((a) => parseInt(a.waterwasterec));
+      const water = data.map((a) => parseInt(a.document.water));
+      const waterrec = data.map((a) => parseInt(a.document.waterrec));
+      const material = data.map((a) => parseInt(a.document.material));
+      const materialrec = data.map((a) => parseInt(a.document.materialrec));
+      const ghg = data.map((a) => parseFloat(a.document.ghg));
+      const waterpol = data.map((a) => parseInt(a.document.waterpol));
+      const landpol = data.map((a) => parseInt(a.document.landpol));
+      const air = data.map((a) => parseFloat(a.document.air));
+      const hazmat = data.map((a) => parseInt(a.document.hazmat));
+      const solidwaste = data.map((a) => parseInt(a.document.solidwaste));
+      const waterwaste = data.map((a) => parseInt(a.document.waterwaste));
+      const hazwaste = data.map((a) => parseInt(a.document.hazwaste));
+      const solidwasterec = data.map((a) => parseInt(a.document.solidwasterec));
+      const waterwasterec = data.map((a) => parseInt(a.document.waterwasterec));
 
       // const energy = data.map(a => parseInt(a.energy)/parseInt(a.batch))
       // const renewenergy = data.map(a => parseInt(a.renewenergy)/parseInt(a.batch))
@@ -188,201 +198,185 @@ export default function LciReports() {
       // const hazwaste = data.map(a => parseInt(a.hazwaste)/parseInt(a.batch))
       // const solidwasterec = data.map(a => parseInt(a.solidwasterec)/parseInt(a.batch))
       // const waterwasterec = data.map(a => parseInt(a.waterwasterec)/parseInt(a.batch))
-      setEnergyChartData(
-        {
-          labels: id,
-          datasets: [
-            {
-              label: "Energy Consumption",
-              data: energy,
-              borderColor: "rgb(252, 217, 0)",
-              backgroundColor: "rgb(252, 217, 0)",
-            },
-            {
-              label: "Renewable energy Consumption",
-              data: renewenergy,
-              borderColor: "rgb(184,225,133)",
-              backgroundColor: "rgb(184,225,133)",
-            },
-          ],
-        },
-        setOptionsE({
-          responsive: true,
-          scales: {
-            y: {
-              title: {
-                display: true,
-                text: "Energy (kWh)",
-              },
+      setEnergyChartData({
+        labels: id,
+        datasets: [
+          {
+            label: "Energy Consumption",
+            data: energy,
+            borderColor: "rgb(252, 217, 0)",
+            backgroundColor: "rgb(252, 217, 0)",
+          },
+          {
+            label: "Renewable energy Consumption",
+            data: renewenergy,
+            borderColor: "rgb(184,225,133)",
+            backgroundColor: "rgb(184,225,133)",
+          },
+        ],
+      });
+      setOptionsE({
+        responsive: true,
+        scales: {
+          y: {
+            title: {
+              display: true,
+              text: "Energy (kWh)",
             },
           },
-        })
-      );
+        },
+      });
 
-      setWaterChartData(
-        {
-          labels: id,
-          datasets: [
-            {
-              label: "Water Consumption",
-              data: water,
-              borderColor: "rgb(171,217,233)",
-              backgroundColor: "rgba(171,217,233)",
-            },
-            {
-              label: "Recycled or Reused Water Consumption",
-              data: waterrec,
-              borderColor: "rgb(98,195,165)",
-              backgroundColor: "rgba(98,195,165)",
-            },
-          ],
-        },
-        setOptionsW({
-          responsive: true,
-          scales: {
-            y: {
-              title: {
-                display: true,
-                text: "Water (m3)",
-              },
+      setWaterChartData({
+        labels: id,
+        datasets: [
+          {
+            label: "Water Consumption",
+            data: water,
+            borderColor: "rgb(171,217,233)",
+            backgroundColor: "rgba(171,217,233)",
+          },
+          {
+            label: "Recycled or Reused Water Consumption",
+            data: waterrec,
+            borderColor: "rgb(98,195,165)",
+            backgroundColor: "rgba(98,195,165)",
+          },
+        ],
+      });
+      setOptionsW({
+        responsive: true,
+        scales: {
+          y: {
+            title: {
+              display: true,
+              text: "Water (m3)",
             },
           },
-        })
-      );
+        },
+      });
 
-      setMaterialChartData(
-        {
-          labels: id,
-          datasets: [
-            {
-              label: "Material Consumption",
-              data: material,
-              borderColor: "rgb(253,174,97)",
-              backgroundColor: "rgba(253,174,97)",
-            },
-            {
-              label: "Recycled or Reused Material Consumption",
-              data: materialrec,
-              borderColor: "rgb(226,117,174)",
-              backgroundColor: "rgba(226,117,174)",
-            },
-            {
-              label: "Hazardous Material Consumption",
-              data: hazmat,
-              borderColor: "rgb(118,111,178)",
-              backgroundColor: "rgba(118,111,178)",
-            },
-          ],
-        },
-        setOptionsM({
-          responsive: true,
-          scales: {
-            y: {
-              title: {
-                display: true,
-                text: "Material (kg)",
-              },
+      setMaterialChartData({
+        labels: id,
+        datasets: [
+          {
+            label: "Material Consumption",
+            data: material,
+            borderColor: "rgb(253,174,97)",
+            backgroundColor: "rgba(253,174,97)",
+          },
+          {
+            label: "Recycled or Reused Material Consumption",
+            data: materialrec,
+            borderColor: "rgb(226,117,174)",
+            backgroundColor: "rgba(226,117,174)",
+          },
+          {
+            label: "Hazardous Material Consumption",
+            data: hazmat,
+            borderColor: "rgb(118,111,178)",
+            backgroundColor: "rgba(118,111,178)",
+          },
+        ],
+      });
+      setOptionsM({
+        responsive: true,
+        scales: {
+          y: {
+            title: {
+              display: true,
+              text: "Material (kg)",
             },
           },
-        })
-      );
+        },
+      });
 
-      setGhgChartData(
-        {
-          labels: id,
-          datasets: [
-            {
-              label: "Greenhouse Gas Emission",
-              data: ghg,
-              borderColor: "rgb(213,49,36)",
-              backgroundColor: "rgba(213,49,36)",
+      setGhgChartData({
+        labels: id,
+        datasets: [
+          {
+            label: "Greenhouse Gas Emission",
+            data: ghg,
+            borderColor: "rgb(213,49,36)",
+            backgroundColor: "rgba(213,49,36)",
+          },
+          {
+            label: "Air Pollution",
+            data: air,
+            borderColor: "rgb(108, 117, 125)",
+            backgroundColor: "rgba(108, 117, 125)",
+          },
+        ],
+      });
+      setOptionsG({
+        responsive: true,
+        scales: {
+          y: {
+            title: {
+              display: true,
+              text: "Emmision (tonnes)",
             },
-            {
-              label: "Air Pollution",
-              data: air,
-              borderColor: "rgb(108, 117, 125)",
-              backgroundColor: "rgba(108, 117, 125)",
-            },
-          ],
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
           },
         },
-        setOptionsG({
-          responsive: true,
-          scales: {
-            y: {
-              title: {
-                display: true,
-                text: "Emmision (tonnes)",
-              },
-            },
-          },
-        })
-      );
+      });
 
-      setLandChartData(
-        {
-          labels: id,
-          datasets: [
-            {
-              label: "Land Pollution",
-              data: landpol,
-              borderColor: "rgb(236,113,20)",
-              backgroundColor: "rgba(236,113,20)",
-            },
-          ],
-        },
-        setOptionsL({
-          responsive: true,
-          scales: {
-            y: {
-              title: {
-                display: true,
-                text: "Land area (m2)",
-              },
+      setLandChartData({
+        labels: id,
+        datasets: [
+          {
+            label: "Land Pollution",
+            data: landpol,
+            borderColor: "rgb(236,113,20)",
+            backgroundColor: "rgba(236,113,20)",
+          },
+        ],
+      });
+      setOptionsL({
+        responsive: true,
+        scales: {
+          y: {
+            title: {
+              display: true,
+              text: "Land area (m2)",
             },
           },
-        })
-      );
+        },
+      });
 
-      setPollutionChartData(
-        {
-          labels: id,
-          datasets: [
-            {
-              label: "Solid Waste",
-              data: solidwaste,
-              borderColor: "rgb(88, 49, 1)",
-              backgroundColor: "rgba(88, 49, 1)",
-            },
-            {
-              label: "Recycled or Reused Solid Waste",
-              data: solidwasterec,
-              borderColor: "rgb(190, 140, 99)",
-              backgroundColor: "rgba(190, 140, 99)",
-            },
-            {
-              label: "Hazardous Waste",
-              data: hazwaste,
-              borderColor: "rgb(201, 24, 74)",
-              backgroundColor: "rgba(201, 24, 74)",
-            },
-          ],
-        },
-        setOptionsWa({
-          responsive: true,
-          scales: {
-            y: {
-              title: {
-                display: true,
-                text: "Waste (kg)",
-              },
+      setPollutionChartData({
+        labels: id,
+        datasets: [
+          {
+            label: "Solid Waste",
+            data: solidwaste,
+            borderColor: "rgb(88, 49, 1)",
+            backgroundColor: "rgba(88, 49, 1)",
+          },
+          {
+            label: "Recycled or Reused Solid Waste",
+            data: solidwasterec,
+            borderColor: "rgb(190, 140, 99)",
+            backgroundColor: "rgba(190, 140, 99)",
+          },
+          {
+            label: "Hazardous Waste",
+            data: hazwaste,
+            borderColor: "rgb(201, 24, 74)",
+            backgroundColor: "rgba(201, 24, 74)",
+          },
+        ],
+      });
+      setOptionsWa({
+        responsive: true,
+        scales: {
+          y: {
+            title: {
+              display: true,
+              text: "Waste (kg)",
             },
           },
-        })
-      );
+        },
+      });
 
       setWasteChartData({
         labels: id,
@@ -421,10 +415,14 @@ export default function LciReports() {
       <div className="center-chart">
         <div className="label-sel">
           <label>Select Product</label>
-          <select value={formProduct} onChange={(e) => setFormProduct(e.target.value)}>
-            <option value="" disabled selected hidden></option>
-            {unique.map((a) => {
-              return <option value={a}>{a} </option>;
+          <select defaultValue={unique[0]} value={formProduct} onChange={(e) => setFormProduct(e.target.value)}>
+            <option value="" disabled hidden></option>
+            {unique.map((a, i) => {
+              return (
+                <option key={i} value={a}>
+                  {a}{" "}
+                </option>
+              );
             })}
           </select>
         </div>
@@ -432,14 +430,22 @@ export default function LciReports() {
           <label>Filter by Date</label>
           <select value={formMonth} onChange={(e) => setFormMonth(e.target.value)}>
             <option value="" disabled selected hidden></option>
-            {uniqueMonth.map((a) => {
-              return <option value={a}>{a} </option>;
+            {uniqueMonth.map((a, i) => {
+              return (
+                <option key={i} value={a}>
+                  {a}{" "}
+                </option>
+              );
             })}
           </select>
           <select value={formYear} onChange={(e) => setFormYear(e.target.value)}>
             <option value="" disabled selected hidden></option>
-            {uniqueYear.map((a) => {
-              return <option value={a}>{a} </option>;
+            {uniqueYear.map((a, i) => {
+              return (
+                <option key={i} value={a}>
+                  {a}{" "}
+                </option>
+              );
             })}
           </select>
         </div>

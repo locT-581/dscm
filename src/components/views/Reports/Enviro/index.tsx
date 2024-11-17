@@ -199,8 +199,6 @@ export default function EnviroReport() {
     filter();
   }, [company, formMonth, formYear, dataE]);
 
-  console.log("00", data);
-
   useEffect(() => {
     const charts = async () => {
       const energy = data.map((a) => parseInt(a.energy));
