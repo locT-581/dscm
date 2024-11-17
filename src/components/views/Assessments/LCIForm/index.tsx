@@ -1,39 +1,38 @@
 "use client";
 
-import Web3 from "web3";
 import { useEffect, useRef, useState } from "react";
-import { Contract } from "web3-eth-contract"; // Import kiểu Contract từ Web3.js
+import Web3 from "web3";
 
-import { OriginAbi } from "@/types/common";
-import Enviro, { ContractDocument } from "@/types/enviro";
 import getDate from "@/utils/getDate";
+import { monthNumber, months } from "@/utils/const";
+
+import { Contract } from "web3-eth-contract"; // Import kiểu Contract từ Web3.js
+import { OriginAbi } from "@/types/common";
 import Sidebar from "@/components/Sidebar";
+import Product, { ProductBlockChain } from "@/types/product";
+import { Assessment, Origin } from "@/lib/abis";
 
-import Assessment from "../../../../build/contracts/Assessments.json";
-
-export default function EnviroForm() {
+export default function LCIForm() {
   const web3instance = useRef<Web3 | null>(null);
 
-  // const {register} = useForm();
-  const [contract, setContract] = useState<Contract<OriginAbi> | undefined>(undefined);
-  const [account, setAccount] = useState<string>();
-  const [enviroCount, setEnviroCount] = useState<number>(0);
-  const [enviros, setEnviros] = useState<Enviro[]>([]);
+  const [contract, setContract] = useState<Contract<OriginAbi> | undefined>();
+  const [account, setAccount] = useState<string>("");
+  const [LCICount, setLCICount] = useState<number>(0);
   const [date, setDate] = useState("");
   const [d, setD] = useState("");
-
+  const [products, setProducts] = useState<Product[]>([]);
+  const [product, setProduct] = useState<Product | undefined>();
+  const [process, setProcess] = useState("");
   const [monthYear, setMonthYear] = useState("");
   const [month, setMonth] = useState("");
   const [year, setYear] = useState("");
   const [energy, setEnergy] = useState("");
+  const [batch, setBatch] = useState("");
   const [renewenergy, setRenewenergy] = useState("");
   const [water, setWater] = useState("");
   const [waterrec, setWaterrec] = useState("");
   const [material, setMaterial] = useState("");
   const [materialrec, setMaterialrec] = useState("");
-  const [land, setLand] = useState("");
-  const [bio, setBio] = useState("");
-  const [sensitive, setSensitive] = useState("");
   const [ghg, setGhg] = useState("");
   const [waterpol, setWaterpol] = useState("");
   const [waterpoltype, setWaterpoltype] = useState<string[]>([]);
@@ -50,13 +49,6 @@ export default function EnviroForm() {
   const [waterwastedes, setWaterwastedes] = useState<string[]>([]);
   const [productrec, setProductrec] = useState("");
   const [ecolabel, setEcolabel] = useState("");
-  const [product, setProduct] = useState<string[]>([]);
-  const [envirostand, setEnvirostand] = useState("");
-  const [clean, setClean] = useState<string[]>([]);
-  const [envirosus, setEnvirosus] = useState("");
-  const [suppliers, setSuppliers] = useState("");
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
-  const monthNumber = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
 
   useEffect(() => {
     if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
@@ -76,16 +68,28 @@ export default function EnviroForm() {
       setAccount(accounts[0]);
       const networkId = await web3instance.current.eth.net.getId();
       const networkData = Assessment.networks[networkId as unknown as keyof typeof Assessment.networks];
+      const networkDataO = Origin.networks[networkId as unknown as keyof typeof Origin.networks];
+
       if (networkData) {
         //Fetch contract
         const contract = new web3instance.current.eth.Contract(Assessment.abi, networkData.address);
         setContract(contract);
-        const enviroCount: number = Number(await contract.methods.enviroCount().call());
-        setEnviroCount(enviroCount as unknown as number);
-        //Load Enviros
-        for (let i = 1; i <= enviroCount; i++) {
-          const newEnviro = await contract.methods.enviros(i).call();
-          setEnviros((enviros) => [...enviros, newEnviro as unknown as Enviro]);
+        const LCICount: number = await contract.methods.LCICount().call();
+        setLCICount(LCICount);
+        const contractO = new web3instance.current.eth.Contract(Origin.abi, networkDataO.address);
+        const productCount: number = await contractO.methods.productCount().call();
+
+        //Load products
+        for (let i = 1; i <= productCount; i++) {
+          const newProduct: ProductBlockChain = await contractO.methods.products(i).call();
+          setProducts((products) => [
+            ...products,
+            {
+              ...newProduct,
+              id: Number(newProduct.id).toString(),
+              process: JSON.parse(newProduct.process),
+            } as Product,
+          ]);
         }
       } else {
         window.alert("Assessment contract is not deployed to the detected network");
@@ -113,17 +117,16 @@ export default function EnviroForm() {
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const enviroForm: ContractDocument = {
-      id: (parseInt(enviroCount.toString()) + 1).toString(),
+    const LCIForm = {
+      id: (parseInt((Number(LCICount) ?? 0).toString()) + 1).toString(),
+      product: product?.id,
+      batch: batch,
       energy: energy,
       renewenergy: renewenergy,
       water: water,
       waterrec: waterrec,
       material: material,
       materialrec: materialrec,
-      land: land,
-      bio: bio,
-      sensitive: sensitive,
       ghg: ghg,
       waterpol: waterpol,
       waterpoltype: waterpoltype,
@@ -140,31 +143,27 @@ export default function EnviroForm() {
       waterwastedes: waterwastedes,
       productrec: productrec,
       ecolabel: ecolabel,
-      products: product,
-      envirostand: envirostand,
-      clean: clean,
-      envirosus: envirosus,
-      suppliers: suppliers,
     };
-    const document = JSON.stringify(enviroForm);
-    console.log("object");
+    const document = JSON.stringify(LCIForm);
     setD("now");
-    addEnviro({ date, document, month, year });
+    addLCI({ date, document, month, year, process });
   };
 
-  const addEnviro = ({
+  const addLCI = ({
     date,
     document,
     month,
     year,
+    process,
   }: {
     date: string;
     document: string;
     month: string;
     year: string;
+    process: string;
   }) => {
     contract?.methods
-      .addEnviro(date, document, month, year)
+      .addLCI(date, document, month, year, process)
       .send({ from: account })
       .once("receipt", () => {
         window.location.assign("http://localhost:3000/assessments");
@@ -175,27 +174,67 @@ export default function EnviroForm() {
     if (checked) {
       set((prev) => [...prev, name]);
     } else {
-      console.log("not checked");
+      console.log("");
     }
   };
 
   return (
     <div>
       <Sidebar />
-      <div className="LCI-container">
+      <div className="LCI-container text-black">
         <form className="LCI-form" onSubmit={onSubmit}>
           <div>
-            <h3>Enviromental Sustainability Assessment</h3>
+            <h3>Chu kì hàng tồn kho</h3>
             <div className="center">
               <div>
-                <label>Select Month/ Year</label>
-                <input type="month" required value={monthYear} onChange={(e) => setMonthYear(e.target.value)} />
+                <label>Lựa chọn tháng/năm</label>
+                <input type="month" value={monthYear} onChange={(e) => setMonthYear(e.target.value)} />
+              </div>
+              <div>
+                <label>Lựa chọn sản phẩm</label>
+                <select
+                  value={product?.name ?? ""}
+                  onChange={(e) => setProduct(products.find((p) => p.id == e.target.value))}
+                >
+                  <option value="" disabled selected hidden></option>
+                  {products.map((product, key) => {
+                    return (
+                      <option key={key} value={product.id}>
+                        {product.name}{" "}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+              <div>
+                <label>Lựa chọn quy trình sản xuất</label>
+                <select value={process} onChange={(e) => setProcess(e.target.value)}>
+                  <option value="" disabled selected hidden></option>
+                  {!!product
+                    ? product.process.map((process, i) => (
+                        <option key={i} value={process}>
+                          {product.process}{" "}
+                        </option>
+                      ))
+                    : null}
+                </select>
               </div>
             </div>
-            <fieldset className="monthly-kpi-env">
-              <legend>Monthly KPI Update</legend>
+            <fieldset className="monthly-kpi">
+              <legend>Cập nhật thông tin vòng đời sản phẩm</legend>
               <div className="center-form-input">
-                <label className="form-label">1 - Total amount of energy used per month</label>
+                <label>1 - Tổng số sản phẩm trong một lô sản phẩm</label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                  step=".001"
+                  value={batch}
+                  onChange={(e) => setBatch(e.target.value)}
+                />
+                <div></div>
+                <label>2 - Tổng số năng lượng sử dụng cho mỗi lô sản phẩm</label>
                 <input
                   type="number"
                   min="0"
@@ -204,10 +243,30 @@ export default function EnviroForm() {
                   value={energy}
                   onChange={(e) => setEnergy(e.target.value)}
                 />
-                <label className="wrap_text"> kWh/ month</label>
+                <label className="wrap_text"> kWh/Lô</label>
                 <div></div>
-                <label className="form-label">
-                  2 - Total amount of renewable energy used in energy consumption per month
+                {/* <label>
+                4- Choose the type(s) of renewable energy used in the product production
+                </label>
+                <div></div> 
+                    <input 
+                        name = "Solar energy" onChange={(e) => handleChange(e.target.name, e.target.checked)}
+                        type="checkbox" /><label className="wrap_text"> Solar energy</label> 
+                    <input 
+                        name = "Hydropower" onChange={(e) => handleChange(e.target.name, e.target.checked)}
+                        type="checkbox"/><label className="wrap_text"> Hydropower</label> 
+                    <input 
+                        name = "Wind energy" onChange={(e) => handleChange(e.target.name, e.target.checked)}
+                        type="checkbox"/><label className="wrap_text"> Wind energy</label>
+                    <input 
+                        name = "Biomass" onChange={(e) => handleChange(e.target.name, e.target.checked)}
+                        type="checkbox"/><label className="wrap_text"> Biomass</label> 
+                    <input 
+                        name = "Geothermal energy" onChange={(e) => handleChange(e.target.name, e.target.checked)}
+                        type="checkbox"/><label className="wrap_text"> Geothermal energy</label> 
+            <div></div>  */}
+                <label>
+                  3 - Công suất năng lượng tái tạo được sử dụng trong tiêu thụ năng lượng cho mỗi lô sản phẩm.
                 </label>
                 <input
                   type="number"
@@ -216,10 +275,10 @@ export default function EnviroForm() {
                   step=".001"
                   value={renewenergy}
                   onChange={(e) => setRenewenergy(e.target.value)}
-                />
-                <label className="wrap_text"> kWh/ month</label>
+                />{" "}
+                <label className="wrap_text"> kWh/Lô</label>
                 <div></div>
-                <label className="form-label">3 - Total amount of water used per month</label>
+                <label>4 - Tổng lượng nước đã sử dụng cho mỗi lô sản phẩm. </label>
                 <input
                   type="number"
                   min="0"
@@ -228,10 +287,10 @@ export default function EnviroForm() {
                   value={water}
                   onChange={(e) => setWater(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> m3/ month</label>
+                <label className="wrap_text"> m3/Lô</label>
                 <div></div>
-                <label className="form-label">
-                  4 - Total amount of recycled or reused water used in water consumption per month
+                <label>
+                  5 - Tổng lượng nước tái chế hoặc tái sử dụng được sử dụng trong lượng nước tiêu thụ mỗi lô sản phẩm
                 </label>
                 <input
                   type="number"
@@ -241,9 +300,9 @@ export default function EnviroForm() {
                   value={waterrec}
                   onChange={(e) => setWaterrec(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> m3/ month</label>
+                <label className="wrap_text"> m3/Lô</label>
                 <div></div>
-                <label className="form-label">5 - Total amount of materials other than water used per month</label>
+                <label>6 - Tổng lượng vật liệu không phải nước sử dụng cho mỗi lô sản phẩm.</label>
                 <input
                   type="number"
                   min="0"
@@ -252,11 +311,9 @@ export default function EnviroForm() {
                   value={material}
                   onChange={(e) => setMaterial(e.target.value)}
                 />{" "}
-                <label className="wrap_text">kg/ month</label>
+                <label className="wrap_text"> kg/ batch</label>
                 <div></div>
-                <label className="form-label">
-                  6 - Total amount of recycled or reused materials used in material consumption per month
-                </label>
+                <label>7 - Tổng lượng vật liệu tái chế hoặc tái sử dụng được sử dụng trong mỗi lô</label>
                 <input
                   type="number"
                   min="0"
@@ -265,11 +322,9 @@ export default function EnviroForm() {
                   value={materialrec}
                   onChange={(e) => setMaterialrec(e.target.value)}
                 />{" "}
-                <label className="wrap_text">kg/ month</label>
+                <label className="wrap_text"> kg/ batch</label>
                 <div></div>
-                <label className="form-label">
-                  7 - Total amount of greenhouse gas emission (CO2, CH4, N2O, HFCs, PFCs, SF6) generated per month
-                </label>
+                <label>8 - Tổng lượng phát thải khí nhà kính (CO2, CH4, N2O, HFC, PFC, SF6) được tạo ra mỗi mẻ</label>
                 <input
                   type="number"
                   min="0"
@@ -277,10 +332,10 @@ export default function EnviroForm() {
                   step=".001"
                   value={ghg}
                   onChange={(e) => setGhg(e.target.value)}
-                />
-                <label className="wrap_text"> tonnes of CO2e/ month</label>
+                />{" "}
+                <label className="wrap_text"> tonnes of CO2e/ batch</label>
                 <div></div>
-                <label className="form-label">8 - Total amount of water pollution generated per month</label>
+                <label>9 - Tổng lượng ô nhiễm nước phát sinh mỗi mẻ</label>
                 <input
                   type="number"
                   min="0"
@@ -289,35 +344,35 @@ export default function EnviroForm() {
                   value={waterpol}
                   onChange={(e) => setWaterpol(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> m3/ month</label>
+                <label className="wrap_text"> m3/ batch</label>
                 <div></div>
-                <label className="form-label">9 - Choose the type(s) of water pollution</label>
+                <label className="form-label">10 - Chọn (các) loại ô nhiễm nước cho mỗi mẻ</label>
                 <input
                   type="checkbox"
                   name="Oil"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
-                <label className="wrap_text"> Oil</label>
+                <label className="wrap_text"> Dầu</label>
                 <input
                   type="checkbox"
                   name="Fuel"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
-                <label className="wrap_text"> Fuel</label>
+                <label className="wrap_text"> Nhiên liệu</label>
                 <input
                   type="checkbox"
                   name="Wastes"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
-                <label className="wrap_text"> Wastes</label>
+                <label className="wrap_text"> Rác thải</label>
                 <input
                   type="checkbox"
                   name="Chemical"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
-                <label className="wrap_text"> Chemical</label>
+                <label className="wrap_text"> Hoá chất</label>
                 <div></div>
-                <label className="form-label">10 - Total amount of land pollution generated per month</label>
+                <label>11 - Total amount of land pollution generated per batch</label>
                 <input
                   type="number"
                   min="0"
@@ -325,10 +380,10 @@ export default function EnviroForm() {
                   step=".001"
                   value={landpol}
                   onChange={(e) => setLandpol(e.target.value)}
-                />{" "}
-                <label className="wrap_text"> m²/ month</label>
+                />
+                <label className="wrap_text"> m2/ batch</label>
                 <div></div>
-                <label className="form-label">11 - Choose the type(s) of land pollution</label>
+                <label className="form-label">12 - Choose the type(s) of land pollution per batch</label>
                 <input
                   type="checkbox"
                   name="Oil"
@@ -354,7 +409,7 @@ export default function EnviroForm() {
                 />
                 <label className="wrap_text"> Chemical</label>
                 <div></div>
-                <label className="form-label">12 - Total amount of air emission (NOx, SOx) generated per month</label>
+                <label>13 - Total amount of air emission (NOx, SOx) generated per batch</label>
                 <input
                   type="number"
                   min="0"
@@ -363,12 +418,9 @@ export default function EnviroForm() {
                   value={air}
                   onChange={(e) => setAir(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> tonnes/ month</label>
+                <label className="wrap_text"> tonnes/ batch</label>
                 <div></div>
-                <label className="form-label">
-                  13 - Total amount of hazardous materials used per month
-                  {/* <AiIcons.AiOutlineQuestionCircle style={{fontSize: "15px", color:"#2F4050"}} /> */}
-                </label>
+                <label>14 - Total amount of hazardous materials used per batch</label>
                 <input
                   type="number"
                   min="0"
@@ -377,9 +429,9 @@ export default function EnviroForm() {
                   value={hazmat}
                   onChange={(e) => setHazmat(e.target.value)}
                 />{" "}
-                <label className="wrap_text">kg/ month</label>
+                <label className="wrap_text"> kg/ batch</label>
                 <div></div>
-                <label className="form-label">14 - Total amount of hazardous waste generated per month</label>
+                <label className="form-label">15 - Total amount of hazardous waste generated per batch</label>
                 <input
                   type="number"
                   min="0"
@@ -388,9 +440,9 @@ export default function EnviroForm() {
                   value={hazwaste}
                   onChange={(e) => setHazwaste(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> kg/ month</label>
+                <label className="wrap_text"> kg/ batch</label>
                 <div></div>
-                <label className="form-label">15 - Total amount of solid waste generated per month</label>
+                <label>16 - Total amount of solid waste generated per batch</label>
                 <input
                   type="number"
                   min="0"
@@ -399,9 +451,9 @@ export default function EnviroForm() {
                   value={solidwaste}
                   onChange={(e) => setSolidwaste(e.target.value)}
                 />{" "}
-                <label className="wrap_text">kg/ month</label>
+                <label className="wrap_text"> kg/ batch</label>
                 <div></div>
-                <label className="form-label">16 - Total amount of solid waste recycled or reused per month</label>
+                <label className="form-label">17 - Total amount of solid waste recycled or reused per batch</label>
                 <input
                   type="number"
                   min="0"
@@ -410,9 +462,9 @@ export default function EnviroForm() {
                   value={solidwasterec}
                   onChange={(e) => setSolidwasterec(e.target.value)}
                 />{" "}
-                <label className="wrap_text">kg/ month</label>
+                <label className="wrap_text">kg/ batch</label>
                 <div></div>
-                <label className="form-label">17 - Choose the type(s) of solid waste destination</label>
+                <label className="form-label">18 - Choose the type(s) of solid waste destination</label>
                 <div></div>
                 <input
                   type="checkbox"
@@ -451,7 +503,7 @@ export default function EnviroForm() {
                 />
                 <label className="wrap_text"> Composting</label>
                 <div></div>
-                <label className="form-label">18 - Total amount of wastewater generated per month</label>
+                <label className="form-label">19 - Total amount of wastewater generated per batch</label>
                 <input
                   type="number"
                   min="0"
@@ -460,9 +512,9 @@ export default function EnviroForm() {
                   value={waterwaste}
                   onChange={(e) => setWaterwaste(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> m3/ month</label>
+                <label className="wrap_text"> m3/ batch</label>
                 <div></div>
-                <label className="form-label">19 - Total amount of wastewater recycled or reused per month</label>
+                <label className="form-label">20 - Total amount of wastewater recycled or reused per batch</label>
                 <input
                   type="number"
                   min="0"
@@ -471,9 +523,9 @@ export default function EnviroForm() {
                   value={waterwasterec}
                   onChange={(e) => setWaterwasterec(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> m3/ month</label>
+                <label className="wrap_text"> m3/ batch</label>
                 <div></div>
-                <label className="form-label">20 - Choose the type(s) of wastewater destination</label>
+                <label className="form-label">21 - Choose the type(s) of wastewater destination</label>
                 <div></div>
                 <input
                   type="checkbox"
@@ -512,190 +564,43 @@ export default function EnviroForm() {
                 />
                 <label className="wrap_text"> Composting</label>
                 <div></div>
-                <label className="form-label">21 - Total number of products produced per month</label>
+                <label className="form-label">22 - Is the product recyclable or reusable?</label>
                 <input
-                  type="number"
-                  min="0"
-                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
-                  value={product.join(", ")}
-                  onChange={(e) => setProduct(e.target.value.split(", ").map((item) => item.trim()))}
-                />
-                <div></div>
-                <label className="form-label">
-                  22 - Total number of products produced that are recyclable or reusable per month
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
-                  value={productrec}
+                  type="radio"
+                  value="Yes"
+                  checked={productrec === "Yes"}
                   onChange={(e) => setProductrec(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">
-                  23 - Total number of products produced with eco-friendly packaging and labeling per month
-                </label>
+                <label className="wrap_text"> Yes</label>
                 <input
-                  type="number"
-                  min="0"
-                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
-                  value={ecolabel}
+                  type="radio"
+                  value="No"
+                  checked={productrec === "No"}
+                  onChange={(e) => setProductrec(e.target.value)}
+                />
+                <label className="wrap_text"> No</label>
+                <div></div>
+                <label className="form-label">23 - Does the product has eco-friendly packaging and labeling?</label>
+                <input
+                  type="radio"
+                  value="Yes"
+                  checked={ecolabel === "Yes"}
                   onChange={(e) => setEcolabel(e.target.value)}
                 />
-                <div></div>
-              </div>
-            </fieldset>
-            <fieldset className="annual-kpi">
-              <legend>Annual KPI Update</legend>
-              <div>
-                <label className="form-label">
-                  1 - Total amount of land owned, leased, or managed for production activities or extractive use
-                </label>
-                <div></div>
-                <input
-                  type="number"
-                  min="0"
-                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
-                  value={land}
-                  onChange={(e) => setLand(e.target.value)}
-                />
-                <label className="wrap_text"> m2</label>
-                <div></div>
-                <label className="form-label">2 - Is there a biodiversity policy?</label>
-                <div></div>
-                <input
-                  type="radio"
-                  value="Yes"
-                  name="bio"
-                  checked={bio === "Yes"}
-                  onChange={(e) => setBio(e.target.value)}
-                />
                 <label className="wrap_text"> Yes</label>
                 <input
                   type="radio"
                   value="No"
-                  name="bio"
-                  checked={bio === "No"}
-                  onChange={(e) => setBio(e.target.value)}
+                  checked={ecolabel === "No"}
+                  onChange={(e) => setEcolabel(e.target.value)}
                 />
                 <label className="wrap_text"> No</label>
                 <div></div>
-                <label className="form-label">
-                  3 - Are there activities and operations on protected and sensitive areas? (e.g., IUCN protected area
-                  categories 1–4, world heritage sites, and biosphere reserves)
-                  {/* <AiIcons.AiOutlineQuestionCircle style={{fontSize: "15px", color:"#2F4050"}} /> */}
-                </label>
-                <div></div>
-                <input
-                  type="radio"
-                  value="Yes"
-                  name="sensitive"
-                  checked={sensitive === "Yes"}
-                  onChange={(e) => setSensitive(e.target.value)}
-                />
-                <label className="wrap_text"> Yes</label>
-                <input
-                  type="radio"
-                  value="No"
-                  name="sensitive"
-                  checked={sensitive === "No"}
-                  onChange={(e) => setSensitive(e.target.value)}
-                />
-                <label className="wrap_text"> No</label>
-                <div></div>
-                <label className="form-label">
-                  4 - Is there ISO 14000 certification regarding environmental standards?
-                </label>
-                <div></div>
-                <input
-                  type="radio"
-                  value="Yes"
-                  name="envirostand"
-                  checked={envirostand === "Yes"}
-                  onChange={(e) => setEnvirostand(e.target.value)}
-                />
-                <label className="wrap_text"> Yes</label>
-                <input
-                  type="radio"
-                  value="No"
-                  name="envirostand"
-                  checked={envirostand === "No"}
-                  onChange={(e) => setEnvirostand(e.target.value)}
-                />
-                <label className="wrap_text"> No</label>
-                <div></div>
-                <label className="form-label">5 - Choose the type(s) of clean technology used</label>
-                <div></div>
-                <input
-                  type="checkbox"
-                  name="Recycling"
-                  onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
-                />
-                <label className="wrap_text"> Recycling</label>
-                <input
-                  type="checkbox"
-                  name="Renewable energy"
-                  onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
-                />
-                <label className="wrap_text"> Renewable energy</label>
-                <input
-                  type="checkbox"
-                  name="Green transportation"
-                  onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
-                />
-                <label className="wrap_text"> Green transportation</label>
-                <input
-                  type="checkbox"
-                  name="Electric motors"
-                  onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
-                />
-                <label className="wrap_text"> Electric motors</label>
-                <div></div>
-                <input
-                  type="checkbox"
-                  name="Green chemistry"
-                  onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
-                />
-                <label className="wrap_text"> Green chemistry</label>
-                <input
-                  type="checkbox"
-                  name="Green lighting"
-                  onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
-                />
-                <label className="wrap_text"> Green lighting</label>
-                <input
-                  type="checkbox"
-                  name="Grey water"
-                  onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
-                />
-                <label className="wrap_text"> Grey water</label>
-                <div></div>
-                <label className="form-label">
-                  6 - Total number of suppliers monitored on environmental sustainability per year
-                </label>
-                <div></div>
-                <input
-                  type="number"
-                  min="0"
-                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
-                  value={envirosus}
-                  onChange={(e) => setEnvirosus(e.target.value)}
-                />
-                <div></div>
-                <label className="form-label">7 - Total number of suppliers per year</label>
-                <div></div>
-                <input
-                  type="number"
-                  min="0"
-                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
-                  value={suppliers}
-                  onChange={(e) => setSuppliers(e.target.value)}
-                />
               </div>
             </fieldset>
             <div className="center-btn">
               <button className="btn form-input-LCI" type="submit">
-                Calculate Assessment
+                Calculate LCI
               </button>
             </div>
           </div>

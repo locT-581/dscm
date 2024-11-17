@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import "./style.css";
 
 export interface IButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  color: string;
+  color?: string;
   text: React.ReactNode;
   onClick?: () => void;
 }

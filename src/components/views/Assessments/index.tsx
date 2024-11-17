@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import Assessment from "../../../../build/contracts/Assessments.json";
 import LCIType from "@/types/LCI";
-import EnviroType from "@/types/enviro";
+import EnviroType, { ContractDocument } from "@/types/enviro";
 import SocialType from "@/types/social";
 import Button from "@/components/Button";
 import Link from "next/link";
@@ -33,7 +33,7 @@ export default function Assessments() {
   useEffect(() => {
     if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
       web3instance.current = new Web3(window.ethereum);
-      window.ethereum.request({ method: "eth_requestAccounts" }).then((accounts) => {});
+      window.ethereum.request({ method: "eth_requestAccounts" });
     } else if (window.web3) {
       console.log("object");
       window.web3 = new Web3(window.web3.currentProvider);

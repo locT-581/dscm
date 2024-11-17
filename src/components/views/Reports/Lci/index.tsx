@@ -112,7 +112,12 @@ export default function LciReports() {
 
           setLCIs((LCIs) => [
             ...LCIs,
-            { ...newLCI, document: JSON.parse(newLCI.document), id: Number(newLCI.id).toString() } as unknown as LCI,
+            {
+              ...newLCI,
+              document: JSON.parse(newLCI.document),
+              id: Number(newLCI.id).toString(),
+              product: JSON.parse(newLCI.product),
+            },
           ]);
           setMonth((LCIs) => [...LCIs, newLCI.month]);
           setYear((LCIs) => [...LCIs, newLCI.year]);
@@ -415,12 +420,12 @@ export default function LciReports() {
       <div className="center-chart">
         <div className="label-sel">
           <label>Select Product</label>
-          <select defaultValue={unique[0]} value={formProduct} onChange={(e) => setFormProduct(e.target.value)}>
+          <select defaultValue={unique[0].id} value={formProduct} onChange={(e) => setFormProduct(e.target.value)}>
             <option value="" disabled hidden></option>
             {unique.map((a, i) => {
               return (
-                <option key={i} value={a}>
-                  {a}{" "}
+                <option key={i} value={a.id}>
+                  {a.name}{" "}
                 </option>
               );
             })}

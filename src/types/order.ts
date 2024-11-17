@@ -1,5 +1,5 @@
 export default interface Order {
-  id: BigInt;
+  id: bigint;
   name: string;
   quantity: number;
   date: string;

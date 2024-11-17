@@ -3,7 +3,7 @@ export default interface Enviro {
   assessType: string;
   date: string;
   account: string;
-  document: Document;
+  document: ContractDocument;
   month: string;
   year: string;
 }
@@ -31,23 +31,23 @@ export interface ContractDocument {
   sensitive: string;
   ghg: string;
   waterpol: string;
-  waterpoltype: string;
+  waterpoltype: string[];
   landpol: string;
-  landpoltype: string;
+  landpoltype: string[];
   air: string;
   hazmat: string;
   hazwaste: string;
   solidwaste: string;
   solidwasterec: string;
-  solidwastedes: string;
+  solidwastedes: string[];
   waterwaste: string;
   waterwasterec: string;
-  waterwastedes: string;
+  waterwastedes: string[];
   productrec: string;
   ecolabel: string;
-  products: string;
+  products: string[];
   envirostand: string;
-  clean: string;
+  clean: string[];
   envirosus: string;
   suppliers: string;
 }

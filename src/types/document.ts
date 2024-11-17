@@ -59,3 +59,55 @@ export interface EnviroFormType {
   envirosus: string;
   suppliers: string;
 }
+
+export interface SocialFormType {
+  id: string;
+  trainh: string;
+  trainemp: string;
+  emp: string;
+  resemp: string;
+  hiredemp: string;
+  fullemp: string;
+  workh: string;
+  overtimeh: string;
+  empwage: string;
+  minwage: string;
+  insurance: string;
+  femwage: string;
+  malwage: string;
+  fem: string;
+  male: string;
+  femboard: string;
+  empboard: string;
+  disabled: string;
+  minority: string;
+  older: string;
+  socialstand: string;
+  ilo: string;
+  fire: string;
+  medical: string;
+  sanitation: string;
+  gear: string;
+  workacc: string;
+  union: string;
+  empunion: string;
+  bargain: string;
+  discri: string;
+  child: string;
+  forced: string;
+  indig: string;
+  localemp: string;
+  localsup: string;
+  donation: string;
+  earning: string;
+  corrup: string;
+  anticomp: string;
+  socialsus: string;
+  suppliers: string;
+  productassess: string;
+  product: string;
+  productincident: string;
+  privacy: string;
+  leaks: string;
+  cuscomp: string;
+}

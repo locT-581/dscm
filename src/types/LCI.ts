@@ -1,13 +1,16 @@
+import { CLIFormType } from "./document";
+import Product from "./product";
+
 export default interface LCI {
-  id: StringConstructor;
+  id: string;
   assessType: string;
   date: string;
   account: string;
-  document: string;
+  document: CLIFormType;
   month: string;
   year: string;
   process: string;
-  product: string;
+  product: Product;
 }
 
 export interface LCIBlockchain {

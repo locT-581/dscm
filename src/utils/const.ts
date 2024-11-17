@@ -26,7 +26,7 @@ export const SidebarData: {
   },
   {
     title: "Reports",
-    path: "/Reports",
+    path: "/reports",
     icon: "SummarizeIcon",
     cName: "side-text",
   },
