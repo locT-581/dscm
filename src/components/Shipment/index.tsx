@@ -2,8 +2,8 @@ import Order from "@/types/order";
 import type Shipment from "@/types/shipment";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 export interface IShipmentProps {
-  shipments: Shipment[];
-  orders: Order[];
+  shipments: Shipment[] | undefined;
+  orders: Order[] | undefined;
 }
 
 export default function Shipment({ shipments, orders }: IShipmentProps) {
@@ -33,13 +33,13 @@ export default function Shipment({ shipments, orders }: IShipmentProps) {
 
 const ShipList = ({ shipments, orders }: IShipmentProps) =>
   shipments
-    .sort((a, b) => +b.id - +a.id)
+    ?.sort((a, b) => +b.id - +a.id)
     .map((shipment, i) => (
       <tr className="shipments" key={i}>
         <td className="shipType">{shipment.shipType}</td>
         <td className="shipType">{shipment.product}</td>
         <td className="shipType">
-          {orders.filter((obj) => (obj.id + "").includes(shipment.product)).map((order) => order.name)}
+          {orders?.filter((obj) => (obj.id + "").includes(shipment.product)).map((order) => order.name)}
         </td>
         <td className="shipType">{shipment.process}</td>
         <td className="address">

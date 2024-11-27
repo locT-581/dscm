@@ -1,14 +1,16 @@
 import SocialType from "@/types/social";
 import Link from "next/link";
 import InterestsIcon from "@mui/icons-material/Interests";
+import { usePathname } from "next/navigation";
 
-const AssessList = ({ assessments }: { assessments: SocialType[] }) =>
-  assessments
+const AssessList = ({ assessments }: { assessments: SocialType[] }) => {
+  const pathname = usePathname();
+  return assessments
     .sort((a, b) => Number(b.id) - Number(a.id))
     .map((a) => (
       <tr key={a.id}>
         <td className="p-name">
-          <Link href={`social?date=${a.date}`} style={{ textDecoration: "none", color: "black" }}>
+          <Link href={`${pathname}/social?date=${a.date}`} style={{ textDecoration: "none", color: "black" }}>
             <InterestsIcon style={{ fontSize: "30px", cursor: "pointer" }} />
           </Link>
         </td>
@@ -27,6 +29,7 @@ const AssessList = ({ assessments }: { assessments: SocialType[] }) =>
         <td className="p-comp">{a.date}</td>
       </tr>
     ));
+};
 
 const Social = ({ Smerge }: { Smerge: SocialType[] }) => {
   return (

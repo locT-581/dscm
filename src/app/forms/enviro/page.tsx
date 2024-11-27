@@ -1,4 +1,4 @@
-import EnviroForm from "@/components/views/Assessments/EnviroForm";
+import EnviroForm from "@/components/views/Form/EnviroForm";
 
 export default function App() {
   return <EnviroForm />;

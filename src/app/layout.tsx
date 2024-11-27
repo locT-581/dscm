@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import StoreProvider from "@/redux/StoreProvider";
+import Web3Provider from "@/layouts/Web3Provider";
+import { Web3StoreProvider } from "@/stores/storeProvider";
+import DefaultLayout from "@/layouts/DefaultLayout";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,11 +30,15 @@ export default function RootLayout({
     <html lang="en">
       <body
         style={{
-          color: "#000",
+          color: "#023047",
         }}
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <StoreProvider>{children}</StoreProvider>
+        <Web3StoreProvider>
+          <Web3Provider>
+            <DefaultLayout>{children}</DefaultLayout>
+          </Web3Provider>
+        </Web3StoreProvider>
       </body>
     </html>
   );

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import Assessment from "../../../../build/contracts/Assessments.json";
 import LCIType from "@/types/LCI";
-import EnviroType, { ContractDocument } from "@/types/enviro";
+import EnviroType from "@/types/enviro";
 import SocialType from "@/types/social";
 import Button from "@/components/Button";
 import Link from "next/link";

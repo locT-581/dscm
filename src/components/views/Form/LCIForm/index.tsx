@@ -196,7 +196,7 @@ export default function LCIForm() {
                   value={product?.name ?? ""}
                   onChange={(e) => setProduct(products.find((p) => p.id == e.target.value))}
                 >
-                  <option value="" disabled selected hidden></option>
+                  <option value="" disabled hidden></option>
                   {products.map((product, key) => {
                     return (
                       <option key={key} value={product.id}>
@@ -209,7 +209,7 @@ export default function LCIForm() {
               <div>
                 <label>Lựa chọn quy trình sản xuất</label>
                 <select value={process} onChange={(e) => setProcess(e.target.value)}>
-                  <option value="" disabled selected hidden></option>
+                  <option value="" disabled hidden></option>
                   {!!product
                     ? product.process.map((process, i) => (
                         <option key={i} value={process}>

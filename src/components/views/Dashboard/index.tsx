@@ -55,9 +55,8 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="main-container">
-        <Sidebar />
-        <header className="dashheader">
+      <div className="">
+        <header className="">
           <div className="shipment-btns">
             <Button
               onClick={() => {

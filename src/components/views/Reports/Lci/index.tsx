@@ -434,7 +434,7 @@ export default function LciReports() {
         <div>
           <label>Filter by Date</label>
           <select value={formMonth} onChange={(e) => setFormMonth(e.target.value)}>
-            <option value="" disabled selected hidden></option>
+            <option value="" disabled hidden></option>
             {uniqueMonth.map((a, i) => {
               return (
                 <option key={i} value={a}>
@@ -444,7 +444,7 @@ export default function LciReports() {
             })}
           </select>
           <select value={formYear} onChange={(e) => setFormYear(e.target.value)}>
-            <option value="" disabled selected hidden></option>
+            <option value="" disabled hidden></option>
             {uniqueYear.map((a, i) => {
               return (
                 <option key={i} value={a}>

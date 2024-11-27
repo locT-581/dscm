@@ -1,18 +1,20 @@
 import LCIType from "@/types/LCI";
 import Link from "next/link";
 import Diversity2Icon from "@mui/icons-material/Diversity2";
+import { usePathname } from "next/navigation";
 
-const AssessList = ({ assessments }: { assessments: LCIType[] }) =>
-  assessments
+const AssessList = ({ assessments }: { assessments: LCIType[] }) => {
+  const pathname = usePathname();
+  return assessments
     .sort((a, b) => Number(b.id) - Number(a.id))
     .map((a, i) => (
       <tr key={i}>
         <td className="p-name">
-          <Link href={`lci?date=${a.date}`} style={{ textDecoration: "none", color: "black" }}>
+          <Link href={`${pathname}/lci?date=${a.date}`} style={{ textDecoration: "none", color: "black" }}>
             <Diversity2Icon style={{ fontSize: "30px", cursor: "pointer" }} />
           </Link>
         </td>
-        <td className="p-comp">{a.product}</td>
+        <td className="p-comp">{a.product?.name}</td>
         <td className="p-comp">{a.process}</td>
         <td className="p-comp">{a.month + " " + a.year}</td>
         <td className="p-comp">
@@ -29,6 +31,7 @@ const AssessList = ({ assessments }: { assessments: LCIType[] }) =>
         <td className="p-comp">{a.date}</td>
       </tr>
     ));
+};
 
 const LCIIndicators = ({ assessments }: { assessments: LCIType[] }) => {
   return (
