@@ -62,29 +62,29 @@ export default function AddProduct({ addProduct, onAdd }: IAddProductProps) {
     <div className="center">
       <form className="product-form" onSubmit={onSubmit}>
         <div className="product-form-header">
-          <h2>Add Product</h2>
+          <h2>Thêm sản phẩm</h2>
           <button className="btn form-close" style={{ background: "red", fontSize: "14px" }} onClick={onAdd}>
             X
           </button>
         </div>
         <div className="product-center-form">
           <div className="form-inputs">
-            <label>Image</label>
+            <label>Hình ảnh</label>
             <input type="file" className="product" placeholder="Upload an Image" onChange={handleChange} />
           </div>
           <div></div>
           <div className="form-inputs">
-            <label>Product Name</label>
+            <label>Tên sản phẩm</label>
             <input
               type="text"
               className="product"
               required
-              placeholder="Enter Product Name"
+              placeholder="Nhập tên sản phẩm"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <h3>Product Production Processes</h3>
+          <h3>Quy trình sản xuất</h3>
           {processes.map((c, id) => {
             return (
               <div className="form-inputs" key={id}>
@@ -92,7 +92,7 @@ export default function AddProduct({ addProduct, onAdd }: IAddProductProps) {
                   name="process"
                   className="process-add"
                   required
-                  placeholder="Enter Product Production Process"
+                  placeholder="Nhập quy trình sản xuất"
                   value={c}
                   onChange={(e) => handleChangeInput(id, e)}
                 />
@@ -104,7 +104,7 @@ export default function AddProduct({ addProduct, onAdd }: IAddProductProps) {
           })}
           <div></div>
           <button className="btn product-input-btn" type="submit">
-            Add
+            Thêm
           </button>
         </div>
       </form>

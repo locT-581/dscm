@@ -9,7 +9,7 @@ export interface IProductProps {
 
 const ProductList = ({ products, onView }: IProductProps) =>
   products
-    .sort((a, b) => Number(b.id) - Number(a.id))
+    ?.sort((a, b) => Number(b.id) - Number(a.id))
     .map((product) => (
       <tr key={Number(product.id)}>
         <td className="p-img">
@@ -21,7 +21,12 @@ const ProductList = ({ products, onView }: IProductProps) =>
           />
         </td>
         <td className="p-name">{product.name}</td>
-        <td className="p-comp">{product.process.replace(/^\[(.+)\]$/, "$1").replace(/"/g, " ")}</td>
+        <td className="p-comp">
+          {product.process
+            .toString()
+            .replace(/^\[(.+)\]$/, "$1")
+            .replace(/"/g, " ")}
+        </td>
         <td className="p-comp">{product.date}</td>
       </tr>
     ));
@@ -32,9 +37,9 @@ export default function Product({ products, onView }: IProductProps) {
       <thead>
         <tr>
           <th className="product-img"></th>
-          <th className="product-name">Product Name</th>
-          <th className="process">Product Production Processes</th>
-          <th>Date Time Added</th>
+          <th className="product-name">Tên sản phẩm</th>
+          <th className="process">Quy trình sản xuất</th>
+          <th>Thời gian tạo</th>
         </tr>
       </thead>
       <tbody>
