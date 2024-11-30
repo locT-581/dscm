@@ -1,4 +1,6 @@
-import { Product } from "./product";
+import Process from "./process";
+import Product from "./product";
+import Supplier from "./supplier";
 import Unit from "./unit";
 
 export interface OrderOnChain {
@@ -23,10 +25,33 @@ export interface OrderBlockChainType {
   date: string;
   account: string;
   unit: string;
+  name: string;
 }
 
-export default interface Order extends OrderOnChain {
+export interface OrderFireStore {
   id: string;
-  status: string;
+  productID: string;
+  process: {
+    processID: string;
+    supplierID?: string | null;
+  }[];
+  quantity: number;
+  date: string;
+  account: string;
+  unitID: string;
+  statusProcessID: string;
+}
+
+export default interface Order {
+  id: string;
   product: Product;
+  process: {
+    process: Process;
+    supplier?: Supplier | null;
+  }[];
+  quantity: number;
+  date: string;
+  account: string;
+  unit: Unit;
+  statusProcess: Process | null; // status of process
 }

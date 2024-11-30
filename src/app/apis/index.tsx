@@ -1,4 +1,5 @@
 import { db } from "@/lib/firebase";
+import Order, { OrderFireStore } from "@/types/order";
 import Process from "@/types/process";
 import Product, { ProductOffChain } from "@/types/product";
 import Supplier from "@/types/supplier";
@@ -31,7 +32,7 @@ export const getAllSupplier = async (): Promise<Supplier[]> => {
           role: doc.data().role,
           name: doc.data().name,
           address: doc.data().address,
-          phoneNumber: doc.data().phone,
+          phoneNumber: doc.data().phoneNumber,
           email: doc.data().email,
           account: doc.data().account,
           productsProcesses: doc.data().productsProcesses,
@@ -216,4 +217,43 @@ export const getAllProcesses = async (): Promise<Process[]> => {
       return [];
     });
   return processes;
+};
+
+/**
+ * Get all Orders from fire store
+ */
+export const getAllOrders = async (): Promise<OrderFireStore[]> => {
+  const orders: Order[] = [];
+  const supplierRef = collection(db, "order");
+  await getDocs(supplierRef)
+    .then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        orders.push({
+          id: doc.id,
+          ...doc.data(),
+        } as Order);
+      });
+    })
+    .catch((error) => {
+      console.log("Error getting documents: ", error);
+      return [];
+    });
+  return orders;
+};
+
+/**
+ * Add new order to fire store
+ * @param order - Order
+ * @param id - string
+ * @returns {Promise} - Promise<void>
+ */
+export const addOrder = async (order: OrderFireStore, id: string): Promise<void> => {
+  if (!id) {
+    throw new Error("ID is required to add a product");
+  }
+  const docRef = doc(db, "order", id);
+  return await setDoc(docRef, {
+    ...order,
+    createdAt: serverTimestamp(),
+  });
 };

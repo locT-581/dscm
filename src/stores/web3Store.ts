@@ -3,11 +3,11 @@ import { Contract } from "web3-eth-contract";
 import { createStore } from "zustand/vanilla";
 
 import { OriginAbi } from "@/types/common";
-import Order, { OrderBlockChainType } from "@/types/order";
+import Order, { OrderBlockChainType, OrderFireStore } from "@/types/order";
 import Shipment, { ShipmentBlockChainType } from "@/types/shipment";
 import Product, { ProductBlockChain } from "@/types/product";
 import { units } from "@/utils/const";
-import { getAllProcesses, getAllProducts, getAllSupplier } from "@/app/apis";
+import { getAllOrders, getAllProcesses, getAllProducts, getAllSupplier } from "@/app/apis";
 import Process from "@/types/process";
 import Supplier from "@/types/supplier";
 
@@ -77,22 +77,37 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
     // fetch Data
     getOrders: async () => {
       const { contract, products } = get();
-      if (!contract || !!!products) return;
+      if (!contract) return;
+      console.log("🚀 ~ getOrders: ~ products:", products);
+
+      const allOrders: OrderFireStore[] = await getAllOrders();
 
       const orderCount: number = await contract.methods.orderCount().call();
       const orders: Order[] = [];
+
       for (let i = 1; i <= orderCount; i++) {
         const orderBlockchain: OrderBlockChainType = await contract.methods.orders(i).call();
+
+        const orderOffChain: OrderFireStore | undefined = allOrders.find(
+          (order) => order.id == Number(orderBlockchain.id).toString()
+        );
+
         const newOrder: Order = {
           ...orderBlockchain,
           id: Number(orderBlockchain.id).toString(),
           unit: units.find((unit) => unit.id == orderBlockchain.unit) ?? { id: "", name: "" },
-          product: products?.find((product) => product.id == orderBlockchain.productID) as Product,
-          status: "Đã tạo",
+          product: products?.find((product) => product.id == orderBlockchain.name) as Product,
+          process:
+            orderOffChain?.process.map((process) => ({
+              process: get().processes?.find((p) => p.id == process.processID) as Process,
+              supplier: get().suppliers?.find((s) => s.id == process.supplierID) as Supplier,
+            })) ?? [],
+          statusProcess: get().processes?.find((p) => p.id == orderOffChain?.statusProcessID) ?? null,
         };
 
         orders.push(newOrder);
       }
+
       set(() => ({ orders }));
     },
 
