@@ -1,0 +1,6 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "commentTranslate.targetLanguage": "vi",
+  "cSpell.words": ["Enviro", "Helia", "ipfs", "kubo", "latlong"]
+}
