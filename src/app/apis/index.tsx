@@ -116,9 +116,9 @@ export const getProductById = async (id: string | number): Promise<Product | nul
  * @param product - product
  * @returns {Promise} - Promise<DocumentData>
  */
-export const createProduct = async (product: ProductOffChain, id: string): Promise<void> => {
+export const addProduct = async (product: ProductOffChain, id: string): Promise<void> => {
   if (!id) {
-    throw new Error("ID is required to create a product");
+    throw new Error("ID is required to add a product");
   }
   const docRef = doc(db, "product", id);
   return await setDoc(docRef, {
