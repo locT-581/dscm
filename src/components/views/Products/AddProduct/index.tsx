@@ -17,7 +17,10 @@ import { units } from "@/utils/const";
 import CheckIcon from "@mui/icons-material/Check";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import CustomizedSteppers from "@/components/HorizontalStepper";
-
+import Process from "@/types/process";
+import { Property } from "@/types/product";
+import { addProduct as addProductToFireStore } from "@/app/apis/index";
+import Unit from "@/types/unit";
 export interface ColourOption {
   readonly value: string;
   readonly label: string;
@@ -30,7 +33,7 @@ export default function AddProduct() {
   const animatedComponents = makeAnimated();
   const { notify, update } = useToast();
 
-  const { contract, account, getProducts } = useWeb3Store((state) => state);
+  const { contract, account, getProducts, processes, products } = useWeb3Store((state) => state);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | undefined>();
@@ -39,10 +42,12 @@ export default function AddProduct() {
   };
 
   const [name, setName] = useState("");
-  const [processes, setProcesses] = useState<string[]>([""]);
+  const [selectedProcesses, setSelectedProcesses] = useState<Process[]>([]);
 
-  const [properties, setProperties] = useState<{ name: string; value: string[] }[] | undefined>([]);
+  const [properties, setProperties] = useState<Property[] | undefined>([]);
   const [propertiesTabActive, setPropertiesTabActive] = useState<number>(0);
+
+  const [unit, setUnit] = useState<Unit | null>(null);
 
   const [date, setDate] = useState("");
   const [d, setD] = useState("");
@@ -64,12 +69,19 @@ export default function AddProduct() {
     process: string;
     date: string;
   }) => {
-    notify("Đang thêm sản phẩm...");
-
     contract?.methods
       .addProduct(name, image, process, date)
       .send({ from: account })
-      .once("receipt", async () => {
+      .once("receipt", async (e) => {
+        await addProductToFireStore(
+          {
+            process: selectedProcesses,
+            unit: unit!,
+            properties,
+          },
+          Number(e.events?.ProductAdded.returnValues.id).toString() ?? (products!.length - 1).toString()
+        );
+        
         await getProducts();
         update(true, "Thêm sản phẩm thành công!");
       })
@@ -80,34 +92,22 @@ export default function AddProduct() {
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!file) return;
+    if (!file || !!!processes || !!!unit) return;
 
+    notify("Đang thêm sản phẩm...");
     const data = new FormData();
     data.set("file", file);
-
     const uploadRequest = await fetch("/api/files", {
       method: "POST",
       body: data,
     });
     const ipfsUrl = await uploadRequest.json();
 
-    const process = JSON.stringify(processes);
+    const process = JSON.stringify(processes.map((p) => p.id));
     setD("now");
     addProduct({ name, image: ipfsUrl, process, date });
   };
 
-  const colourOptions: readonly ColourOption[] = [
-    { value: "ocean", label: "Ocean", color: "#00B8D9", isFixed: true },
-    { value: "blue", label: "Blue", color: "#0052CC", isDisabled: true },
-    { value: "purple", label: "Purple", color: "#5243AA" },
-    { value: "red", label: "Red", color: "#FF5630", isFixed: true },
-    { value: "orange", label: "Orange", color: "#FF8B00" },
-    { value: "yellow", label: "Yellow", color: "#FFC400" },
-    { value: "green", label: "Green", color: "#36B37E" },
-    { value: "forest", label: "Forest", color: "#00875A" },
-    { value: "slate", label: "Slate", color: "#253858" },
-    { value: "silver", label: "Silver", color: "#666666" },
-  ];
   const [isEditing, setIsEditing] = useState<number | null>(null);
   const handleDoubleClick = (id: number) => {
     setIsEditing(id);
@@ -127,8 +127,6 @@ export default function AddProduct() {
         <div className="flex flex-col gap-4 w-full border border-[#ab9797] rounded-xl p-4">
           <h4 className="text-xl font-semibold">Thông tin chung</h4>
 
-          <CustomizedSteppers />
-
           <div className="flex flex-col gap-1">
             <label htmlFor="name-product" className="font-medium">
               Tên sản phẩm
@@ -143,16 +141,31 @@ export default function AddProduct() {
             />
           </div>
 
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-3">
             <label htmlFor="processes-product" className="font-medium">
               Thêm quy trình sản phẩm
             </label>
+            {selectedProcesses.length > 0 && (
+              <CustomizedSteppers
+                steps={selectedProcesses.map((p) => ({ label: p.name, icon: p.image }))}
+                activeStep={-1}
+              />
+            )}
             <Select
               required
               closeMenuOnSelect={false}
               components={animatedComponents}
               isMulti
-              options={colourOptions}
+              onChange={(selectedProcesses) => {
+                const x = selectedProcesses?.map(
+                  (process) =>
+                    (processes?.find(
+                      (p) => p.id == (process as unknown as { value: string; label: string }).value
+                    ) as Process) || ""
+                );
+                setSelectedProcesses(x);
+              }}
+              options={processes?.map((process) => ({ value: process.id, label: process.name })).filter(Boolean)}
             />
           </div>
 
@@ -366,6 +379,9 @@ export default function AddProduct() {
               Chọn đơn vị
             </label>
             <Select
+              onChange={(selectedUnit) =>
+                setUnit(units.find((unit) => unit.id == (selectedUnit as { value: string }).value) ?? null)
+              }
               required
               closeMenuOnSelect={true}
               components={animatedComponents}
