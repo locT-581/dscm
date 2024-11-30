@@ -46,7 +46,6 @@ export const getSupplierById = async (id: string): Promise<Supplier | null> => {
     .then((doc) => {
       if (doc.exists()) {
         const { createAt, ...tempUser } = doc.data();
-        console.log("🚀 ~ .then ~ createdAt:", createAt);
         supplier = { id: doc.id, ...tempUser } as Supplier;
       } else {
         console.log("No such document!");
@@ -73,7 +72,7 @@ export const getAllProducts = async (): Promise<ProductOffChain[]> => {
       querySnapshot.forEach((doc) => {
         products.push({
           offChainId: doc.id,
-          process: doc.data().productsProcesses,
+          process: doc.data().process,
           unit: doc.data().unit,
         });
       });
@@ -96,7 +95,6 @@ export const getProductById = async (id: string | number): Promise<Product | nul
     .then((doc) => {
       if (doc.exists()) {
         const { createAt, ...tempProduct } = doc.data();
-        console.log("🚀 ~ .then ~ createdAt:", createAt);
         product = { id: doc.id, ...tempProduct } as Product;
       } else {
         console.log("No such document!");
@@ -149,7 +147,6 @@ export const getProcessById = async (id: string): Promise<Process | null> => {
     .then((doc) => {
       if (doc.exists()) {
         const { createAt, ...tempUser } = doc.data();
-        console.log("🚀 ~ .then ~ createdAt:", createAt);
         process = { id: doc.id, ...tempUser } as Process;
       } else {
         console.log("No such document!");

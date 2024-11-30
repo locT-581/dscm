@@ -7,7 +7,7 @@ import Order, { OrderBlockChainType } from "@/types/order";
 import Shipment, { ShipmentBlockChainType } from "@/types/shipment";
 import Product, { ProductBlockChain } from "@/types/product";
 import { units } from "@/utils/const";
-import { getAllProcesses, getProductById } from "@/app/apis";
+import { getAllProcesses, getAllProducts } from "@/app/apis";
 import Process from "@/types/process";
 
 export type StoreState = {
@@ -108,18 +108,23 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
       const { contract, processes } = get();
       if (!contract || !!!processes) return;
 
+      const allProduct = await getAllProducts();
+
       const productCount: number = await contract.methods.productCount().call();
       const products: Product[] = [];
       for (let i = 1; i <= productCount; i++) {
         const productOnchain: ProductBlockChain = await contract.methods.products(i).call();
-        const productOffChain = await getProductById(i);
+        const productOffChain = allProduct.find(
+          (product) => product.offChainId == Number(productOnchain.id).toString()
+        );
+        console.log("🚀 ~ getProducts: ~ productOffChain:", productOffChain);
 
         const newProduct: Product = {
           ...productOnchain,
           ...productOffChain,
           id: Number(productOnchain.id).toString(),
-          process: processes.filter((process) => productOffChain?.process.map((p) => p.id).includes(process.id)),
-          unit: units.find((unit) => unit.id == productOffChain?.unit.id) ?? { id: "", name: "" },
+          process: productOffChain?.process ?? [],
+          unit: productOffChain?.unit ?? { id: "", name: "" },
         };
 
         products.push(newProduct);
