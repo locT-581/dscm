@@ -137,9 +137,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
             <TableSortLabel
               active={orderBy === headCell.id}
               direction={orderBy === headCell.id ? order : "asc"}
-              onClick={() => {
-                if (headCell.allowSort) createSortHandler(headCell.id);
-              }}
+              onClick={createSortHandler(headCell.id)}
             >
               {headCell.label}
               {/* {orderBy === headCell.id ? (
@@ -221,7 +219,14 @@ export default function TableProduct({ rowList }: { rowList: Data[] }) {
                       #{row.id}
                     </TableCell>
                     <TableCell align="center" className="overflow-hidden !flex !justify-center !items-center">
-                      <img src={row.image} alt="" className="w-[5vw] aspect-square object-cover" />
+                      <img
+                        onClick={() => {
+                          window.open(row.image, "_blank");
+                        }}
+                        src={row.image}
+                        alt=""
+                        className="w-[5vw] aspect-square object-cover"
+                      />
                     </TableCell>
                     <TableCell align="center">{row.name}</TableCell>
                     <TableCell align="center">{row.processes}</TableCell>
