@@ -5,36 +5,49 @@ export const SidebarData: {
   title: string;
   path: string;
   icon: ISideBarIconProps["keyIcon"];
+  isShow?: boolean;
 }[] = [
   {
     title: "Tổng quan",
     path: "/",
     icon: "DashboardIcon",
+    isShow: true,
   },
   {
     title: "Sản phẩm",
     path: "/san-pham",
     icon: "ProductionQuantityLimitsIcon",
+    isShow: true,
   },
   {
     title: "Đánh giá",
     path: "/danh-gia",
     icon: "AssessmentIcon",
+    isShow: true,
   },
   {
     title: "Báo cáo",
     path: "/bao-cao",
     icon: "SummarizeIcon",
+    isShow: true,
   },
   {
     title: "Vận chuyển",
     path: "/van-chuyen",
     icon: "LocationCityIcon",
+    isShow: true,
   },
   {
     title: "Thêm quy trình",
     path: "/them-quy-trinh",
     icon: "LocationCityIcon",
+    isShow: false,
+  },
+  {
+    title: "Thêm sản phẩm",
+    path: "/them-san-pham",
+    icon: "SummarizeIcon",
+    isShow: false,
   },
 ];
 

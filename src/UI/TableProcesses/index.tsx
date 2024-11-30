@@ -13,7 +13,6 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
-import Unit from "@/types/unit";
 import Link from "next/link";
 import Button from "../Button";
 
@@ -21,19 +20,17 @@ interface Data {
   id: string;
   image: string;
   name: string;
-  processes: string[];
-  unit: Unit;
+  description: string;
   date: string;
 }
 
-function createData(id: string, image: string, name: string, processes: string[], unit: Unit, date: string): Data {
+function createData(id: string, image: string, name: string, description: string, date: string): Data {
   return {
     id,
     name,
     image,
-    unit,
     date,
-    processes,
+    description,
   };
 }
 
@@ -86,21 +83,14 @@ const headCells: readonly HeadCell[] = [
     id: "name",
     numeric: false,
     disablePadding: false,
-    label: "Tên Sản phẩm",
+    label: "Tên Quy trình",
     allowSort: true,
   },
   {
-    id: "processes",
+    id: "description",
     numeric: false,
     disablePadding: false,
-    label: "Quy trình sản xuất",
-    allowSort: false,
-  },
-  {
-    id: "unit",
-    numeric: false,
-    disablePadding: false,
-    label: "Đơn vị",
+    label: "Mô tả",
     allowSort: true,
   },
   {
@@ -152,9 +142,9 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-export default function TableProduct({ rowList }: { rowList: Data[] }) {
+export default function TableProcesses({ rowList }: { rowList: Data[] }) {
   const [rows] = React.useState(
-    rowList.map((row) => createData(row.id, row.image, row.name, row.processes, row.unit, row.date))
+    rowList.map((row) => createData(row.id, row.image, row.name, row.description, row.date))
   );
   const [order, setOrder] = React.useState<Order>("desc");
   const [orderBy, setOrderBy] = React.useState<keyof Data>("date");
@@ -181,7 +171,7 @@ export default function TableProduct({ rowList }: { rowList: Data[] }) {
 
   const visibleRows = React.useMemo(() => {
     return [...rows]
-      .map((row) => ({ ...row, id: +row.id, unit: row.unit.name, processes: row.processes.join(", ") }))
+      .map((row) => ({ ...row, id: +row.id }))
       .sort(getComparator(order, orderBy))
       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   }, [order, orderBy, page, rowsPerPage, rows]);
@@ -198,11 +188,11 @@ export default function TableProduct({ rowList }: { rowList: Data[] }) {
           ]}
         >
           <Typography sx={{ flex: "1 1 100%" }} variant="h6" id="tableTitle" component="div">
-            Danh sách sản phẩm
+            Danh sách quy trình
           </Typography>
 
-          <Link className="w-fit flex flex-shrink-0" href="/san-pham/them-san-pham">
-            <Button>Thêm sản phẩm</Button>
+          <Link className="w-fit flex flex-shrink-0" href="/san-pham/them-quy-trinh">
+            <Button>Thêm quy trình</Button>
           </Link>
         </Toolbar>
 
@@ -229,8 +219,7 @@ export default function TableProduct({ rowList }: { rowList: Data[] }) {
                       />
                     </TableCell>
                     <TableCell align="center">{row.name}</TableCell>
-                    <TableCell align="center">{row.processes}</TableCell>
-                    <TableCell align="center">{row.unit}</TableCell>
+                    <TableCell align="center">{row.description}</TableCell>
                     <TableCell align="center">{row.date}</TableCell>
                   </TableRow>
                 );
@@ -255,7 +244,7 @@ export default function TableProduct({ rowList }: { rowList: Data[] }) {
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage="Số sản phẩm mỗi trang"
+          labelRowsPerPage="Số quy trình mỗi trang"
         />
       </Paper>
     </Box>
