@@ -1,11 +1,9 @@
+/* eslint-disable @next/next/no-img-element */
 import * as React from "react";
 import { styled } from "@mui/material/styles";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
-import SettingsIcon from "@mui/icons-material/Settings";
-import GroupAddIcon from "@mui/icons-material/GroupAdd";
-import VideoLabelIcon from "@mui/icons-material/VideoLabel";
 import StepConnector, { stepConnectorClasses } from "@mui/material/StepConnector";
 import { StepIconProps } from "@mui/material/StepIcon";
 
@@ -66,46 +64,36 @@ const ColorlibStepIconRoot = styled("div")<{
   ],
 }));
 
-function ColorlibStepIcon(props: StepIconProps) {
-  const { active, completed, className } = props;
-
-  const icons: { [index: string]: React.ReactElement<unknown> } = {
-    1: <SettingsIcon />,
-    2: <GroupAddIcon />,
-    3: <VideoLabelIcon />,
-  };
-
-  return (
-    <ColorlibStepIconRoot ownerState={{ completed, active }} className={className}>
-      {icons[String(props.icon)]}
-    </ColorlibStepIconRoot>
-  );
-}
+// function ColorlibStepIcon
 
 export default function CustomizedSteppers({
-  steps = [
-    "Select campaign settings",
-    "Create an ad group",
-    "Create an ad",
-    "Create an ad",
-    "Create an ad",
-    "Create an ad",
-  ],
-  activeStep = 1,
+  steps,
+  activeStep = 0,
 }: {
-  steps: string[];
-  activeStep: number;
+  steps: { label: string; icon: string }[];
+  activeStep?: number;
 }) {
   return (
     <Stepper alternativeLabel activeStep={activeStep} connector={<ColorlibConnector />}>
-      {steps.map((label) => (
-        <Step key={label}>
+      {steps.map((step) => (
+        <Step key={step.label}>
           <StepLabel
             slots={{
-              stepIcon: ColorlibStepIcon,
+              stepIcon: (props: StepIconProps) => {
+                const { active, completed, className } = props;
+                return (
+                  <ColorlibStepIconRoot
+                    ownerState={{ completed, active }}
+                    className={`${className} aspect-square overflow-hidden`}
+                  >
+                    {/* {step.icon} */}
+                    <img src={step.icon} alt="" className="w-full h-full rounded-full !object-cover object-center" />
+                  </ColorlibStepIconRoot>
+                );
+              },
             }}
           >
-            {label}
+            {step.label}
           </StepLabel>
         </Step>
       ))}
