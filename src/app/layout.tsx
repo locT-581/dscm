@@ -8,6 +8,7 @@ import DefaultLayout from "@/layouts/DefaultLayout";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-toastify/dist/ReactToastify.min.css";
+import AuthLayout from "@/layouts/AuthLayout";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -41,7 +42,9 @@ export default function RootLayout({
         <ToastContainer />
         <Web3StoreProvider>
           <Web3Provider>
-            <DefaultLayout>{children}</DefaultLayout>
+            <AuthLayout>
+              <DefaultLayout>{children}</DefaultLayout>
+            </AuthLayout>
           </Web3Provider>
         </Web3StoreProvider>
       </body>
