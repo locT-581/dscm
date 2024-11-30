@@ -8,6 +8,7 @@ import Button from "@/UI/Button";
 import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
 import { addProcess } from "@/app/apis";
 import useToast from "@/hook/useToast";
+import { useWeb3Store } from "@/stores/storeProvider";
 
 export interface ColourOption {
   readonly value: string;
@@ -19,6 +20,7 @@ export interface ColourOption {
 
 export default function AddProcess() {
   const { update, notify } = useToast();
+  const { getProcess } = useWeb3Store((state) => state);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | undefined>();
@@ -48,6 +50,7 @@ export default function AddProcess() {
       setDescription("");
       setFile(undefined);
 
+      getProcess();
       update(true, "Đã thêm quy trình sản phẩm thành công!");
     });
   };
