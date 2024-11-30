@@ -41,16 +41,18 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
         </header>
 
         <IconBreadcrumbs
-          stack={pathParts.map((part, index) => ({
-            href: pathParts.slice(0, index + 1).join("/"),
-            icon: (
-              <SideBarIcon
-                width={16}
-                keyIcon={SidebarData.find((path) => path.path.replace("/", "") == part)?.icon ?? "DashboardIcon"}
-              />
-            ),
-            label: SidebarData.find((path) => path.path.replace("/", "") == part)?.title ?? "",
-          }))}
+          stack={
+            pathParts.map((part, index) => ({
+              href: pathParts.slice(0, index + 1).join("/"),
+              icon: (
+                <SideBarIcon
+                  width={16}
+                  keyIcon={SidebarData.find((path) => path.path.replace("/", "") == part)?.icon ?? "DashboardIcon"}
+                />
+              ),
+              label: SidebarData.find((path) => path.path.replace("/", "") == part)?.title ?? "",
+            })) ?? ["/"]
+          }
         />
         <div className="h-full w-full">{children}</div>
       </div>

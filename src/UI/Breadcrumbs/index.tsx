@@ -14,15 +14,15 @@ export default function IconBreadcrumbs({
   return (
     <div role="presentation" onClick={handleClick}>
       <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" />}>
-        {stack.splice(0, stack.length - 1).map(({ href, icon, label }, index) => (
+        {stack?.splice(0, stack.length - 1)?.map(({ href, icon, label }, index) => (
           <Link key={index} href={"/" + href} className="flex gap-1 items-center hover:underline-offset-2">
             {icon}
             {label}
           </Link>
         ))}
         <Typography sx={{ color: "text.primary", display: "flex", alignItems: "center" }}>
-          {stack[stack.length - 1].icon}
-          {stack[stack.length - 1].label}
+          {stack[stack.length - 1]?.icon}
+          {stack[stack.length - 1]?.label}
         </Typography>
       </Breadcrumbs>
     </div>
