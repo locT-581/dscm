@@ -2,6 +2,7 @@ import { db } from "@/lib/firebase";
 import Process from "@/types/process";
 import Product, { ProductOffChain } from "@/types/product";
 import Supplier from "@/types/supplier";
+import getDate from "@/utils/getDate";
 import { addDoc, collection, doc, DocumentData, getDoc, getDocs, serverTimestamp, setDoc } from "firebase/firestore";
 
 /**
@@ -175,6 +176,10 @@ export const getAllProcesses = async (): Promise<Process[]> => {
           id: doc.id,
           name: doc.data().name,
           image: doc.data().image,
+          description: doc.data().description,
+          date: getDate(
+            new Date(doc.data().createdAt.seconds * 1000 + doc.data().createdAt.nanoseconds / 1e6).getTime()
+          ),
         });
       });
     })
