@@ -9,12 +9,15 @@ import Product, { ProductBlockChain } from "@/types/product";
 import { units } from "@/utils/const";
 import { getAllProcesses, getAllProducts } from "@/app/apis";
 import Process from "@/types/process";
+import Supplier from "@/types/supplier";
 
 export type StoreState = {
   web3: Web3 | undefined;
   account: string | undefined;
   networkId: number | undefined;
   contract: Contract<OriginAbi> | undefined;
+
+  user: Supplier | undefined;
 
   orders: Order[] | undefined;
   shipments: Shipment[] | undefined;
@@ -31,6 +34,7 @@ export type StoreAction = {
   setOrders: (orders: StoreState["orders"]) => void;
   setShipments: (shipments: StoreState["shipments"]) => void;
   setProducts: (products: StoreState["products"]) => void;
+  setUser: (user: StoreState["user"]) => void;
 
   getOrders: () => Promise<void>;
   getShipments: () => Promise<void>;
@@ -46,6 +50,8 @@ export const defaultInitState: StoreState = {
   networkId: undefined,
   contract: undefined,
 
+  user: undefined,
+
   orders: undefined,
   shipments: undefined,
   products: undefined,
@@ -56,13 +62,14 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
   return createStore<StoreType>()((set, get) => ({
     ...initState,
     setWeb3: (web3: Web3 | undefined) => set(() => ({ web3 })),
-    setAccount: (account: string | undefined) => set(() => ({ account })),
+    setAccount: (account: string | undefined) => set(() => ({ account: account?.toLocaleLowerCase() })),
     setNetWorkId: (networkId: number | undefined) => set(() => ({ networkId })),
     setContract: (contract: Contract<OriginAbi> | undefined) => set(() => ({ contract })),
 
     setOrders: (orders: Order[] | undefined) => set(() => ({ orders })),
     setShipments: (shipments: Shipment[] | undefined) => set(() => ({ shipments })),
     setProducts: (products: Product[] | undefined) => set(() => ({ products })),
+    setUser: (user: Supplier | undefined) => set(() => ({ user })),
 
     // fetch Data
     getOrders: async () => {
@@ -105,20 +112,17 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
     },
 
     getProducts: async () => {
-      const { contract, processes } = get();
-      if (!contract || !!!processes) return;
-
+      const { contract } = get();
+      if (!contract) return;
       const allProduct = await getAllProducts();
-
       const productCount: number = await contract.methods.productCount().call();
+
       const products: Product[] = [];
       for (let i = 1; i <= productCount; i++) {
         const productOnchain: ProductBlockChain = await contract.methods.products(i).call();
         const productOffChain = allProduct.find(
           (product) => product.offChainId == Number(productOnchain.id).toString()
         );
-        console.log("🚀 ~ getProducts: ~ productOffChain:", productOffChain);
-
         const newProduct: Product = {
           ...productOnchain,
           ...productOffChain,

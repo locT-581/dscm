@@ -5,6 +5,7 @@ import { useEffect } from "react";
 
 import { Origin } from "@/lib/abis";
 import { useWeb3Store } from "@/stores/storeProvider";
+import { getSupplierByAddress } from "@/app/apis";
 
 export interface IWeb3ProviderProps {
   children: React.ReactNode;
@@ -25,6 +26,8 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
     getProducts,
     processes,
     getProcess,
+    user,
+    setUser,
   } = useWeb3Store((state) => state);
 
   // get Web3
@@ -35,9 +38,12 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
       const web3Instance = new Web3(window.ethereum);
       setWeb3(web3Instance);
 
-      window.ethereum.request({ method: "eth_requestAccounts" }).then((accounts) => {
+      window.ethereum.request({ method: "eth_requestAccounts" }).then(async (accounts) => {
         const accountList = accounts as string[];
         setAccount(accountList[0]);
+
+        const user = await getSupplierByAddress(accountList[0].toLocaleLowerCase());
+        setUser(user ?? undefined);
       });
     } else if (window.web3) {
       window.web3 = new Web3(window.web3.currentProvider);
@@ -80,5 +86,6 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
     if (contract && !!!shipments) getShipments();
   }, [contract, shipments, getShipments]);
 
+  if (!!!user) return <>Đăng nhập vào hệ thống</>;
   return <>{children}</>;
 }

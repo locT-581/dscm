@@ -6,6 +6,7 @@ export const SidebarData: {
   path: string;
   icon: ISideBarIconProps["keyIcon"];
   isShow?: boolean;
+  onlyAdmin?: boolean;
 }[] = [
   {
     title: "Tổng quan",
@@ -18,6 +19,13 @@ export const SidebarData: {
     path: "/san-pham",
     icon: "ProductionQuantityLimitsIcon",
     isShow: true,
+  },
+  {
+    title: "Nhà cung cấp",
+    path: "/nha-cung-cap",
+    icon: "ProductionQuantityLimitsIcon",
+    isShow: true,
+    onlyAdmin: true,
   },
   {
     title: "Đánh giá",

@@ -1,6 +1,8 @@
 import Process from "./process";
 
+type Role = "Focal company" | "Supplier";
 export default interface Supplier {
+  role?: Role;
   id: string;
   name: string;
   productsProcesses: Process;
