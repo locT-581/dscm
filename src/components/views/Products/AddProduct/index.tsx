@@ -75,13 +75,14 @@ export default function AddProduct() {
       .once("receipt", async (e) => {
         await addProductToFireStore(
           {
+            offChainId: Number(e.events?.ProductAdded.returnValues.id).toString() ?? (products!.length - 1).toString(),
             process: selectedProcesses,
             unit: unit!,
             properties,
           },
           Number(e.events?.ProductAdded.returnValues.id).toString() ?? (products!.length - 1).toString()
         );
-        
+
         await getProducts();
         update(true, "Thêm sản phẩm thành công!");
       })

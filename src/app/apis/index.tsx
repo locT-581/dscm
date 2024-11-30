@@ -3,7 +3,18 @@ import Process from "@/types/process";
 import Product, { ProductOffChain } from "@/types/product";
 import Supplier from "@/types/supplier";
 import getDate from "@/utils/getDate";
-import { addDoc, collection, doc, DocumentData, getDoc, getDocs, serverTimestamp, setDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  DocumentData,
+  getDoc,
+  getDocs,
+  serverTimestamp,
+  setDoc,
+  query,
+  where,
+} from "firebase/firestore";
 
 /**
  * Get all Supplier from fire store
@@ -17,6 +28,7 @@ export const getAllSupplier = async (): Promise<Supplier[]> => {
       querySnapshot.forEach((doc) => {
         suppliers.push({
           id: doc.id,
+          role: doc.data().role,
           name: doc.data().name,
           address: doc.data().address,
           phoneNumber: doc.data().phone,
@@ -33,7 +45,7 @@ export const getAllSupplier = async (): Promise<Supplier[]> => {
       console.log("Error getting documents: ", error);
       return [];
     });
-  return suppliers;
+  return suppliers.filter((s) => s.role != "Focal company");
 };
 
 /**
@@ -41,22 +53,27 @@ export const getAllSupplier = async (): Promise<Supplier[]> => {
  * @param id - string
  * @returns - Promise<Supplier | null>
  */
-export const getSupplierById = async (id: string): Promise<Supplier | null> => {
+export const getSupplierByAddress = async (id: string): Promise<Supplier | null> => {
   let supplier: Supplier | null = null;
-  await getDoc(doc(db, "supplier", id))
-    .then((doc) => {
-      if (doc.exists()) {
-        const { createAt, ...tempUser } = doc.data();
-        supplier = { id: doc.id, ...tempUser } as Supplier;
-      } else {
-        console.log("No such document!");
-        return null;
-      }
-    })
-    .catch((error) => {
-      console.log("Error getting document:", error);
-      return null;
-    });
+  // get supplier by address (query by address)
+  const supplierRef = collection(db, "supplier");
+  const supplierQuery = query(supplierRef, where("account", "==", id));
+  const result = await getDocs(supplierQuery);
+  result.forEach((doc) => {
+    supplier = {
+      id: doc.id,
+      role: doc.data().role,
+      name: doc.data().name,
+      address: doc.data().address,
+      phoneNumber: doc.data().phone,
+      email: doc.data().email,
+      account: doc.data().account,
+      productsProcesses: doc.data().productsProcesses,
+      type: doc.data().type,
+      taxCode: doc.data().taxCode,
+      website: doc.data().website,
+    };
+  });
 
   return supplier;
 };
@@ -83,6 +100,17 @@ export const getAllProducts = async (): Promise<ProductOffChain[]> => {
       return [];
     });
   return products;
+};
+
+/**
+ * Add new supplier to firestore
+ * @param supplier - Supplier
+ * @returns {Promise} - Promise<DocumentData>
+ */
+export const addSupplier = async (supplier: Supplier): Promise<DocumentData> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { id, ...rest } = supplier;
+  return await addDoc(collection(db, "supplier"), { ...rest });
 };
 
 /**

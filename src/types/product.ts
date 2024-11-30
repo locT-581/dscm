@@ -11,8 +11,15 @@ export interface ProductOnChain {
 }
 
 export interface ProductOffChain {
+  offChainId: string;
   process: Process[];
   unit: Unit;
+  properties?: Property[];
+}
+
+export interface Property {
+  name: string;
+  value: string[];
 }
 
 export interface ProductBlockChain {

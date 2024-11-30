@@ -5,7 +5,7 @@ export default interface Supplier {
   role?: Role;
   id: string;
   name: string;
-  productsProcesses: Process;
+  productsProcesses: Process[];
   type: "Doanh nghiệp" | "Cá nhân";
   address: string;
   account: string;

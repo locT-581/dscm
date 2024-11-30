@@ -28,6 +28,8 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
     getProcess,
     user,
     setUser,
+    suppliers,
+    getSuppliers,
   } = useWeb3Store((state) => state);
 
   // get Web3
@@ -50,7 +52,7 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
     } else {
       console.log("Please install MetaMask!");
     }
-  }, [setWeb3, setAccount, web3]);
+  }, [setWeb3, setAccount, setUser, web3]);
 
   // get contract
   useEffect(() => {
@@ -85,6 +87,10 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
   useEffect(() => {
     if (contract && !!!shipments) getShipments();
   }, [contract, shipments, getShipments]);
+
+  useEffect(() => {
+    if (user && user.role === "Focal company" && !!!suppliers) getSuppliers();
+  }, [user, suppliers, getSuppliers]);
 
   if (!!!user) return <>Đăng nhập vào hệ thống</>;
   return <>{children}</>;

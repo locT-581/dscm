@@ -7,7 +7,7 @@ import Order, { OrderBlockChainType } from "@/types/order";
 import Shipment, { ShipmentBlockChainType } from "@/types/shipment";
 import Product, { ProductBlockChain } from "@/types/product";
 import { units } from "@/utils/const";
-import { getAllProcesses, getAllProducts } from "@/app/apis";
+import { getAllProcesses, getAllProducts, getAllSupplier } from "@/app/apis";
 import Process from "@/types/process";
 import Supplier from "@/types/supplier";
 
@@ -23,6 +23,7 @@ export type StoreState = {
   shipments: Shipment[] | undefined;
   products: Product[] | undefined;
   processes: Process[] | undefined;
+  suppliers: Supplier[] | undefined;
 };
 
 export type StoreAction = {
@@ -40,6 +41,7 @@ export type StoreAction = {
   getShipments: () => Promise<void>;
   getProducts: () => Promise<void>;
   getProcess: () => Promise<void>;
+  getSuppliers: () => Promise<void>;
 };
 
 export type StoreType = StoreState & StoreAction;
@@ -56,6 +58,7 @@ export const defaultInitState: StoreState = {
   shipments: undefined,
   products: undefined,
   processes: undefined,
+  suppliers: undefined,
 };
 
 export const createWeb3Store = (initState: StoreState = defaultInitState) => {
@@ -139,6 +142,11 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
     getProcess: async () => {
       const processes = await getAllProcesses();
       set(() => ({ processes }));
+    },
+
+    getSuppliers: async () => {
+      const suppliers = await getAllSupplier();
+      set(() => ({ suppliers }));
     },
   }));
 };

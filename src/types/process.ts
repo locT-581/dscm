@@ -3,4 +3,5 @@ export default interface Process {
   name: string;
   description?: string;
   image: string;
+  date: string;
 }

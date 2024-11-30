@@ -143,7 +143,7 @@ export default function Sidebar() {
             }}
             className="relative flex flex-col items-center justify-center w-full"
           >
-            {SidebarData.map((item, index) => {
+            {SidebarData.filter((i) => i.isShow).map((item, index) => {
               return (
                 <Link
                   key={index}
