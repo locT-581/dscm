@@ -135,8 +135,9 @@ export default function Sidebar() {
         <div
           style={{
             paddingBlock: height * 0.125 + "px",
+            width: isFullSize ? "90%" : "55%",
           }}
-          className="absolute w-[55%] inset-0 flex flex-col items-center justify-between mx-auto"
+          className="absolute inset-0 flex flex-col items-center mx-auto"
         >
           <button
             type="button"
@@ -145,12 +146,16 @@ export default function Sidebar() {
             }}
           >
             <KeyboardDoubleArrowRightIcon
+              style={{
+                right: (isFullSize ? 8 : -4) + "px",
+              }}
               className={`absolute -right-1 top-[7%] cursor-pointer ${!isFullSize ? "rotate-0" : "rotate-180"} `}
             />
           </button>
           <div
             style={{
               gap: height * 0.0275 + "px",
+              justifyContent: !isFullSize ? "center" : "flex-start",
             }}
             className="relative flex flex-col items-center justify-center w-full"
           >
@@ -164,8 +169,12 @@ export default function Sidebar() {
                       backgroundColor:
                         pathname.replace("/", "") === item.path.replace("/", "") ? "#DEE2FF" : "transparent",
                       color: pathname.replace("/", "") === item.path.replace("/", "") ? "#028090" : "#D6EADF",
+                      aspectRatio: !isFullSize ? "1/1" : "unset",
+                      paddingBlock: (isFullSize ? 12 : 0) + "px",
+                      paddingLeft: (isFullSize ? 12 : 0) + "px",
+                      justifyContent: !isFullSize ? "center" : "start",
                     }}
-                    className="flex gap-1 w-full aspect-square items-center justify-center rounded-xl !hover:bg-[#DEE2FF] !hover:text-[#028090] transition-all"
+                    className="flex gap-1 w-full items-center rounded-xl hover:bg-[#DEE2FF] hover:text-[#028090] transition-all"
                     href={item.path}
                   >
                     <SideBarIcon width="170%" keyIcon={item.icon} />
@@ -174,10 +183,10 @@ export default function Sidebar() {
                 );
               })}
           </div>
-          <button>
+          {/* <button>
             <LogoutIcon sx={{ fontSize: 36 }} />
             {isFullSize && <span>Đăng xuất</span>}
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
