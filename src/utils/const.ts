@@ -24,7 +24,7 @@ export const SidebarData: {
   {
     title: "Nhà cung cấp",
     path: "/nha-cung-cap",
-    icon: "ProductionQuantityLimitsIcon",
+    icon: "PrecisionManufacturingIcon",
     isShow: true,
     onlyAdmin: true,
   },

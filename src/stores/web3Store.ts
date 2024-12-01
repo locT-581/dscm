@@ -268,6 +268,7 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
           ) as Supplier,
         });
       }
+      console.log("🚀 ~ getEnviros: ~ enviros:", enviros);
       set(() => ({ enviros }));
     },
     getSocials: async () => {

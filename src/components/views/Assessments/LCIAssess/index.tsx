@@ -18,7 +18,7 @@ const AssessList = ({ assessments }: { assessments: Assessment[] }) =>
       <th>
         <table className="LCI-table">
           <caption>
-            Kiểm kê vòng đời của {a.process?.name ?? ""} của {(a.document as CLIFormType).product.name}
+            Kiểm kê vòng đời của {a.process?.name ?? ""} của {(a.document as CLIFormType)?.product?.name}
           </caption>
           <caption className="captwo">
             {"Cho kỳ tháng " + a.month + " năm " + a.year + " bởi "}

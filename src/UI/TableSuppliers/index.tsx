@@ -157,7 +157,7 @@ export default function TableSuppliers({ rowList }: { rowList: Data[] }) {
 
   const visibleRows = React.useMemo(() => {
     return [...rows]
-      .map((row) => ({ ...row, processes: row.processes.map((process) => process.name).join(", ") }))
+      .map((row) => ({ ...row, processes: row.processes?.map((process) => process.name).join(", ") }))
       .sort(getComparator(order, orderBy))
       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   }, [order, orderBy, page, rowsPerPage, rows]);

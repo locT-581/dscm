@@ -28,7 +28,7 @@ const AssessList = ({
       <table className="LCI-table">
         <caption>
           Đánh giá bền vững môi trường cho
-          {a.account?.name}
+          {" " + a.account?.name}
         </caption>
         <caption className="captwo">{"Cho kỳ tháng " + a.month + " năm " + a.year}</caption>
         <thead>

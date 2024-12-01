@@ -194,7 +194,7 @@ export default function SocialReport() {
       const privacy = data.map((a) => parseInt((a.document as SocialFormType).privacy));
       const leaks = data.map((a) => parseInt((a.document as SocialFormType).leaks));
       const cuscomp = data.map((a) => parseInt((a.document as SocialFormType).cuscomp));
-      const suppliers = data.map((a) => parseInt((a.document as SocialFormType).suppliers));
+      const suppliers = data.map((a) => parseInt((a.document as SocialFormType).suppliers.name));
 
       setDonationChartData({
         labels: id,

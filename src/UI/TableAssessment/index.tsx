@@ -13,12 +13,14 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
-
+import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
+import Link from "next/link";
 interface Data {
   id: string;
   account: string;
   period: string;
   dated: string;
+  href: string;
 }
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -186,7 +188,10 @@ export default function TableAssessment({
                 return (
                   <TableRow hover role="row" tabIndex={-1} key={index} sx={{ cursor: "pointer", padding: "12px" }}>
                     <TableCell component="th" id={labelId} scope="row" align="center">
-                      {row.id}
+                      <Link href={row.href} className="flex gap-1 cursor-pointer items-center justify-center">
+                        {row.id}
+                        <ArrowOutwardIcon sx={{ fontSize: "12px" }} />
+                      </Link>
                     </TableCell>
                     <TableCell align="center">{row.account}</TableCell>
                     <TableCell align="center">{row.period}</TableCell>
