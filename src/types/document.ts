@@ -1,4 +1,5 @@
 import Product from "./product";
+import Supplier from "./supplier";
 
 export interface CLIFormType {
   id: string;
@@ -105,7 +106,7 @@ export interface SocialFormType {
   corrup: string;
   anticomp: string;
   socialsus: string;
-  suppliers: string;
+  suppliers: Supplier;
   productassess: string;
   product: Product;
   productincident: string;

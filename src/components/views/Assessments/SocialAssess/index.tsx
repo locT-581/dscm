@@ -1,11 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import Web3 from "web3";
 import { useSearchParams } from "next/navigation";
-import { Assessment } from "@/lib/abis";
-
-import Social, { SocialBlockChainType } from "@/types/social";
 
 import * as GiIcons from "react-icons/gi";
 import * as MdIcons from "react-icons/md";
@@ -15,444 +11,465 @@ import * as FaIcons from "react-icons/fa";
 import * as BsIcons from "react-icons/bs";
 import * as FiIcons from "react-icons/fi";
 import * as IoIcons from "react-icons/io";
+import { useWeb3Store } from "@/stores/storeProvider";
+import Assessment from "@/types/assessment";
+import { SocialFormType } from "@/types/document";
 
-const SocialList = ({ assessments }: { assessments: Social[] }) =>
+const SocialList = ({ assessments }: { assessments: Assessment[] }) =>
   assessments.map((a) => (
     <tr key={a.id}>
       <td>
         <table className="LCI-table">
           <caption>
-            Social Sustainability Assessment for
-            {a.account === "0xf00EbF44706A84d73698D51390a6801215fF338c"
-              ? " Supplier#1"
-              : a.account === "0x2074b4e9bE42c7724C936c16795C42c04e83d7ae"
-              ? " Supplier#2"
-              : a.account === "0xa686525B5A5c9353c649b9Ef7f387a9B92085619"
-              ? " Supplier#3"
-              : a.account === "0x5e66410a4C6443d035E05162C9bb59708cB0596F"
-              ? " Supplier#4"
-              : a.account === "0x3421668462324bFB48EA07D0B12243091CD09759"
-              ? " Company"
-              : a.account}
+            Đánh giá tính bền vững xã hội cho
+            {(a.document as SocialFormType)?.suppliers?.name}
           </caption>
-          <caption className="captwo">{"For period " + a.month + " " + a.year}</caption>
+          <caption className="captwo">{"Kỳ tháng " + a.month + " năm " + a.year}</caption>
           <thead>
             <tr>
-              <th>Categories</th>
-              <th>Indicators</th>
-              <th>Measurements</th>
-              <th>Values</th>
-              <th>Units</th>
+              <th>Thể loại</th>
+              <th>Các chỉ số</th>
+              <th>Số đo</th>
+              <th>Giá trị</th>
+              <th>Đơn vị</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <th rowSpan={17} className="category">
-                Labor Practices
+                Thực hành lao động
               </th>
               <th rowSpan={2}>
-                Employee training and development <MdIcons.MdOutlineSchool />
+                Đào tạo và phát triển nhân viên <MdIcons.MdOutlineSchool />
               </th>
-              <th>Average training hours per employee per year</th>
+              <th>Số giờ đào tạo trung bình mỗi nhân viên mỗi năm</th>
               <td>
-                {(+a.document.trainh / +a.document.trainemp) % 1 !== 0
-                  ? (+a.document.trainh / +a.document.trainemp).toFixed(1)
-                  : +a.document.trainh / +a.document.trainemp}
+                {(+(a.document as SocialFormType).trainh / +(a.document as SocialFormType).trainemp) % 1 !== 0
+                  ? (+(a.document as SocialFormType).trainh / +(a.document as SocialFormType).trainemp).toFixed(1)
+                  : +(a.document as SocialFormType).trainh / +(a.document as SocialFormType).trainemp}
               </td>
               <td>hours/ year</td>
             </tr>
             <tr>
-              <th>Percentage of employees trained per year</th>
+              <th>Tỷ lệ nhân viên được đào tạo mỗi năm</th>
               <td>
-                {((+a.document.trainemp * 100) / +a.document.emp) % 1 !== 0
-                  ? ((+a.document.trainemp * 100) / +a.document.emp).toFixed(1)
-                  : (+a.document.trainemp * 100) / +a.document.emp}
+                {((+(a.document as SocialFormType).trainemp * 100) / +(a.document as SocialFormType).emp) % 1 !== 0
+                  ? ((+(a.document as SocialFormType).trainemp * 100) / +(a.document as SocialFormType).emp).toFixed(1)
+                  : (+(a.document as SocialFormType).trainemp * 100) / +(a.document as SocialFormType).emp}
               </td>
               <td>%</td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Employee turnover
+                Doanh thu nhân viên
                 <GrIcons.GrPowerCycle />
               </th>
-              <th>Employee turnover per year</th>
+              <th>Doanh thu nhân viên mỗi năm</th>
               <td>
-                {(+a.document.resemp / +a.document.hiredemp) % 1 !== 0
-                  ? (+a.document.resemp / +a.document.hiredemp).toFixed(1)
-                  : +a.document.resemp / +a.document.hiredemp}
+                {(+(a.document as SocialFormType).resemp / +(a.document as SocialFormType).hiredemp) % 1 !== 0
+                  ? (+(a.document as SocialFormType).resemp / +(a.document as SocialFormType).hiredemp).toFixed(1)
+                  : +(a.document as SocialFormType).resemp / +(a.document as SocialFormType).hiredemp}
               </td>
-              <td>turnover/ year</td>
+              <td>doanh thu/năm</td>
             </tr>
             <tr>
               <th rowSpan={2}>
-                Full and part-time employees
+                Nhân viên toàn thời gian và bán thời gian
                 <GrIcons.GrUserWorker />
               </th>
-              <th>Percentage of full-time employees</th>
+              <th>Tỷ lệ nhân viên toàn thời gian</th>
               <td>
-                {((+a.document.fullemp * 100) / +a.document.emp) % 1 !== 0
-                  ? ((+a.document.fullemp * 100) / +a.document.emp).toFixed(1)
-                  : (+a.document.fullemp * 100) / +a.document.emp}
+                {((+(a.document as SocialFormType).fullemp * 100) / +(a.document as SocialFormType).emp) % 1 !== 0
+                  ? ((+(a.document as SocialFormType).fullemp * 100) / +(a.document as SocialFormType).emp).toFixed(1)
+                  : (+(a.document as SocialFormType).fullemp * 100) / +(a.document as SocialFormType).emp}
               </td>
               <td>%</td>
             </tr>
             <tr>
-              <th>Percentage part-time employees</th>
+              <th>Tỷ lệ nhân viên bán thời gian</th>
               <td>
-                {(((+a.document.emp - +a.document.fullemp) * 100) / +a.document.emp) % 1 !== 0
-                  ? (((+a.document.emp - +a.document.fullemp) * 100) / +a.document.emp).toFixed(1)
-                  : ((+a.document.emp - +a.document.fullemp) * 100) / +a.document.emp}
+                {(((+(a.document as SocialFormType).emp - +(a.document as SocialFormType).fullemp) * 100) /
+                  +(a.document as SocialFormType).emp) %
+                  1 !==
+                0
+                  ? (
+                      ((+(a.document as SocialFormType).emp - +(a.document as SocialFormType).fullemp) * 100) /
+                      +(a.document as SocialFormType).emp
+                    ).toFixed(1)
+                  : ((+(a.document as SocialFormType).emp - +(a.document as SocialFormType).fullemp) * 100) /
+                    +(a.document as SocialFormType).emp}
               </td>
               <td>%</td>
             </tr>
             <tr>
               <th rowSpan={2}>
-                Hours of work
+                Giờ làm việc
                 <AiIcons.AiOutlineClockCircle />
               </th>
-              <th>Average weekly contractual working hours per employee per month</th>
-              <td>{+a.document.workh}</td>
-              <td>hours/ month</td>
+              <th>Số giờ làm việc theo hợp đồng trung bình hàng tuần của mỗi nhân viên mỗi tháng</th>
+              <td>{+(a.document as SocialFormType).workh}</td>
+              <td>giờ/tháng</td>
             </tr>
             <tr>
               <th>Average weekly overtime hours per employee per month</th>
-              <td>{+a.document.overtimeh}</td>
-              <td>hours/ month</td>
+              <td>{+(a.document as SocialFormType).overtimeh}</td>
+              <td>giờ/tháng</td>
             </tr>
             <tr>
               <th rowSpan={2}>
-                Fair wage
+                Lương công bằng
                 <MdIcons.MdAttachMoney />
               </th>
-              <th>Percentage of employee wage to the minimum wage</th>
+              <th>Tỷ lệ lương của người lao động trên mức lương tối thiểu</th>
               <td>
-                {((+a.document.empwage * 100) / 4250) % 1 !== 0
-                  ? ((+a.document.empwage * 100) / 4250).toFixed(1)
-                  : (+a.document.empwage * 100) / 4250}
+                {((+(a.document as SocialFormType).empwage * 100) / 4250) % 1 !== 0
+                  ? ((+(a.document as SocialFormType).empwage * 100) / 4250).toFixed(1)
+                  : (+(a.document as SocialFormType).empwage * 100) / 4250}
               </td>
               <td>%</td>
             </tr>
             <tr>
-              <th>Percentage of full-time employees earning below minimum wage</th>
+              <th>Tỷ lệ nhân viên toàn thời gian có thu nhập dưới mức lương tối thiểu</th>
               <td>
-                {((+a.document.minwage * 100) / +a.document.emp) % 1 !== 0
-                  ? ((+a.document.minwage * 100) / +a.document.emp).toFixed(1)
-                  : (+a.document.minwage * 100) / +a.document.emp}
+                {((+(a.document as SocialFormType).minwage * 100) / +(a.document as SocialFormType).emp) % 1 !== 0
+                  ? ((+(a.document as SocialFormType).minwage * 100) / +(a.document as SocialFormType).emp).toFixed(1)
+                  : (+(a.document as SocialFormType).minwage * 100) / +(a.document as SocialFormType).emp}
               </td>
               <td>%</td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Social benefits and security
+                Phúc lợi và an ninh xã hội
                 <MdIcons.MdSecurity />
               </th>
               <th>
-                Percentage of employees entitled for health insurance, parental leave, unemployment, disability and
-                invalidity coverage, retirement provision
+                Tỷ lệ người lao động được hưởng bảo hiểm y tế, nghỉ thai sản, thất nghiệp, khuyết tật và bảo hiểm tàn
+                tật, cung cấp hưu trí
               </th>
               <td>
-                {((+a.document.insurance * 100) / +a.document.emp) % 1 !== 0
-                  ? ((+a.document.insurance * 100) / +a.document.emp).toFixed(1)
-                  : (+a.document.insurance * 100) / +a.document.emp}
+                {((+(a.document as SocialFormType).insurance * 100) / +(a.document as SocialFormType).emp) % 1 !== 0
+                  ? ((+(a.document as SocialFormType).insurance * 100) / +(a.document as SocialFormType).emp).toFixed(1)
+                  : (+(a.document as SocialFormType).insurance * 100) / +(a.document as SocialFormType).emp}
               </td>
               <td>%</td>
             </tr>
             <tr>
               <th rowSpan={3}>
-                Gender diversity
+                Đa dạng giới tính
                 <BsIcons.BsGenderAmbiguous />
               </th>
-              <th>Wage diversity of genders</th>
+              <th>Mức lương đa dạng theo giới tính</th>
               <td>
-                {(+a.document.femwage / +a.document.malwage) % 1 !== 0
-                  ? (+a.document.femwage / +a.document.malwage).toFixed(1)
-                  : +a.document.femwage / +a.document.malwage}
+                {(+(a.document as SocialFormType).femwage / +(a.document as SocialFormType).malwage) % 1 !== 0
+                  ? (+(a.document as SocialFormType).femwage / +(a.document as SocialFormType).malwage).toFixed(1)
+                  : +(a.document as SocialFormType).femwage / +(a.document as SocialFormType).malwage}
               </td>
-              <td>female wage/ male wage</td>
+              <td>lương nữ/lương nam</td>
             </tr>
             <tr>
-              <th>Employee gender diversity</th>
+              <th>Đa dạng giới tính của nhân viên</th>
               <td>
-                {(+a.document.fem / +a.document.male) % 1 !== 0
-                  ? (+a.document.fem / +a.document.male).toFixed(1)
-                  : +a.document.fem / +a.document.male}
+                {(+(a.document as SocialFormType).fem / +(a.document as SocialFormType).male) % 1 !== 0
+                  ? (+(a.document as SocialFormType).fem / +(a.document as SocialFormType).male).toFixed(1)
+                  : +(a.document as SocialFormType).fem / +(a.document as SocialFormType).male}
               </td>
-              <td>female employees/ male employees</td>
+              <td>nhân viên nữ/nhân viên nam</td>
             </tr>
             <tr>
-              <th>Percentage of female employees in board of directors and management positions</th>
+              <th>Tỷ lệ lao động nữ trong HĐQT và các vị trí quản lý</th>
               <td>
-                {((+a.document.femboard * 100) / +a.document.empboard) % 1 !== 0
-                  ? ((+a.document.femboard * 100) / +a.document.empboard).toFixed(1)
-                  : (+a.document.femboard * 100) / +a.document.empboard}
+                {((+(a.document as SocialFormType).femboard * 100) / +(a.document as SocialFormType).empboard) % 1 !== 0
+                  ? (
+                      (+(a.document as SocialFormType).femboard * 100) /
+                      +(a.document as SocialFormType).empboard
+                    ).toFixed(1)
+                  : (+(a.document as SocialFormType).femboard * 100) / +(a.document as SocialFormType).empboard}
               </td>
               <td>%</td>
             </tr>
             <tr>
               <th rowSpan={3}>
-                Diversity among the workforce
+                Sự đa dạng trong lực lượng lao động
                 <MdIcons.MdGroups />
               </th>
-              <th>Percentage of disabled employees</th>
+              <th>Tỷ lệ nhân viên khuyết tật</th>
               <td>
-                {((+a.document.disabled * 100) / +a.document.emp) % 1 !== 0
-                  ? ((+a.document.disabled * 100) / +a.document.emp).toFixed(1)
-                  : (+a.document.disabled * 100) / +a.document.emp}
+                {((+(a.document as SocialFormType).disabled * 100) / +(a.document as SocialFormType).emp) % 1 !== 0
+                  ? ((+(a.document as SocialFormType).disabled * 100) / +(a.document as SocialFormType).emp).toFixed(1)
+                  : (+(a.document as SocialFormType).disabled * 100) / +(a.document as SocialFormType).emp}
               </td>
               <td>%</td>
             </tr>
             <tr>
-              <th>Percentage of minority employees</th>
+              <th>Tỷ lệ lao động thiểu số</th>
               <td>
-                {((+a.document.minority * 100) / +a.document.emp) % 1 !== 0
-                  ? ((+a.document.minority * 100) / +a.document.emp).toFixed(1)
-                  : (+a.document.minority * 100) / +a.document.emp}
+                {((+(a.document as SocialFormType).minority * 100) / +(a.document as SocialFormType).emp) % 1 !== 0
+                  ? ((+(a.document as SocialFormType).minority * 100) / +(a.document as SocialFormType).emp).toFixed(1)
+                  : (+(a.document as SocialFormType).minority * 100) / +(a.document as SocialFormType).emp}
               </td>
               <td>%</td>
             </tr>
             <tr>
-              <th>Percentage of employees with age over 65</th>
+              <th>Tỷ lệ lao động có độ tuổi trên 65</th>
               <td>
-                {((+a.document.older * 100) / +a.document.emp) % 1 !== 0
-                  ? ((+a.document.older * 100) / +a.document.emp).toFixed(1)
-                  : (+a.document.older * 100) / +a.document.emp}
+                {((+(a.document as SocialFormType).older * 100) / +(a.document as SocialFormType).emp) % 1 !== 0
+                  ? ((+(a.document as SocialFormType).older * 100) / +(a.document as SocialFormType).emp).toFixed(1)
+                  : (+(a.document as SocialFormType).older * 100) / +(a.document as SocialFormType).emp}
               </td>
               <td>%</td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Social standards <GrIcons.GrCertificate />
+                Chuẩn mực xã hội <GrIcons.GrCertificate />
               </th>
-              <th>Existence of external certifications regarding social standards</th>
-              <td>{(+a.document.socialstand + " ").replace(/,/g, ", ")}</td>
+              <th>Sự tồn tại của các chứng nhận bên ngoài về tiêu chuẩn xã hội</th>
+              <td>{(+(a.document as SocialFormType).socialstand + " ").replace(/,/g, ", ")}</td>
               <td></td>
             </tr>
             <tr>
               <th rowSpan={6} className="category">
-                Work Health and Safety
+                Sức khỏe và An toàn lao động
               </th>
               <th rowSpan={5}>
-                Occupational health and safety
+                Sức khỏe và an toàn nghề nghiệp
                 <GiIcons.GiHealthNormal />
               </th>
-              <th>Occupational health and safety compliance</th>
-              <td>{+a.document.ilo}</td>
+              <th>Tuân thủ an toàn và sức khỏe nghề nghiệp</th>
+              <td>{+(a.document as SocialFormType).ilo}</td>
               <td></td>
             </tr>
             <tr>
-              <th>Existence of fire-fighting equipment and emergency exits </th>
-              <td>{+a.document.fire}</td>
+              <th>Có thiết bị chữa cháy và lối thoát hiểm</th>
+              <td>{+(a.document as SocialFormType).fire}</td>
               <td></td>
             </tr>
             <tr>
-              <th>Provision of medical assistance and first aid </th>
-              <td>{+a.document.medical}</td>
+              <th>Cung cấp hỗ trợ y tế và sơ cứu</th>
+              <td>{+(a.document as SocialFormType).medical}</td>
               <td></td>
             </tr>
             <tr>
-              <th>Access to drinking water and sanitation</th>
-              <td>{+a.document.sanitation}</td>
+              <th>Tiếp cận nước uống và vệ sinh</th>
+              <td>{+(a.document as SocialFormType).sanitation}</td>
               <td></td>
             </tr>
             <tr>
-              <th>Provision of protective gear</th>
-              <td>{+a.document.gear}</td>
+              <th>Cung cấp đồ bảo hộ</th>
+              <td>{+(a.document as SocialFormType).gear}</td>
               <td></td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Accidents
+                Tai nạn
                 <MdIcons.MdOutlinePersonalInjury />
               </th>
-              <th>Work accidents per year</th>
-              <td>{+a.document.workacc}</td>
-              <td>accidents/ year</td>
+              <th>Tai nạn lao động mỗi năm</th>
+              <td>{+(a.document as SocialFormType).workacc}</td>
+              <td>tai nạn/năm</td>
             </tr>
             <tr>
               <th rowSpan={7} className="category">
-                Human Rights
+                Nhân Quyền
               </th>
               <th rowSpan={2}>
-                Freedom of association
+                Tự do hiệp hội
                 <GiIcons.GiThreeFriends />
               </th>
-              <th>Presence of unions within the organization</th>
-              <td>{+a.document.union}</td>
+              <th>Sự hiện diện của các công đoàn trong tổ chức</th>
+              <td>{+(a.document as SocialFormType).union}</td>
               <td></td>
             </tr>
             <tr>
-              <th>Percentage of employees joined to labor unions</th>
+              <th>Tỷ lệ người lao động tham gia công đoàn</th>
               <td>
-                {((+a.document.empunion * 100) / +a.document.emp) % 1 !== 0
-                  ? ((+a.document.empunion * 100) / +a.document.emp).toFixed(1)
-                  : (+a.document.empunion * 100) / +a.document.emp}
+                {((+(a.document as SocialFormType).empunion * 100) / +(a.document as SocialFormType).emp) % 1 !== 0
+                  ? ((+(a.document as SocialFormType).empunion * 100) / +(a.document as SocialFormType).emp).toFixed(1)
+                  : (+(a.document as SocialFormType).empunion * 100) / +(a.document as SocialFormType).emp}
               </td>
               <td>%</td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Collective bargaining agreements
+                Thỏa ước thương lượng tập thể
                 <FaIcons.FaRegHandshake />
               </th>
-              <th>Percentage of employees covered by collective bargaining agreements</th>
+              <th>Tỷ lệ người lao động được thỏa ước lao động tập thể</th>
               <td>
-                {((+a.document.bargain * 100) / +a.document.emp) % 1 !== 0
-                  ? ((+a.document.bargain * 100) / +a.document.emp).toFixed(1)
-                  : (+a.document.bargain * 100) / +a.document.emp}
+                {((+(a.document as SocialFormType).bargain * 100) / +(a.document as SocialFormType).emp) % 1 !== 0
+                  ? ((+(a.document as SocialFormType).bargain * 100) / +(a.document as SocialFormType).emp).toFixed(1)
+                  : (+(a.document as SocialFormType).bargain * 100) / +(a.document as SocialFormType).emp}
               </td>
               <td>%</td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Discrimination
+                Phân biệt
                 <GiIcons.GiInjustice />
               </th>
-              <th>Discrimination incidents per year</th>
-              <td>{+a.document.discri}</td>
-              <td>incidents</td>
+              <th>Sự cố phân biệt đối xử mỗi năm</th>
+              <td>{+(a.document as SocialFormType).discri}</td>
+              <td>Sự cố</td>
             </tr>
             <tr>
               <th rowSpan={2}>
-                Child and forced labor
+                Trẻ em và lao động cưỡng bức
                 <GiIcons.GiCrossedChains />
               </th>
-              <th>Child labor </th>
-              <td>{+a.document.child}</td>
-              <td>employees</td>
+              <th>Lao động trẻ em</th>
+              <td>{+(a.document as SocialFormType).child}</td>
+              <td>Người lao động</td>
             </tr>
             <tr>
-              <th>Forced labor</th>
-              <td>{+a.document.forced}</td>
-              <td>employees</td>
+              <th>Lao động cưỡng bức</th>
+              <td>{+(a.document as SocialFormType).forced}</td>
+              <td>Người lao động</td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Rights of indigenous people
+                Quyền của người bản địa
                 <FaIcons.FaFeatherAlt />
               </th>
-              <th>Violation of the rights of indigenous people per year</th>
-              <td>{+a.document.indig}</td>
-              <td>incidents/ year</td>
+              <th>Vi phạm quyền lợi của người bản địa mỗi năm</th>
+              <td>{+(a.document as SocialFormType).indig}</td>
+              <td>sự cố/năm</td>
             </tr>
             <tr>
               <th rowSpan={6} className="category">
-                Society
+                Xã hội
               </th>
               <th rowSpan={1}>
-                Job localization
+                Bản địa hóa công việc
                 <AiIcons.AiOutlineHome />
                 <GrIcons.GrUserWorker />
               </th>
-              <th>Percentage of local employees</th>
+              <th>Tỷ lệ lao động địa phương</th>
               <td>
-                {((+a.document.localemp * 100) / +a.document.emp) % 1 !== 0
-                  ? ((+a.document.localemp * 100) / +a.document.emp).toFixed(1)
-                  : (+a.document.localemp * 100) / +a.document.emp}
+                {((+(a.document as SocialFormType).localemp * 100) / +(a.document as SocialFormType).emp) % 1 !== 0
+                  ? ((+(a.document as SocialFormType).localemp * 100) / +(a.document as SocialFormType).emp).toFixed(1)
+                  : (+(a.document as SocialFormType).localemp * 100) / +(a.document as SocialFormType).emp}
               </td>
               <td>%</td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Source localization
+                Bản địa hóa nguồn
                 <AiIcons.AiOutlineHome />
                 <FiIcons.FiMapPin />
               </th>
-              <th>Percentage of local suppliers</th>
+              <th>Tỷ lệ nhà cung cấp địa phương</th>
               <td>
-                {((+a.document.localsup * 100) / +a.document.suppliers) % 1 !== 0
-                  ? ((+a.document.localsup * 100) / +a.document.suppliers).toFixed(1)
-                  : (+a.document.localsup * 100) / +a.document.suppliers}
+                {((+(a.document as SocialFormType).localsup * 100) / +(a.document as SocialFormType).suppliers) % 1 !==
+                0
+                  ? (
+                      (+(a.document as SocialFormType).localsup * 100) /
+                      +(a.document as SocialFormType).suppliers
+                    ).toFixed(1)
+                  : (+(a.document as SocialFormType).localsup * 100) / +(a.document as SocialFormType).suppliers}
               </td>
               <td>%</td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Community development
+                Phát triển cộng đồng
                 <FaIcons.FaSchool />
                 <IoIcons.IoIosConstruct />
               </th>
-              <th>Percentage of charity donations to earnings per year</th>
+              <th>Tỷ lệ quyên góp từ thiện trên thu nhập mỗi năm</th>
               <td>
-                {((+a.document.donation * 100) / +a.document.earning) % 1 !== 0
-                  ? ((+a.document.donation * 100) / +a.document.earning).toFixed(1)
-                  : (+a.document.donation * 100) / +a.document.earning}
+                {((+(a.document as SocialFormType).donation * 100) / +(a.document as SocialFormType).earning) % 1 !== 0
+                  ? (
+                      (+(a.document as SocialFormType).donation * 100) /
+                      +(a.document as SocialFormType).earning
+                    ).toFixed(1)
+                  : (+(a.document as SocialFormType).donation * 100) / +(a.document as SocialFormType).earning}
               </td>
               <td>%</td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Anti-corruption
+                Chống tham nhũng
                 <GiIcons.GiPrisoner />
               </th>
-              <th>Corruption incidents per year</th>
-              <td>{+a.document.corrup}</td>
+              <th>Số vụ tham nhũng mỗi năm</th>
+              <td>{+(a.document as SocialFormType).corrup}</td>
               <td>incidents/ year</td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Anti-competitive behavior
+                Hành vi phản cạnh tranh
                 <GiIcons.GiPodiumWinner />
               </th>
-              <th>Legal actions pending or completed regarding anti-competitive behavior per year</th>
-              <td>{+a.document.anticomp}</td>
-              <td>legal actions/ year</td>
+              <th>
+                Các hành động pháp lý đang chờ xử lý hoặc đã hoàn thành liên quan đến hành vi phản cạnh tranh mỗi năm
+              </th>
+              <td>{+(a.document as SocialFormType).anticomp}</td>
+              <td>hành động pháp lý/năm</td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Supplier sustainability assessment
+                Đánh giá tính bền vững của nhà cung cấp
                 <MdIcons.MdOutlineAssessment />
               </th>
-              <th>Percentage of suppliers monitored on social sustainability per year</th>
+              <th>Tỷ lệ nhà cung cấp được giám sát về tính bền vững xã hội mỗi năm</th>
               <td>
-                {((+a.document.socialsus * 100) / +a.document.suppliers) % 1 !== 0
-                  ? ((+a.document.socialsus * 100) / +a.document.suppliers).toFixed(1)
-                  : (+a.document.socialsus * 100) / +a.document.suppliers}
+                {((+(a.document as SocialFormType).socialsus * 100) / +(a.document as SocialFormType).suppliers) % 1 !==
+                0
+                  ? (
+                      (+(a.document as SocialFormType).socialsus * 100) /
+                      +(a.document as SocialFormType).suppliers
+                    ).toFixed(1)
+                  : (+(a.document as SocialFormType).socialsus * 100) / +(a.document as SocialFormType).suppliers}
               </td>
               <td>%</td>
             </tr>
             <tr>
               <th rowSpan={5} className="category">
-                Customer Responsibility
+                Trách nhiệm của khách hàng
               </th>
               <th rowSpan={2}>
-                Customer health and safety
+                Sức khỏe và sự an toàn của khách hàng
                 <MdIcons.MdHealthAndSafety />
               </th>
-              <th>Percentage of products and services for which health and safety impacts are assessed</th>
+              <th>Tỷ lệ sản phẩm và dịch vụ được đánh giá tác động đến sức khỏe và an toàn</th>
               <td>
-                {((+a.document.productassess * 100) / +a.document.product) % 1 !== 0
-                  ? ((+a.document.productassess * 100) / +a.document.product).toFixed(1)
-                  : (+a.document.productassess * 100) / +a.document.product}
+                {((+(a.document as SocialFormType).productassess * 100) / +(a.document as SocialFormType).product) %
+                  1 !==
+                0
+                  ? (
+                      (+(a.document as SocialFormType).productassess * 100) /
+                      +(a.document as SocialFormType).product
+                    ).toFixed(1)
+                  : (+(a.document as SocialFormType).productassess * 100) / +(a.document as SocialFormType).product}
               </td>
               <td>%</td>
             </tr>
             <tr>
-              <th>Health and safety incidents concerning products and services per year</th>
-              <td>{+a.document.productincident}</td>
-              <td>incidents/ year</td>
+              <th>Sự cố về sức khỏe và an toàn liên quan đến sản phẩm và dịch vụ mỗi năm</th>
+              <td>{+(a.document as SocialFormType).productincident}</td>
+              <td>sự cố/năm</td>
             </tr>
             <tr>
               <th rowSpan={2}>
-                Respect for privacy
+                Tôn trọng quyền riêng tư
                 <MdIcons.MdOutlinePrivacyTip />
               </th>
-              <th>Customer privacy complaints per year</th>
-              <td>{+a.document.privacy}</td>
-              <td>complaints/ year</td>
+              <th>Khiếu nại về quyền riêng tư của khách hàng mỗi năm</th>
+              <td>{+(a.document as SocialFormType).privacy}</td>
+              <td>khiếu nại/năm</td>
             </tr>
             <tr>
-              <th>Leaks, thefts, or losses of customer data per year</th>
-              <td>{+a.document.leaks}</td>
-              <td>leaks, thefts, or losses/ year</td>
+              <th>Rò rỉ, trộm cắp hoặc mất dữ liệu khách hàng mỗi năm</th>
+              <td>{+(a.document as SocialFormType).leaks}</td>
+              <td>rò rỉ, trộm cắp hoặc mất mát/năm</td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Customer satisfaction
+                Sự hài lòng của khách hàng
                 <AiIcons.AiOutlineLike />
               </th>
-              <th>Customer complaints per month</th>
-              <td>{+a.document.cuscomp}</td>
-              <td>complaints/ month</td>
+              <th>Khiếu nại của khách hàng mỗi tháng</th>
+              <td>{+(a.document as SocialFormType).cuscomp}</td>
+              <td>khiếu nại/tháng</td>
             </tr>
           </tbody>
         </table>
@@ -461,72 +478,27 @@ const SocialList = ({ assessments }: { assessments: Social[] }) =>
   ));
 
 const SocialAssess = () => {
-  const web3Instance = useRef<Web3 | null>(null);
-
+  const { socials } = useWeb3Store((state) => state);
   const searchParams = useSearchParams();
   const dateState = searchParams.get("date");
 
-  const [socials, setSocials] = useState<Social[]>([]);
-  // const [socialform, setSocialForm] = useState<SocialFormType[]>([]);
   const [date, setDate] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadWeb3 = async () => {
-      if (window.ethereum) {
-        web3Instance.current = new Web3(window.ethereum);
-        window.ethereum.request({ method: "eth_requestAccounts" });
-      }
-      if (window.web3) {
-        window.web3 = new Web3(window.web3.currentProvider);
-      } else {
-        window.alert("Please use Metamask!");
-      }
-    };
-    loadWeb3();
-  }, []);
-
-  useEffect(() => {
-    const loadBlockchainData = async () => {
-      if (!web3Instance.current) return;
-
-      const networkId = await web3Instance.current.eth.net.getId();
-      const networkData = Assessment.networks[networkId as unknown as keyof typeof Assessment.networks];
-      if (networkData) {
-        //Fetch contract
-        const contract = new web3Instance.current.eth.Contract(Assessment.abi, networkData.address);
-        const socialCount = Number(await contract.methods.socialCount().call());
-        //Load Socials
-        for (let i = 1; i <= socialCount; i++) {
-          const newSocial: SocialBlockChainType = await contract.methods.socials(i).call();
-          setSocials((socials) => [
-            ...socials,
-            { ...newSocial, document: JSON.parse(newSocial.document), id: Number(newSocial.id).toString() },
-          ]);
-
-          // setSocialForm((socials) => [...socials, JSON.parse(newSocial.document)]);
-        }
-      } else {
-        window.alert("Assessment contract is not deployed to the detected network");
-      }
-    };
-    loadBlockchainData();
-  }, []);
 
   useEffect(() => {
     setDate(dateState);
   }, [dateState]);
 
   // const Smerge = socials.map((t1) => ({ ...t1, ...socialform.find((t2) => t2.id === t1.id) }));
-  const social = socials.filter((obj) => obj.date.includes(date ?? ""));
   // const social = Smerge.filter((obj) => obj.date.includes(date));
+  const social = socials?.filter((obj) => obj.date.includes(date ?? ""));
 
   return (
     <>
-      <div className="margin">
+      <div className="ml-[10%]">
         <table className="assess-table">
           <tbody>
-            <SocialList assessments={social} />
-            {!!!social && <h2> No Assessment Found</h2>}
+            <SocialList assessments={socials ?? []} />
+            {!!!social && <h2> Không có thông tin</h2>}
           </tbody>
         </table>
       </div>

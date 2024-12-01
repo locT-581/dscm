@@ -6,324 +6,323 @@ import * as BiIcons from "react-icons/bi";
 import * as RiIcons from "react-icons/ri";
 import * as AiIcons from "react-icons/ai";
 
-import LCI, { LCIBlockchain } from "@/types/LCI";
-import { useEffect, useRef, useState } from "react";
-import { Assessment } from "@/lib/abis";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import Product from "@/types/product";
+import Assessment from "@/types/assessment";
+import { useWeb3Store } from "@/stores/storeProvider";
+import { CLIFormType } from "@/types/document";
 
-const AssessList = ({ assessments }: { assessments: LCI[] }) =>
+const AssessList = ({ assessments }: { assessments: Assessment[] }) =>
   assessments.map((a) => (
     <tr key={a.id}>
       <th>
         <table className="LCI-table">
           <caption>
-            Life Cycle Inventory of {a.process} of an {a.product.name}
+            Kiểm kê vòng đời của {a.process?.name ?? ""} của {(a.document as CLIFormType).product.name}
           </caption>
           <caption className="captwo">
-            {"For the period " + a.month + " " + a.year + " by "}
-            {a.account === "0xf00EbF44706A84d73698D51390a6801215fF338c"
-              ? " Supplier#1"
-              : a.account === "0x2074b4e9bE42c7724C936c16795C42c04e83d7ae"
-              ? " Supplier#2"
-              : a.account === "0xa686525B5A5c9353c649b9Ef7f387a9B92085619"
-              ? " Supplier#3"
-              : a.account === "0x5e66410a4C6443d035E05162C9bb59708cB0596F"
-              ? " Supplier#4"
-              : a.account === "0x3421668462324bFB48EA07D0B12243091CD09759"
-              ? " Company"
-              : a.account}
+            {"Cho kỳ tháng " + a.month + " năm " + a.year + " bởi "}
+            {a.account.name}
           </caption>
           <thead>
             <tr>
-              <th>Categories</th>
-              <th>Indicators</th>
-              <th>Measurements</th>
-              <th>Values</th>
-              <th>Units</th>
+              <th>Thể loại</th>
+              <th>Các chỉ số</th>
+              <th>Số đo</th>
+              <th>Giá trị</th>
+              <th>Đơn vị</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <th rowSpan={9} className="category">
-                Natural Resources
+                Tài nguyên thiên nhiên
               </th>
               <th rowSpan={1}>
-                Energy consumption <GiIcons.GiElectric />
+                Tiêu thụ năng lượng <GiIcons.GiElectric />
               </th>
-              <th>Amount of energy used per unit of product</th>
+              <th>Lượng năng lượng sử dụng trên một đơn vị sản phẩm</th>
               <td>
-                {(+a.document.energy / +a.document.batch) % 1 !== 0
-                  ? (+a.document.energy / +a.document.batch).toFixed(2)
-                  : +a.document.energy / +a.document.batch}
+                {(+(a.document as CLIFormType).energy / +(a.document as CLIFormType).batch) % 1 !== 0
+                  ? (+(a.document as CLIFormType).energy / +(a.document as CLIFormType).batch).toFixed(2)
+                  : +(a.document as CLIFormType).energy / +(a.document as CLIFormType).batch}
               </td>
-              <td>kWh/ unit of product</td>
+              <td>kWh/đơn vị sản phẩm</td>
             </tr>
             <tr>
               <th rowSpan={2}>
-                Renewable energy <GiIcons.GiWindTurbine />
+                Năng lượng tái tạo <GiIcons.GiWindTurbine />
               </th>
-              <th>Amount of renewable energy used in energy consumption per unit of product</th>
+              <th>Lượng năng lượng tái tạo được sử dụng trong tiêu thụ năng lượng trên một đơn vị sản phẩm</th>
               <td>
-                {(+a.document.renewenergy / +a.document.batch) % 1 !== 0
-                  ? (+a.document.renewenergy / +a.document.batch).toFixed(2)
-                  : +a.document.renewenergy / +a.document.batch}
+                {(+(a.document as CLIFormType).renewenergy / +(a.document as CLIFormType).batch) % 1 !== 0
+                  ? (+(a.document as CLIFormType).renewenergy / +(a.document as CLIFormType).batch).toFixed(2)
+                  : +(a.document as CLIFormType).renewenergy / +(a.document as CLIFormType).batch}
               </td>
-              <td>kWh/ unit of product</td>
+              <td>kWh/đơn vị sản phẩm</td>
             </tr>
             <tr>
-              <th>Percentage of renewable energy used per unit of product</th>
+              <th>Tỷ lệ năng lượng tái tạo được sử dụng trên một đơn vị sản phẩm</th>
               <td>
-                {((+a.document.renewenergy * 100) / +a.document.energy) % 1 !== 0
-                  ? ((+a.document.renewenergy * 100) / +a.document.energy).toFixed(2)
-                  : (+a.document.renewenergy * 100) / +a.document.energy}
+                {((+(a.document as CLIFormType).renewenergy * 100) / +(a.document as CLIFormType).energy) % 1 !== 0
+                  ? ((+(a.document as CLIFormType).renewenergy * 100) / +(a.document as CLIFormType).energy).toFixed(2)
+                  : (+(a.document as CLIFormType).renewenergy * 100) / +(a.document as CLIFormType).energy}
               </td>
               <td>%</td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Water consumption <GiIcons.GiWaterDrop />
+                Tiêu thụ nước <GiIcons.GiWaterDrop />
               </th>
-              <th>Amount of water used per unit of product</th>
+              <th>Lượng nước sử dụng trên một đơn vị sản phẩm</th>
               <td>
-                {(+a.document.water / +a.document.batch) % 1 !== 0
-                  ? (+a.document.water / +a.document.batch).toFixed(2)
-                  : +a.document.water / +a.document.batch}
+                {(+(a.document as CLIFormType).water / +(a.document as CLIFormType).batch) % 1 !== 0
+                  ? (+(a.document as CLIFormType).water / +(a.document as CLIFormType).batch).toFixed(2)
+                  : +(a.document as CLIFormType).water / +(a.document as CLIFormType).batch}
               </td>
-              <td>m3/ unit of product</td>
+              <td>m3/đơn vị sản phẩm</td>
             </tr>
             <tr>
               <th rowSpan={2}>
-                Recycled or reused water <GiIcons.GiWaterRecycling />
+                Nước tái chế hoặc tái sử dụng <GiIcons.GiWaterRecycling />
               </th>
-              <th>Amount of recycled or reused water used in water consumption per unit of product</th>
+              <th>
+                Lượng nước tái chế hoặc tái sử dụng được sử dụng trong lượng nước tiêu thụ trên một đơn vị sản phẩm
+              </th>
               <td>
-                {(+a.document.waterrec / +a.document.batch) % 1 !== 0
-                  ? (+a.document.waterrec / +a.document.batch).toFixed(2)
-                  : +a.document.waterrec / +a.document.batch}
+                {(+(a.document as CLIFormType).waterrec / +(a.document as CLIFormType).batch) % 1 !== 0
+                  ? (+(a.document as CLIFormType).waterrec / +(a.document as CLIFormType).batch).toFixed(2)
+                  : +(a.document as CLIFormType).waterrec / +(a.document as CLIFormType).batch}
               </td>
-              <td>m3/ unit of product</td>
+              <td>m3/đơn vị sản phẩm</td>
             </tr>
             <tr>
-              <th>Percentage of recycled or reused water per unit of product</th>
+              <th>Tỷ lệ nước tái chế hoặc tái sử dụng trên một đơn vị sản phẩm</th>
               <td>
-                {((+a.document.waterrec * 100) / +a.document.water) % 1 !== 0
-                  ? ((+a.document.waterrec * 100) / +a.document.water).toFixed(2)
-                  : (+a.document.waterrec * 100) / +a.document.water}
+                {((+(a.document as CLIFormType).waterrec * 100) / +(a.document as CLIFormType).water) % 1 !== 0
+                  ? ((+(a.document as CLIFormType).waterrec * 100) / +(a.document as CLIFormType).water).toFixed(2)
+                  : (+(a.document as CLIFormType).waterrec * 100) / +(a.document as CLIFormType).water}
               </td>
               <td>%</td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Material consumption <AiIcons.AiFillGold />
+                Tiêu thụ vật liệu
+                <AiIcons.AiFillGold />
                 <AiIcons.AiFillGold />
               </th>
-              <th>Amount of materials other than water used per unit of product</th>
+              <th>Lượng nguyên liệu không phải nước được sử dụng trên một đơn vị sản phẩm</th>
               <td>
-                {(+a.document.material / +a.document.batch) % 1 !== 0
-                  ? (+a.document.material / +a.document.batch).toFixed(2)
-                  : +a.document.material / +a.document.batch}
+                {(+(a.document as CLIFormType).material / +(a.document as CLIFormType).batch) % 1 !== 0
+                  ? (+(a.document as CLIFormType).material / +(a.document as CLIFormType).batch).toFixed(2)
+                  : +(a.document as CLIFormType).material / +(a.document as CLIFormType).batch}
               </td>
-              <td>kg/ unit of product</td>
+              <td>kg/đơn vị sản phẩm</td>
             </tr>
             <tr>
               <th rowSpan={2}>
-                Recycled or reused materials <BiIcons.BiRecycle />
+                Vật liệu tái chế hoặc tái sử dụng <BiIcons.BiRecycle />
               </th>
-              <th>Amount of recycled or reused materials used in material consumption per unit of product</th>
+              <th>
+                Lượng vật liệu tái chế hoặc tái sử dụng được sử dụng trong tiêu hao nguyên liệu trên một đơn vị sản phẩm
+              </th>
               <td>
-                {(+a.document.materialrec / +a.document.batch) % 1 !== 0
-                  ? (+a.document.materialrec / +a.document.batch).toFixed(2)
-                  : +a.document.materialrec / +a.document.batch}
+                {(+(a.document as CLIFormType).materialrec / +(a.document as CLIFormType).batch) % 1 !== 0
+                  ? (+(a.document as CLIFormType).materialrec / +(a.document as CLIFormType).batch).toFixed(2)
+                  : +(a.document as CLIFormType).materialrec / +(a.document as CLIFormType).batch}
               </td>
-              <td>kg/ unit of product</td>
+              <td>kg/đơn vị sản phẩm</td>
             </tr>
             <tr>
-              <th>Percentage of recycled or reused materials per unit of product</th>
+              <th>Tỷ lệ vật liệu tái chế hoặc tái sử dụng trên một đơn vị sản phẩm</th>
               <td>
-                {((+a.document.materialrec * 100) / +a.document.material) % 1 !== 0
-                  ? ((+a.document.materialrec * 100) / +a.document.material).toFixed(2)
-                  : (+a.document.materialrec * 100) / +a.document.material}
+                {((+(a.document as CLIFormType).materialrec * 100) / +(a.document as CLIFormType).material) % 1 !== 0
+                  ? ((+(a.document as CLIFormType).materialrec * 100) / +(a.document as CLIFormType).material).toFixed(
+                      2
+                    )
+                  : (+(a.document as CLIFormType).materialrec * 100) / +(a.document as CLIFormType).material}
               </td>
               <td>%</td>
             </tr>
             <tr>
               <th rowSpan={18} className="category">
-                Pollution and Waste Management
+                Quản lý ô nhiễm và chất thải
               </th>
               <th rowSpan={1}>
-                Greenhouse gas emission <GiIcons.GiGreenhouse />
+                Phát thải khí nhà kính
+                <GiIcons.GiGreenhouse />
               </th>
-              <th>Amount of greenhouse gas emission generated per unit of product</th>
+              <th>Lượng phát thải khí nhà kính trên một đơn vị sản phẩm</th>
               <td>
-                {(+a.document.ghg / +a.document.batch) % 1 !== 0
-                  ? (+a.document.ghg / +a.document.batch).toFixed(2)
-                  : +a.document.ghg / +a.document.batch}
+                {(+(a.document as CLIFormType).ghg / +(a.document as CLIFormType).batch) % 1 !== 0
+                  ? (+(a.document as CLIFormType).ghg / +(a.document as CLIFormType).batch).toFixed(2)
+                  : +(a.document as CLIFormType).ghg / +(a.document as CLIFormType).batch}
               </td>
-              <td>tonnes of CO2e/ unit of product</td>
+              <td>tấn CO2e/đơn vị sản phẩm</td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Air Pollution
+                Ô nhiễm không khí
                 <GiIcons.GiGasMask />
               </th>
-              <th>Amount of air emission generated per unit of product</th>
+              <th>Lượng khí thải phát sinh trên một đơn vị sản phẩm</th>
               <td>
-                {(+a.document.air / +a.document.batch) % 1 !== 0
-                  ? (+a.document.air / +a.document.batch).toFixed(2)
-                  : +a.document.air / +a.document.batch}
+                {(+(a.document as CLIFormType).air / +(a.document as CLIFormType).batch) % 1 !== 0
+                  ? (+(a.document as CLIFormType).air / +(a.document as CLIFormType).batch).toFixed(2)
+                  : +(a.document as CLIFormType).air / +(a.document as CLIFormType).batch}
               </td>
-              <td>tonnes/ unit of product</td>
+              <td>tấn/đơn vị sản phẩm</td>
             </tr>
             <tr>
               <th rowSpan={2}>
-                Water pollution
+                Ô nhiễm nước
                 <GiIcons.GiChemicalDrop />
               </th>
-              <th>Amount of water pollution generated per unit of product</th>
+              <th>Lượng ô nhiễm nước tạo ra trên một đơn vị sản phẩm</th>
               <td>
-                {(+a.document.waterpol / +a.document.batch) % 1 !== 0
-                  ? (+a.document.waterpol / +a.document.batch).toFixed(2)
-                  : +a.document.waterpol / +a.document.batch}
+                {(+(a.document as CLIFormType).waterpol / +(a.document as CLIFormType).batch) % 1 !== 0
+                  ? (+(a.document as CLIFormType).waterpol / +(a.document as CLIFormType).batch).toFixed(2)
+                  : +(a.document as CLIFormType).waterpol / +(a.document as CLIFormType).batch}
               </td>
-              <td>m3/ unit of product</td>
+              <td>m3/đơn vị sản phẩm</td>
             </tr>
             <tr>
-              <th>Type of water pollution</th>
-              <td>{(+a.document.waterpoltype + " ").replace(/,/g, ", ")}</td>
+              <th>Loại ô nhiễm nước</th>
+              <td>{(+(a.document as CLIFormType).waterpoltype + " ").replace(/,/g, ", ")}</td>
               <td></td>
             </tr>
             <tr>
               <th rowSpan={2}>
-                Land pollution
+                ô nhiễm đất
                 <GiIcons.GiChemicalDrop />
               </th>
-              <th>Amount of land pollution generated per unit of product</th>
+              <th>Lượng ô nhiễm đất phát sinh trên một đơn vị sản phẩm</th>
               <td>
-                {(+a.document.landpol / +a.document.batch) % 1 !== 0
-                  ? (+a.document.landpol / +a.document.batch).toFixed(2)
-                  : +a.document.landpol / +a.document.batch}
+                {(+(a.document as CLIFormType).landpol / +(a.document as CLIFormType).batch) % 1 !== 0
+                  ? (+(a.document as CLIFormType).landpol / +(a.document as CLIFormType).batch).toFixed(2)
+                  : +(a.document as CLIFormType).landpol / +(a.document as CLIFormType).batch}
               </td>
-              <td>m2/ unit of product</td>
+              <td>m2/đơn vị sản phẩm</td>
             </tr>
             <tr>
-              <th>Type of land pollution</th>
-              <td>{(+a.document.landpoltype + " ").replace(/,/g, ", ")}</td>
+              <th>Loại ô nhiễm đất</th>
+              <td>{(+(a.document as CLIFormType).landpoltype + " ").replace(/,/g, ", ")}</td>
               <td></td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Use of hazardous materials <GiIcons.GiPoisonBottle />
+                Sử dụng vật liệu nguy hiểm
+                <GiIcons.GiPoisonBottle />
               </th>
-              <th>Amount of hazardous materials used per unit of product</th>
+              <th>Lượng vật liệu nguy hiểm được sử dụng trên một đơn vị sản phẩm</th>
               <td>
-                {(+a.document.hazmat / +a.document.batch) % 1 !== 0
-                  ? (+a.document.hazmat / +a.document.batch).toFixed(2)
-                  : +a.document.hazmat / +a.document.batch}
+                {(+(a.document as CLIFormType).hazmat / +(a.document as CLIFormType).batch) % 1 !== 0
+                  ? (+(a.document as CLIFormType).hazmat / +(a.document as CLIFormType).batch).toFixed(2)
+                  : +(a.document as CLIFormType).hazmat / +(a.document as CLIFormType).batch}
               </td>
-              <td>kg/ unit of product</td>
+              <td>kg/đơn vị sản phẩm</td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Hazardous waste
+                Chất thải nguy hại
                 <GiIcons.GiNuclearWaste />
               </th>
-              <th>Amount of hazardous waste generated per unit of product</th>
+              <th>Lượng chất thải nguy hại phát sinh trên một đơn vị sản phẩm</th>
               <td>
-                {(+a.document.hazwaste / +a.document.batch) % 1 !== 0
-                  ? (+a.document.hazwaste / +a.document.batch).toFixed(2)
-                  : +a.document.hazwaste / +a.document.batch}
+                {(+(a.document as CLIFormType).hazwaste / +(a.document as CLIFormType).batch) % 1 !== 0
+                  ? (+(a.document as CLIFormType).hazwaste / +(a.document as CLIFormType).batch).toFixed(2)
+                  : +(a.document as CLIFormType).hazwaste / +(a.document as CLIFormType).batch}
               </td>
-              <td>kg/ unit of product</td>
+              <td>kg/đơn vị sản phẩm</td>
             </tr>
             <tr>
               <th rowSpan={4}>
-                Solid waste
+                Chất thải rắn
                 <GiIcons.GiTrashCan />
               </th>
-              <th>Amount of solid waste generated per unit of product</th>
+              <th>Lượng chất thải rắn phát sinh trên một đơn vị sản phẩm</th>
               <td>
-                {(+a.document.solidwaste / +a.document.batch) % 1 !== 0
-                  ? (+a.document.solidwaste / +a.document.batch).toFixed(2)
-                  : +a.document.solidwaste / +a.document.batch}
+                {(+(a.document as CLIFormType).solidwaste / +(a.document as CLIFormType).batch) % 1 !== 0
+                  ? (+(a.document as CLIFormType).solidwaste / +(a.document as CLIFormType).batch).toFixed(2)
+                  : +(a.document as CLIFormType).solidwaste / +(a.document as CLIFormType).batch}
               </td>
-              <td>kg/ unit of product</td>
+              <td>kg/đơn vị sản phẩm</td>
             </tr>
             <tr>
-              <th>Amount of solid waste recycled or reused per unit of product</th>
+              <th>Lượng chất thải rắn được tái chế hoặc tái sử dụng trên một đơn vị sản phẩm</th>
               <td>
-                {(+a.document.solidwasterec / +a.document.batch) % 1 !== 0
-                  ? (+a.document.solidwasterec / +a.document.batch).toFixed(2)
-                  : +a.document.solidwasterec / +a.document.batch}
+                {(+(a.document as CLIFormType).solidwasterec / +(a.document as CLIFormType).batch) % 1 !== 0
+                  ? (+(a.document as CLIFormType).solidwasterec / +(a.document as CLIFormType).batch).toFixed(2)
+                  : +(a.document as CLIFormType).solidwasterec / +(a.document as CLIFormType).batch}
               </td>
-              <td>kg/ unit of product</td>
+              <td>kg/đơn vị sản phẩm</td>
             </tr>
             <tr>
-              <th>Percentage of solid waste recycled or reused per unit of product</th>
+              <th>Tỷ lệ chất thải rắn được tái chế hoặc tái sử dụng trên một đơn vị sản phẩm</th>
               <td>
-                {(+a.document.solidwasterec / +a.document.solidwaste) % 1 !== 0
-                  ? (+a.document.solidwasterec / +a.document.solidwaste).toFixed(2)
-                  : +a.document.solidwasterec / +a.document.solidwaste}
+                {(+(a.document as CLIFormType).solidwasterec / +(a.document as CLIFormType).solidwaste) % 1 !== 0
+                  ? (+(a.document as CLIFormType).solidwasterec / +(a.document as CLIFormType).solidwaste).toFixed(2)
+                  : +(a.document as CLIFormType).solidwasterec / +(a.document as CLIFormType).solidwaste}
               </td>
               <td>%</td>
             </tr>
             <tr>
-              <th>Type of solid waste destination </th>
-              <td>{(+a.document.solidwastedes + " ").replace(/,/g, ", ")}</td>
+              <th>Loại điểm đến chất thải rắn </th>
+              <td>{(+(a.document as CLIFormType).solidwastedes + " ").replace(/,/g, ", ")}</td>
               <td></td>
             </tr>
             <tr>
               <th rowSpan={4}>
-                Wastewater
+                Nước thải
                 <GiIcons.GiTrashCan />
               </th>
-              <th>Amount of wastewater generated per unit of product</th>
+              <th>Lượng nước thải phát sinh trên một đơn vị sản phẩm</th>
               <td>
-                {(+a.document.waterwaste / +a.document.batch) % 1 !== 0
-                  ? (+a.document.waterwaste / +a.document.batch).toFixed(2)
-                  : +a.document.waterwaste / +a.document.batch}
+                {(+(a.document as CLIFormType).waterwaste / +(a.document as CLIFormType).batch) % 1 !== 0
+                  ? (+(a.document as CLIFormType).waterwaste / +(a.document as CLIFormType).batch).toFixed(2)
+                  : +(a.document as CLIFormType).waterwaste / +(a.document as CLIFormType).batch}
               </td>
-              <td>m3/ unit of product</td>
+              <td>m3/đơn vị sản phẩm</td>
             </tr>
             <tr>
-              <th>Amount of wastewater recycled or reused per unit of product</th>
+              <th>Lượng nước thải được tái chế hoặc tái sử dụng trên một đơn vị sản phẩm</th>
               <td>
-                {(+a.document.waterwasterec / +a.document.batch) % 1 !== 0
-                  ? (+a.document.waterwasterec / +a.document.batch).toFixed(2)
-                  : +a.document.waterwasterec / +a.document.batch}
+                {(+(a.document as CLIFormType).waterwasterec / +(a.document as CLIFormType).batch) % 1 !== 0
+                  ? (+(a.document as CLIFormType).waterwasterec / +(a.document as CLIFormType).batch).toFixed(2)
+                  : +(a.document as CLIFormType).waterwasterec / +(a.document as CLIFormType).batch}
               </td>
-              <td>m3/ unit of product</td>
+              <td>m3/đơn vị sản phẩm</td>
             </tr>
             <tr>
-              <th>Percentage of wastewater recycled or reused per unit of product</th>
+              <th>Tỷ lệ nước thải được tái chế hoặc tái sử dụng trên một đơn vị sản phẩm</th>
               <td>
-                {(+a.document.waterwasterec / +a.document.waterwaste) % 1 !== 0
-                  ? (+a.document.waterwasterec / +a.document.waterwaste).toFixed(2)
-                  : +a.document.waterwasterec / +a.document.waterwaste}
+                {(+(a.document as CLIFormType).waterwasterec / +(a.document as CLIFormType).waterwaste) % 1 !== 0
+                  ? (+(a.document as CLIFormType).waterwasterec / +(a.document as CLIFormType).waterwaste).toFixed(2)
+                  : +(a.document as CLIFormType).waterwasterec / +(a.document as CLIFormType).waterwaste}
               </td>
               <td>%</td>
             </tr>
             <tr>
-              <th>Type of wastewater destination </th>
-              <td>{(+a.document.waterwastedes + " ").replace(/,/g, ", ")}</td>
+              <th>Loại nơi xử lý nước thải</th>
+              <td>{(+(a.document as CLIFormType).waterwastedes + " ").replace(/,/g, ", ")}</td>
               <td></td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Product recyclability
+                Pkhả năng tái chế sản phẩm
                 <RiIcons.RiRecycleFill />
               </th>
-              <th>Whether the product produced is recyclable or reusable</th>
-              <td>{+a.document.productrec}</td>
+              <th>Sản phẩm được sản xuất có thể tái chế hoặc tái sử dụng được hay không</th>
+              <td>{+(a.document as CLIFormType).productrec}</td>
               <td></td>
             </tr>
             <tr>
               <th rowSpan={1}>
-                Green packaging and labeling
+                Bao bì và ghi nhãn xanh
                 <BiIcons.BiPackage />
               </th>
-              <th>Whether the product has eco-friendly packaging and labeling</th>
-              <td>{+a.document.ecolabel}</td>
+              <th>Sản phẩm có bao bì và nhãn mác thân thiện với môi trường hay không</th>
+              <td>{+(a.document as CLIFormType).ecolabel}</td>
               <td></td>
             </tr>
           </tbody>
@@ -333,56 +332,9 @@ const AssessList = ({ assessments }: { assessments: LCI[] }) =>
   ));
 
 export default function LCIAssess() {
-  const web3Instance = useRef<Web3 | null>(null);
-
-  useEffect(() => {
-    const loadWeb3 = async () => {
-      if (window.ethereum) {
-        web3Instance.current = new Web3(window.ethereum);
-        window.ethereum.request({ method: "eth_requestAccounts" });
-      }
-      if (window.web3) {
-        window.web3 = new Web3(window.web3.currentProvider);
-      } else {
-        window.alert("Please use Metamask!");
-      }
-    };
-    loadWeb3();
-  }, []);
-
-  useEffect(() => {
-    const loadBlockchainData = async () => {
-      if (web3Instance.current === null) return;
-      const networkId = await web3Instance.current.eth.net.getId();
-      const networkData = Assessment.networks[networkId as unknown as keyof typeof Assessment.networks];
-      if (networkData) {
-        //Fetch contract
-        const contract = new web3Instance.current.eth.Contract(Assessment.abi, networkData.address);
-        const LCICount = Number(await contract.methods.LCICount().call());
-        //Load LCIs
-        for (let i = 1; i <= LCICount; i++) {
-          const newLCI: LCIBlockchain = await contract.methods.LCIs(i).call();
-          setLCIs((LCIs) => [
-            ...LCIs,
-            {
-              ...newLCI,
-              id: Number(newLCI.id).toString(),
-              document: JSON.parse(newLCI.document),
-              product: (newLCI.product ? JSON.parse(newLCI.product) : {}) as Product,
-            },
-          ]);
-          // setForm((LCIs) => [...LCIs, JSON.parse(newLCI.document)]);
-        }
-      } else {
-        window.alert("Assessment contract is not deployed to the detected network");
-      }
-    };
-    loadBlockchainData();
-  }, []);
+  const { LCIs } = useWeb3Store((state) => state);
 
   const [date, setDate] = useState<string | null>(null);
-  const [LCIs, setLCIs] = useState<LCI[]>([]);
-  // const [form, setForm] = useState<CLIFormType[]>([]);
 
   const params = useSearchParams();
   const dateState = params.get("date");
@@ -391,18 +343,17 @@ export default function LCIAssess() {
     setDate(dateState);
   }, [dateState]);
 
-  // const merge = LCIs.map((t1) => ({ ...t1, ...form.find((t2) => t2.id === t1.id) }));
-  const lci = LCIs.filter((obj) => obj.date.includes(date ?? "")).map((obj) => obj);
+  const lci = LCIs?.filter((obj) => obj.date.includes(date ?? "")).map((obj) => obj);
 
   return (
     <>
       <div className="margin">
         <table className="assess-table">
           <tbody>
-            <AssessList assessments={lci} />
+            <AssessList assessments={lci ?? []} />
           </tbody>
         </table>
-        {lci.length == 0 && <h2> No Assessment Found</h2>}
+        {lci?.length == 0 && <h2> No Assessment Found</h2>}
       </div>
     </>
   );

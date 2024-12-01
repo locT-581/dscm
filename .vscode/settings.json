@@ -2,5 +2,6 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "commentTranslate.targetLanguage": "vi",
-  "cSpell.words": ["Enviro", "Enviros", "Helia", "ipfs", "kubo", "latlong"]
+  "cSpell.words": ["Enviro", "Enviros", "Helia", "ipfs", "kubo", "latlong"],
+  "commentTranslate.multiLineMerge": false
 }

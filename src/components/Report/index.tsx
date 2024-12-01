@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Pie } from "react-chartjs-2";
-import { Chart, ArcElement } from "chart.js";
-Chart.register(ArcElement);
+import { Chart, ArcElement, Title, Tooltip, Legend } from "chart.js";
+
+Chart.register(ArcElement, Title, Tooltip, Legend);
 
 import Button from "../Button";
 
@@ -35,10 +36,10 @@ export default function Report({
 
   useEffect(() => {
     setAssessChartData({
-      labels: ["Environmental", "Social", "LCI"],
+      labels: ["Môi trường", "Xã hội", "LCI"],
       datasets: [
         {
-          label: "Assessments",
+          label: "Đánh giá",
           data: [enviroCount, socialCount, LCICount],
           backgroundColor: ["#279b48", "orange", "#03a0dd"],
         },
@@ -60,15 +61,15 @@ export default function Report({
     router.push("bao-cao/moi-truong");
   };
   return (
-    <div>
-      <header className="report-dashheader">
-        <div className="report">
+    <div className="w-full h-full flex pr-[5%] justify-center pt-4">
+      <div className="flex h-fit items-center w-[70%] justify-between">
+        <div className="flex flex-col justify-between w-[35%] gap-3">
           <Button className="btn" onClick={routeE} text="Báo cáo đánh giá môi trường" />
           <Button className="btn" onClick={routeS} text="Báo cáo đánh giá xã hội" />
           <Button className="btn" onClick={routeLCI} text="Báo cáo tồn kho vòng đời" />
         </div>
-      </header>
-      <div className="assessChart">{assessChartData && <Pie data={assessChartData} />}</div>
+        <div className="w-[45%]">{assessChartData && <Pie data={assessChartData} />}</div>
+      </div>
     </div>
   );
 }
