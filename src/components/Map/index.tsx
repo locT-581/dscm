@@ -19,7 +19,7 @@ const Map = ({ markers }: MapProps) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<MapType | null>(null);
 
-  const [zoom] = useState(12);
+  const [zoom] = useState(15);
   const [latitude, setLatitude] = useState<number | undefined>();
   const [longitude, setLongitude] = useState<number | undefined>();
 
@@ -41,15 +41,11 @@ const Map = ({ markers }: MapProps) => {
   }, []);
 
   useEffect(() => {
-    if (map.current || latitude == undefined || longitude == undefined) return;
+    if (!!map.current || latitude == undefined || longitude == undefined) return;
 
     map.current = new L.Map(mapContainer.current ?? "", {
       center: L.latLng(latitude, longitude),
       zoom: zoom,
-    });
-
-    markers.forEach((marker) => {
-      L.marker([marker.lat, marker.long]).addTo(map.current!);
     });
 
     const mtLayer = new MaptilerLayer({
@@ -57,6 +53,21 @@ const Map = ({ markers }: MapProps) => {
     });
     mtLayer.addTo(map.current);
   }, [zoom, latitude, longitude]);
+
+  useEffect(() => {
+    if (!map.current) return;
+
+    markers.forEach((marker) => {
+      L.marker([marker.lat, marker.long], {
+        icon: L.icon({
+          iconUrl: "https://cdn.mapmarker.io/api/v1/pin?size=35&background=%23E74C3C&text=%20&color=%23fff",
+          iconSize: [35, 35],
+          iconAnchor: [25, 50],
+        }),
+        autoPan: true,
+      })?.addTo(map.current!);
+    });
+  }, [markers]);
 
   return (
     <div className={styles.mapWrap}>

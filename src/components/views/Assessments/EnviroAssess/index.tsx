@@ -14,7 +14,7 @@ import * as RiIcons from "react-icons/ri";
 import * as GrIcons from "react-icons/gr";
 import * as FaIcons from "react-icons/fa";
 
-const AssessList = ({
+export const AssessList = ({
   assessments,
   energy,
   material,

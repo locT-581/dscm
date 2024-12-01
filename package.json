@@ -33,9 +33,11 @@
     "zustand": "^5.0.1"
   },
   "devDependencies": {
+    "@types/leaflet": "^1.9.14",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/react-vertical-timeline-component": "^3.3.6",
     "eslint": "^8",
     "eslint-config-next": "15.0.3",
     "postcss": "^8",

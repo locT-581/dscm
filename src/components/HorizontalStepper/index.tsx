@@ -70,7 +70,7 @@ export default function CustomizedSteppers({
   steps,
   activeStep = 0,
 }: {
-  steps: { label: string; icon: string }[];
+  steps: { label: string; icon: string; des?: string }[];
   activeStep?: number;
 }) {
   return (
@@ -84,16 +84,16 @@ export default function CustomizedSteppers({
                 return (
                   <ColorlibStepIconRoot
                     ownerState={{ completed, active }}
-                    className={`${className} aspect-square overflow-hidden`}
+                    className={`${className} aspect-square overflow-hidden !p-1`}
                   >
-                    {/* {step.icon} */}
                     <img src={step.icon} alt="" className="w-full h-full rounded-full !object-cover object-center" />
                   </ColorlibStepIconRoot>
                 );
               },
             }}
           >
-            {step.label}
+            <p className="!text-base font-semibold">{step.label}</p>
+            {step.des && <p className="">{step.des}</p>}
           </StepLabel>
         </Step>
       ))}

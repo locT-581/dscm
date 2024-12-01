@@ -335,15 +335,26 @@ export default function LCIAssess() {
   const { LCIs } = useWeb3Store((state) => state);
 
   const [date, setDate] = useState<string | null>(null);
+  const [process, setProcess] = useState<string | null>(null);
+  const [product, setProduct] = useState<string | null>(null);
 
   const params = useSearchParams();
   const dateState = params.get("date");
+  const processParams = params.get("process");
+  const productParams = params.get("productId");
 
   useEffect(() => {
     setDate(dateState);
-  }, [dateState]);
+    setProcess(processParams);
+    setProduct(productParams);
+  }, [dateState, productParams, processParams]);
 
-  const lci = LCIs?.filter((obj) => obj.date.includes(date ?? "")).map((obj) => obj);
+  const lci =
+    process != null && product != null
+      ? LCIs?.filter((obj) => obj.process?.id == process)
+          .filter((obj) => (obj.document as CLIFormType).product.id == product)
+          .map((obj) => obj) ?? []
+      : LCIs?.filter((obj) => obj.date.includes(date ?? "")).map((obj) => obj);
 
   return (
     <>
@@ -353,7 +364,7 @@ export default function LCIAssess() {
             <AssessList assessments={lci ?? []} />
           </tbody>
         </table>
-        {lci?.length == 0 && <h2> No Assessment Found</h2>}
+        {lci?.length == 0 && <h2> Không tìm thấy dữ liệu</h2>}
       </div>
     </>
   );

@@ -1,82 +1,33 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import Web3 from "web3";
+import { useState, useEffect } from "react";
 
 import { useLoadScript } from "@react-google-maps/api";
 
-import { Origin } from "@/lib/abis";
+import Select from "react-select";
 import TimeLine from "@/components/TimeLine";
 import Product from "@/types/product";
-import Order, { OrderBlockChainType } from "@/types/order";
-import Shipment, { ShipmentBlockChainType } from "@/types/shipment";
 
 import "leaflet/dist/leaflet.css";
 import Map from "@/components/Map";
+import { useWeb3Store } from "@/stores/storeProvider";
 
 const Journey = () => {
-  const web3Instance = useRef<Web3 | null>(null);
+  const { shipments, products } = useWeb3Store((state) => state);
 
   useEffect(() => {
-    const loadWeb3 = async () => {
-      if (window.ethereum) {
-        web3Instance.current = new Web3(window.ethereum);
-        window.ethereum.request({ method: "eth_requestAccounts" });
-      }
-      if (window.web3) {
-        window.web3 = new Web3(window.web3.currentProvider);
-      } else {
-        window.alert("Please use Metamask!");
-      }
-    };
-    loadWeb3();
-  }, []);
+    if (!!shipments) {
+      shipments.forEach((shipment) => {
+        setOrderIDs((orderIDs) => [...orderIDs, shipment.product.id]);
+      });
+    }
+  }, [shipments]);
 
-  useEffect(() => {
-    const loadBlockchainData = async () => {
-      if (!web3Instance.current) return;
-
-      const networkId = await web3Instance.current.eth.net.getId();
-      const networkData = Origin.networks[networkId as unknown as keyof typeof Origin.networks];
-      if (networkData) {
-        //Fetch contract
-        const contract = new web3Instance.current.eth.Contract(Origin.abi, networkData.address);
-        const orderCount = Number(await contract.methods.orderCount().call());
-        //Load orders
-        for (let i = 1; i <= orderCount; i++) {
-          const newOrder: OrderBlockChainType = await contract.methods.orders(i).call();
-          setOrders((orders) => [...orders, { ...newOrder, id: Number(newOrder.id).toString() }]);
-        }
-        const shipmentCount = Number(await contract.methods.shipmentCount().call());
-        //Load shipments
-        for (let i = 1; i <= shipmentCount; i++) {
-          const newShipment: ShipmentBlockChainType = await contract.methods.shipments(i).call();
-
-          setShipment((shipments) => [
-            ...shipments,
-            {
-              ...newShipment,
-              id: Number(newShipment.id).toString(),
-              latlong: JSON.parse(newShipment.latlong.toString()),
-            },
-          ]);
-          setOrderIDs((shipments) => [...shipments, newShipment.product]);
-          setLatlong((latlong) => [...latlong, JSON.parse(newShipment.latlong)]);
-        }
-      } else {
-        window.alert("Origin contract is not deployed to the detected network");
-      }
-    };
-    loadBlockchainData();
-  }, []);
-
-  const [shipments, setShipment] = useState<Shipment[]>([]);
+  /**
+   * List of unique product IDs
+   */
   const [orderIDs, setOrderIDs] = useState<string[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [formProduct, setFormProduct] = useState<Product | undefined>();
-  const [latlong, setLatlong] = useState<Shipment["latlong"][]>([]);
-
-  const newShipment = shipments.map((t1) => ({ ...t1, ...latlong.find((t2) => t2.id === t1.id) }));
+  const [formProduct, setFormProduct] = useState<Product | undefined>(products?.[0]);
 
   const unique = [...new Set(orderIDs.map((item) => item))];
 
@@ -87,55 +38,52 @@ const Journey = () => {
   if (!isLoaded) return null;
 
   return (
-    <div>
-      <div className="journey-map">
-        <div className="timeline-header">
-          <label>Select a Product to View the Journey</label>
-          <select
-            value={formProduct?.id}
-            onChange={(e) => setFormProduct(orders.find((order) => order.id === e.target.value))}
-          >
-            <option value="" disabled hidden></option>
-            {unique.map((a, i) => {
-              return (
-                <option key={i} value={a}>
-                  ORDER # {a}: {orders.filter((obj) => obj.id.includes(a)).map((o) => o.name)}{" "}
-                </option>
-              );
-            })}
-          </select>
-        </div>
-        <Map
-          markers={newShipment
-            // .filter((obj) => obj.product.includes(formProduct.name))
-            .map((a) => ({ lat: Number(a.latitude), long: Number(a.longitude) }))}
+    <div className="journey-map flex flex-col items-center gap-4 pb-4">
+      <div className="label-sel flex flex-col gap-2">
+        <label>Chọn một đơn hàng để xem hành trình</label>
+        <Select
+          placeholder="Chọn sản phẩm"
+          className="!z-[999] w-full max-w-[350px]"
+          required
+          closeMenuOnSelect={true}
+          onChange={(e) => {
+            setFormProduct(products?.find((p) => p.id === (e as { value: string; label: string }).value));
+          }}
+          options={unique
+            ?.map((a) => {
+              const p = products?.find((product) => product.id === a);
+              return { value: p?.id ?? "", label: p?.name ?? "" };
+            })
+            .filter(Boolean)}
         />
-
-        {!!!formProduct ? (
-          <div id="map"></div>
-        ) : (
-          // <GoogleMap
-          //   id="map"
-          //   mapContainerStyle={mapContainerStyle}
-          //   zoom={11}
-          //   center={center}
-          //   options={options}
-          //   onLoad={onMapLoad}
-          // >
-          //   {newShipment
-          //     .filter((obj) => obj.product.includes(formProduct))
-          //     .map((a) => (
-          //       <Marker key={a.id} position={{ lat: Number(a.latitude), lng: Number(a.longitude) }} />
-          //     ))}
-          // </GoogleMap>
-          <Map
-            markers={newShipment
-              // .filter((obj) => obj.product.includes(formProduct.name))
-              .map((a) => ({ lat: Number(a.latitude), long: Number(a.longitude) }))}
-          />
-        )}
       </div>
-      <TimeLine shipments={shipments} product={formProduct} />
+
+      <Map
+        markers={
+          shipments
+            ?.filter((s) => s.product.id == formProduct?.id)
+            .map((a) => ({ lat: Number(a.latlong.latitude), long: Number(a.latlong.longitude) })) ?? [
+            { lat: 10, long: 105 },
+          ]
+        }
+      />
+      {
+        // <GoogleMap
+        //   id="map"
+        //   mapContainerStyle={mapContainerStyle}
+        //   zoom={11}
+        //   center={center}
+        //   options={options}
+        //   onLoad={onMapLoad}
+        // >
+        //   {newShipment
+        //     .filter((obj) => obj.product.includes(formProduct))
+        //     .map((a) => (
+        //       <Marker key={a.id} position={{ lat: Number(a.latitude), lng: Number(a.longitude) }} />
+        //     ))}
+        // </GoogleMap>
+      }
+      {formProduct && <TimeLine shipments={shipments ?? []} product={formProduct} />}
     </div>
   );
 };

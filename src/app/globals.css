@@ -345,3 +345,65 @@ td {
   margin-left: 40%;
   position: absolute;
 }
+
+.time-margin {
+  margin-left: 10%;
+}
+
+.timeline-header {
+  display: block;
+  margin-top: 90px;
+  margin-bottom: 25px;
+}
+.timeline-header select {
+  width: 80%;
+  margin-left: 20px;
+  text-align: center;
+}
+
+.timeline {
+  display: flex;
+  justify-content: center;
+  font-size: 14px;
+  margin-left: 100px;
+  margin-right: 100px;
+  border-radius: 25px;
+  margin-bottom: 20px;
+}
+
+.time-title {
+  display: flex;
+  justify-content: space-between;
+}
+.time-title h4 {
+  font-size: 15px;
+}
+
+.time-title-btn {
+  margin-left: 8px;
+  text-decoration: none;
+  padding: 0.2em 0.7em;
+  border-radius: 5px;
+  background-color: rgb(184, 225, 133);
+}
+
+.captwo {
+  font-size: 15px;
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  font-weight: 450;
+}
+
+.as-btn {
+  margin-top: 15px;
+  text-decoration: none;
+  padding: 0.2em 0.7em;
+  border-radius: 5px;
+  background-color: rgba(253, 174, 97, 0.4);
+}
+.description {
+  margin-top: 15px;
+  font-weight: 50;
+}

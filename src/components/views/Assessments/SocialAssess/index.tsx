@@ -13,9 +13,10 @@ import * as FiIcons from "react-icons/fi";
 import * as IoIcons from "react-icons/io";
 import { useWeb3Store } from "@/stores/storeProvider";
 import Assessment from "@/types/assessment";
-import { SocialFormType } from "@/types/document";
+import { EnviroFormType, SocialFormType } from "@/types/document";
+import { AssessList } from "../EnviroAssess";
 
-const SocialList = ({ assessments }: { assessments: Assessment[] }) =>
+export const SocialList = ({ assessments }: { assessments: Assessment[] }) =>
   assessments.map((a) => (
     <tr key={a.id}>
       <td>
@@ -48,7 +49,7 @@ const SocialList = ({ assessments }: { assessments: Assessment[] }) =>
                   ? (+(a.document as SocialFormType).trainh / +(a.document as SocialFormType).trainemp).toFixed(1)
                   : +(a.document as SocialFormType).trainh / +(a.document as SocialFormType).trainemp}
               </td>
-              <td>hours/ year</td>
+              <td>giờ/năm</td>
             </tr>
             <tr>
               <th>Tỷ lệ nhân viên được đào tạo mỗi năm</th>
@@ -64,11 +65,11 @@ const SocialList = ({ assessments }: { assessments: Assessment[] }) =>
                 Doanh thu nhân viên
                 <GrIcons.GrPowerCycle />
               </th>
-              <th>Doanh thu nhân viên mỗi năm</th>
+              <th>Doanh thu nhân viên mỗi năm {(a.document as SocialFormType).hiredemp}</th>
               <td>
-                {(+(a.document as SocialFormType).resemp / +(a.document as SocialFormType).hiredemp) % 1 !== 0
-                  ? (+(a.document as SocialFormType).resemp / +(a.document as SocialFormType).hiredemp).toFixed(1)
-                  : +(a.document as SocialFormType).resemp / +(a.document as SocialFormType).hiredemp}
+                {(+(a.document as SocialFormType).resemp / +(a.document as SocialFormType).hiredemp ?? 1) % 1 !== 0
+                  ? (+(a.document as SocialFormType).resemp / +(a.document as SocialFormType).hiredemp ?? 1).toFixed(1)
+                  : +(a.document as SocialFormType).resemp / +(a.document as SocialFormType).hiredemp ?? 1}
               </td>
               <td>doanh thu/năm</td>
             </tr>
@@ -392,7 +393,7 @@ const SocialList = ({ assessments }: { assessments: Assessment[] }) =>
               </th>
               <th>Số vụ tham nhũng mỗi năm</th>
               <td>{+(a.document as SocialFormType).corrup}</td>
-              <td>incidents/ year</td>
+              <td>sự cố/năm</td>
             </tr>
             <tr>
               <th rowSpan={1}>
@@ -478,9 +479,11 @@ const SocialList = ({ assessments }: { assessments: Assessment[] }) =>
   ));
 
 const SocialAssess = () => {
-  const { socials } = useWeb3Store((state) => state);
+  const { socials, enviros } = useWeb3Store((state) => state);
   const searchParams = useSearchParams();
+
   const dateState = searchParams.get("date");
+  const account = searchParams.get("account");
 
   const [date, setDate] = useState<string | null>(null);
 
@@ -490,14 +493,32 @@ const SocialAssess = () => {
 
   // const Smerge = socials.map((t1) => ({ ...t1, ...socialform.find((t2) => t2.id === t1.id) }));
   // const social = Smerge.filter((obj) => obj.date.includes(date));
+
+  useEffect(() => {
+    if (!!enviros) {
+      enviros.map((enviro) => {
+        setMaterial((material) => [...material, (enviro.document as EnviroFormType).material]);
+      });
+    }
+  }, [enviros]);
+
+  const [material, setMaterial] = useState<string[]>([]);
+
   const social = socials?.filter((obj) => obj.date.includes(date ?? ""));
+  const env = enviros?.filter((obj) => obj.date.includes(date ?? ""));
+
+  const energy = enviros
+    ?.filter((obj) => obj.account.id.includes(account ?? ""))
+    .map((obj) => (obj.document as EnviroFormType).energy);
 
   return (
     <>
       <div className="ml-[10%]">
         <table className="assess-table">
           <tbody>
-            <SocialList assessments={socials ?? []} />
+            <AssessList assessments={env?.slice(-1) ?? []} energy={energy ?? []} material={material} />
+            <SocialList assessments={socials?.slice(-1) ?? []} />
+            {!!!env && <h2>Không tìm thấy đánh giá nào</h2>}
             {!!!social && <h2> Không có thông tin</h2>}
           </tbody>
         </table>
