@@ -234,7 +234,10 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
         LCIs.push({
           ...newLCI,
           id: Number(newLCI.id).toString(),
-          document: JSON.parse(newLCI.document),
+          document: {
+            ...JSON.parse(newLCI.document),
+            product: get().products?.find((p) => p.id == JSON.parse(newLCI.document).product),
+          },
           assessType: newLCI.assessType as AssessmentType,
           process: get().processes?.find((p) => p.id == newLCI.process) as Process,
           account: get().suppliers?.find(

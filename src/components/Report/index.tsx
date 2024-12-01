@@ -51,21 +51,21 @@ export default function Report({
   }, [enviroCount, socialCount, LCICount]);
 
   const routeLCI = () => {
-    router.push("reports/lci");
+    router.push("bao-cao/lci");
   };
   const routeS = () => {
-    router.push("reports/social");
+    router.push("bao-cao/xa-hoi");
   };
   const routeE = () => {
-    router.push("reports/enviro");
+    router.push("bao-cao/moi-truong");
   };
   return (
     <div>
       <header className="report-dashheader">
         <div className="report">
-          <Button className="btn" onClick={routeE} text="Environmental Assessment Report" />
-          <Button className="btn" onClick={routeS} text="Social Assessment Report" />
-          <Button className="btn" onClick={routeLCI} text="Life Cycle Inventory Report" />
+          <Button className="btn" onClick={routeE} text="Báo cáo đánh giá môi trường" />
+          <Button className="btn" onClick={routeS} text="Báo cáo đánh giá xã hội" />
+          <Button className="btn" onClick={routeLCI} text="Báo cáo tồn kho vòng đời" />
         </div>
       </header>
       <div className="assessChart">{assessChartData && <Pie data={assessChartData} />}</div>

@@ -243,20 +243,12 @@ td {
 .center-chart {
   display: flex; /* displays children (divs) inline by default thats why you need to change its direction */
   justify-content: flex-start;
-  margin-left: 30%;
 }
 
 .label-sel {
-  margin-right: 80px;
-  margin-bottom: 20px;
-}
-
-.center-form {
-  margin-left: 250px;
 }
 
 .charts {
-  margin-left: 20%;
   margin-bottom: 200px;
   display: flex;
   flex-wrap: wrap;
@@ -273,17 +265,7 @@ td {
 }
 
 .charts-header {
-  margin-left: 20%;
-  margin-top: 30px;
-  margin-bottom: 20px;
   width: 100%;
-  padding: 20px;
-  background-color: #f2f2f2;
-}
-
-.charts-header h2 {
-  font-size: 18px;
-  margin-left: 28%;
 }
 
 .report {
@@ -334,4 +316,32 @@ td {
   padding-top: 20px;
   border: 1px solid #c3c3c3;
   overflow: hidden;
+}
+
+.report {
+  display: flex;
+  flex-direction: column;
+  padding-top: 47%;
+  padding-left: 24%;
+}
+
+.report .btn {
+  margin-bottom: 20px;
+}
+
+.report-dashheader {
+  width: 32%;
+  height: 100%;
+  margin-left: 20%;
+  grid-template-columns: minmax(150px, 25%) 1 fr;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+}
+
+.assessChart {
+  width: 25%;
+  margin-left: 40%;
+  position: absolute;
 }

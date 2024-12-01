@@ -1,6 +1,8 @@
+import Product from "./product";
+
 export interface CLIFormType {
   id: string;
-  product: string;
+  product: Product;
   batch: string;
   energy: string;
   renewenergy: string;
@@ -105,7 +107,7 @@ export interface SocialFormType {
   socialsus: string;
   suppliers: string;
   productassess: string;
-  product: string;
+  product: Product;
   productincident: string;
   privacy: string;
   leaks: string;
