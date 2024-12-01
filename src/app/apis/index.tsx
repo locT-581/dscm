@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebase";
-import Order, { OrderFireStore } from "@/types/order";
+import { OrderFireStore } from "@/types/order";
 import Process from "@/types/process";
 import Product, { ProductOffChain } from "@/types/product";
 import Supplier from "@/types/supplier";
@@ -125,6 +125,7 @@ export const getProductById = async (id: string | number): Promise<Product | nul
     .then((doc) => {
       if (doc.exists()) {
         const { createAt, ...tempProduct } = doc.data();
+        console.log("🚀 ~ .then ~ createAt:", createAt);
         product = { id: doc.id, ...tempProduct } as Product;
       } else {
         console.log("No such document!");
@@ -160,7 +161,7 @@ export const addProduct = async (product: ProductOffChain, id: string): Promise<
  * @param process - process
  * @returns {Promise} - Promise<DocumentData>
  */
-export const addProcess = async (process: Process): Promise<DocumentData> => {
+export const addProcess = async (process: Partial<Process>): Promise<DocumentData> => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { id, ...rest } = process;
   return await addDoc(collection(db, "product-process"), { ...rest, createdAt: serverTimestamp() });
@@ -177,6 +178,7 @@ export const getProcessById = async (id: string): Promise<Process | null> => {
     .then((doc) => {
       if (doc.exists()) {
         const { createAt, ...tempUser } = doc.data();
+        console.log("🚀 ~ .then ~ createAt:", createAt);
         process = { id: doc.id, ...tempUser } as Process;
       } else {
         console.log("No such document!");
@@ -223,7 +225,7 @@ export const getAllProcesses = async (): Promise<Process[]> => {
  * Get all Orders from fire store
  */
 export const getAllOrders = async (): Promise<OrderFireStore[]> => {
-  const orders: Order[] = [];
+  const orders: OrderFireStore[] = [];
   const supplierRef = collection(db, "order");
   await getDocs(supplierRef)
     .then((querySnapshot) => {
@@ -231,7 +233,7 @@ export const getAllOrders = async (): Promise<OrderFireStore[]> => {
         orders.push({
           id: doc.id,
           ...doc.data(),
-        } as Order);
+        } as OrderFireStore);
       });
     })
     .catch((error) => {

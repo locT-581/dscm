@@ -32,14 +32,16 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
       <Sidebar />
       <div className="flex flex-col gap-3 w-full h-full p-4 !pr-8 overflow-auto">
         <header className="w-full flex items-center justify-between">
-          <span className="flex flex-col gap-1">
-            <p className="text-[20px] font-semibold">Xin chào, {user?.name}</p>
-            <p className="text-4xl font-semibold">
+          <span className="flex flex-col gap-[6px]">
+            <span className="text-[20px] font-semibold flex gap-1 items-center">
+              <p className="text-lg">Xin chào,</p> {user?.name}
+            </span>
+            <p className="text-3xl font-semibold">
               Trang {SidebarData.find((path) => path.path.replace("/", "") == pathname.replace("/", ""))?.title}
             </p>
           </span>
 
-          <span className="flex items-center">hhh</span>
+          <span className="flex items-center"></span>
         </header>
 
         <IconBreadcrumbs

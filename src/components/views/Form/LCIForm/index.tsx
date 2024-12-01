@@ -9,13 +9,11 @@ import { monthNumber, months } from "@/utils/const";
 
 import Product from "@/types/product";
 import { useWeb3Store } from "@/stores/storeProvider";
-import { useRouter } from "next/navigation";
 import Process from "@/types/process";
 import Button from "@/UI/Button";
 
 export default function LCIForm() {
   const animatedComponents = makeAnimated();
-  const router = useRouter();
   const { account, LCIs, getCLIs, products, assessmentContract } = useWeb3Store((state) => state);
 
   const [date, setDate] = useState("");

@@ -33,7 +33,6 @@ export default function AddProcess() {
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log({ name, description, file });
     if (!file) return;
 
     const data = new FormData();

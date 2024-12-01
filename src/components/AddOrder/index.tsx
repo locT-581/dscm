@@ -72,7 +72,7 @@ export default function AddOrder({ addOrder, onAdd }: IAddOrderProps) {
               </option>
               {units.map((unit, i) => (
                 <option key={i} value={unit.id}>
-                  {unit.value}
+                  {unit.name}{" "}
                 </option>
               ))}
             </select>

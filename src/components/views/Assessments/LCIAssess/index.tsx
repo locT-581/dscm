@@ -1,6 +1,5 @@
 "use client";
 
-import Web3 from "web3";
 import * as GiIcons from "react-icons/gi";
 import * as BiIcons from "react-icons/bi";
 import * as RiIcons from "react-icons/ri";

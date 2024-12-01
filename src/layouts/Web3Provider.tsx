@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { Assessment, Origin } from "@/lib/abis";
 import { useWeb3Store } from "@/stores/storeProvider";
 import { getSupplierByAddress } from "@/app/apis";
+import { Backdrop, CircularProgress } from "@mui/material";
 
 export interface IWeb3ProviderProps {
   children: React.ReactNode;
@@ -119,6 +120,13 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
     if (contract && !!processes && !!suppliers && !!!socials) getSocials();
   }, [contract, socials, , processes, suppliers, getSocials]);
 
-  if (!!!user) return <>Đăng nhập vào hệ thống</>;
+  if (!!!user)
+    return (
+      <>
+        <Backdrop sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })} open={true}>
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      </>
+    );
   return <>{children}</>;
 }

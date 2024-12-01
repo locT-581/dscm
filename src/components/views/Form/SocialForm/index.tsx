@@ -1,11 +1,7 @@
 "use client";
 
-import { Assessment } from "@/lib/abis";
-import React, { useState, useEffect, useRef } from "react";
-import Web3 from "web3";
+import React, { useState, useEffect } from "react";
 
-import { Contract } from "web3-eth-contract"; // Import kiểu Contract từ Web3.js
-import { OriginAbi } from "@/types/common";
 import getDate from "@/utils/getDate";
 import { monthNumber, months } from "@/utils/const";
 import { useWeb3Store } from "@/stores/storeProvider";

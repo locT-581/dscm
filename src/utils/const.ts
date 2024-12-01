@@ -55,16 +55,51 @@ export const SidebarData: {
   {
     title: "Thêm sản phẩm",
     path: "/them-san-pham",
-    icon: "SummarizeIcon",
+    icon: "ShoppingBasketIcon",
     isShow: false,
     onlyAdmin: true,
   },
   {
     title: "Thêm Nhà cung cấp",
     path: "/them-nha-cung-cap",
-    icon: "SummarizeIcon",
+    icon: "Groups2Icon",
     isShow: false,
     onlyAdmin: true,
+  },
+  {
+    title: "LCI",
+    path: "/lci",
+    icon: "RecyclingIcon",
+    isShow: false,
+    onlyAdmin: false,
+  },
+  {
+    title: "Môi trường",
+    path: "/moi-truong",
+    icon: "ForestIcon",
+    isShow: false,
+    onlyAdmin: false,
+  },
+  {
+    title: "Xã hội",
+    path: "/xa-hoi",
+    icon: "Groups2Icon",
+    isShow: false,
+    onlyAdmin: false,
+  },
+  {
+    title: "Tạo đơn hàng",
+    path: "/tao-don-hang",
+    icon: "ShoppingBasketIcon",
+    isShow: false,
+    onlyAdmin: false,
+  },
+  {
+    title: "Đánh giá",
+    path: "/danh-gia",
+    icon: "SummarizeIcon",
+    isShow: false,
+    onlyAdmin: false,
   },
 ];
 

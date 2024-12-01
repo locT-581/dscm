@@ -39,7 +39,7 @@ Chart.register(
 );
 
 export default function LciReports() {
-  const { products, account, LCIs } = useWeb3Store((state) => state);
+  const { products, LCIs } = useWeb3Store((state) => state);
 
   const [month, setMonth] = useState<string[]>([]);
   const [year, setYear] = useState<string[]>([]);

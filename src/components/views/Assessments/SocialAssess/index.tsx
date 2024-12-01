@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
 import * as GiIcons from "react-icons/gi";
@@ -67,9 +67,9 @@ export const SocialList = ({ assessments }: { assessments: Assessment[] }) =>
               </th>
               <th>Doanh thu nhân viên mỗi năm {(a.document as SocialFormType).hiredemp}</th>
               <td>
-                {(+(a.document as SocialFormType).resemp / +(a.document as SocialFormType).hiredemp ?? 1) % 1 !== 0
-                  ? (+(a.document as SocialFormType).resemp / +(a.document as SocialFormType).hiredemp ?? 1).toFixed(1)
-                  : +(a.document as SocialFormType).resemp / +(a.document as SocialFormType).hiredemp ?? 1}
+                {(+(a.document as SocialFormType).resemp / +(a.document as SocialFormType).hiredemp || 1) % 1 !== 0
+                  ? (+(a.document as SocialFormType).resemp / +(a.document as SocialFormType).hiredemp || 1).toFixed(1)
+                  : +(a.document as SocialFormType).resemp / +(a.document as SocialFormType).hiredemp || 1}
               </td>
               <td>doanh thu/năm</td>
             </tr>

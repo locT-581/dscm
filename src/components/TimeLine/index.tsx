@@ -16,7 +16,7 @@ export interface ITimeLineProps {
 export default function TimeLine({ shipments, product }: ITimeLineProps) {
   const { suppliers } = useWeb3Store((state) => state);
   return (
-    <div className="w-[90%]">
+    <div className="w-[100%]">
       <div className="timeline">
         {!!product ? (
           <VerticalTimeline>

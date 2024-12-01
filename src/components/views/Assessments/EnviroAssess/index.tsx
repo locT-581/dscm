@@ -67,15 +67,13 @@ export const AssessList = ({
           <tr>
             <th>Phần trăm năng lượng giảm mỗi tháng</th>
             <td>
-              {((+(a.document as EnviroFormType).id > 1 &&
+              {+(a.document as EnviroFormType).id > 1 &&
               +energy[+(a.document as EnviroFormType).id - 2] > 0 &&
               +energy[+(a.document as EnviroFormType).id - 1] > 0
                 ? ((+energy[+(a.document as EnviroFormType).id - 2] - +energy[+(a.document as EnviroFormType).id - 1]) *
                     100) /
                   +energy[+(a.document as EnviroFormType).id - 2]
-                : null) ?? 0) %
-                1 !==
-              0
+                : 0 % 1 !== 0
                 ? (+(a.document as EnviroFormType).id > 1 &&
                   +energy[+(a.document as EnviroFormType).id - 2] > 0 &&
                   +energy[+(a.document as EnviroFormType).id - 1] > 0
@@ -83,7 +81,7 @@ export const AssessList = ({
                         +energy[+(a.document as EnviroFormType).id - 1]) *
                         100) /
                       +energy[+(a.document as EnviroFormType).id - 2]
-                    : null ?? 0
+                    : 0
                   ).toFixed(1)
                 : +(a.document as EnviroFormType).id > 1 &&
                   +energy[+(a.document as EnviroFormType).id - 2] > 0 &&
@@ -91,7 +89,7 @@ export const AssessList = ({
                 ? ((+energy[+(a.document as EnviroFormType).id - 2] - +energy[+(a.document as EnviroFormType).id - 1]) *
                     100) /
                   +energy[+(a.document as EnviroFormType).id - 2]
-                : null}
+                : 0}
             </td>
             <td>%</td>
           </tr>

@@ -107,12 +107,12 @@ const headCells: readonly HeadCell[] = [
     disablePadding: false,
     label: "Ngày tạo",
   },
-  {
-    id: "status",
-    numeric: false,
-    disablePadding: false,
-    label: "Trạng thái",
-  },
+  // {
+  //   id: "status",
+  //   numeric: false,
+  //   disablePadding: false,
+  //   label: "Trạng thái",
+  // },
 ];
 
 interface EnhancedTableProps {
@@ -252,7 +252,7 @@ export default function EnhancedTable({
                       <TableCell align="center">{row.quantity}</TableCell>
                       <TableCell align="center">{row.unit}</TableCell>
                       <TableCell align="center">{row.date}</TableCell>
-                      <TableCell align="center">{row.status}</TableCell>
+                      {/* <TableCell align="center">{row.status}</TableCell> */}
                       <TableCell align="center"></TableCell>
                     </TableRow>
                   );

@@ -4,6 +4,10 @@ import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import DashboardCustomizeOutlinedIcon from "@mui/icons-material/DashboardCustomizeOutlined";
 import ProductionQuantityLimitsOutlinedIcon from "@mui/icons-material/ProductionQuantityLimitsOutlined";
 import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
+import RecyclingIcon from "@mui/icons-material/Recycling";
+import ForestIcon from "@mui/icons-material/Forest";
+import Groups2Icon from "@mui/icons-material/Groups2";
+import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
 export interface ISideBarIconProps {
   keyIcon:
     | "DashboardIcon"
@@ -11,7 +15,11 @@ export interface ISideBarIconProps {
     | "AssessmentIcon"
     | "SummarizeIcon"
     | "LocationCityIcon"
-    | "PrecisionManufacturingIcon";
+    | "PrecisionManufacturingIcon"
+    | "RecyclingIcon"
+    | "ForestIcon"
+    | "Groups2Icon"
+    | "ShoppingBasketIcon";
   width?: number | string;
 }
 
@@ -29,6 +37,14 @@ export default function SideBarIcon({ keyIcon, width = 36 }: ISideBarIconProps) 
       return <MapOutlinedIcon color="inherit" sx={{ fontSize: width }} />;
     case "PrecisionManufacturingIcon":
       return <PrecisionManufacturingIcon color="inherit" sx={{ fontSize: width }} />;
+    case "RecyclingIcon":
+      return <RecyclingIcon color="inherit" sx={{ fontSize: width }} />;
+    case "ForestIcon":
+      return <ForestIcon color="inherit" sx={{ fontSize: width }} />;
+    case "Groups2Icon":
+      return <Groups2Icon color="inherit" sx={{ fontSize: width }} />;
+    case "ShoppingBasketIcon":
+      return <ShoppingBasketIcon color="inherit" sx={{ fontSize: width }} />;
     default:
       return null;
   }

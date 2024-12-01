@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { useWeb3Store } from "@/stores/storeProvider";
-import LogoutIcon from "@mui/icons-material/Logout";
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 
 export default function Sidebar() {
