@@ -15,6 +15,9 @@ import {
   ChartOptions,
   LinearScale,
   CategoryScale,
+  Title,
+  Tooltip,
+  Legend,
 } from "chart.js";
 
 import { useWeb3Store } from "@/stores/storeProvider";
@@ -22,7 +25,18 @@ import { CLIFormType } from "@/types/document";
 import Assessment from "@/types/assessment";
 import Product from "@/types/product";
 
-Chart.register(BarElement, PointElement, BarController, LineController, PieController, LinearScale, CategoryScale);
+Chart.register(
+  BarElement,
+  PointElement,
+  BarController,
+  LineController,
+  PieController,
+  LinearScale,
+  CategoryScale,
+  Title,
+  Tooltip,
+  Legend
+);
 
 export default function LciReports() {
   const { products, account, LCIs } = useWeb3Store((state) => state);

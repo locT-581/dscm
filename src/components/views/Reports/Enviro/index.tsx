@@ -13,6 +13,9 @@ import {
   PointElement,
   ChartData,
   ChartOptions,
+  Title,
+  Tooltip,
+  Legend,
 } from "chart.js";
 
 import Select from "react-select";
@@ -20,10 +23,20 @@ import Select from "react-select";
 import { useWeb3Store } from "@/stores/storeProvider";
 import Supplier from "@/types/supplier";
 import Assessment from "@/types/assessment";
-import EnviroForm from "../../Form/EnviroForm";
 import { EnviroFormType } from "@/types/document";
 
-Chart.register(LineElement, BarElement, BarController, LineController, CategoryScale, LinearScale, PointElement);
+Chart.register(
+  LineElement,
+  BarElement,
+  BarController,
+  LineController,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 export default function EnviroReport() {
   const { enviros, suppliers } = useWeb3Store((state) => state);
