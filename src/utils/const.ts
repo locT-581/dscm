@@ -19,6 +19,7 @@ export const SidebarData: {
     path: "/san-pham",
     icon: "ProductionQuantityLimitsIcon",
     isShow: true,
+    onlyAdmin: true,
   },
   {
     title: "Nhà cung cấp",
@@ -56,12 +57,14 @@ export const SidebarData: {
     path: "/them-san-pham",
     icon: "SummarizeIcon",
     isShow: false,
+    onlyAdmin: true,
   },
   {
     title: "Thêm Nhà cung cấp",
     path: "/them-nha-cung-cap",
     icon: "SummarizeIcon",
     isShow: false,
+    onlyAdmin: true,
   },
 ];
 

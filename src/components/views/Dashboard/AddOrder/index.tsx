@@ -67,6 +67,7 @@ export default function AddOrder() {
               steps.map((p) => ({
                 processID: p.process.id,
                 supplierID: p.supplier?.id ?? null,
+                status: "Processing",
               })) ?? [],
             productID: selectedProduct.id,
             account: account ?? "",

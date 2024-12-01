@@ -1,35 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Select from "react-select";
+import makeAnimated from "react-select/animated";
 
 import getDate from "@/utils/getDate";
 import { GeocodeResponse, Position, ShipType } from "@/types/common";
 import axiosClient from "@/services/axiosClient";
 import { useWeb3Store } from "@/stores/storeProvider";
-
+import Order from "@/types/order";
+import CustomizedSteppers from "../HorizontalStepper";
+import Button from "@/UI/Button";
+import CloseIcon from "@mui/icons-material/Close";
 export interface IAddShipmentProps {
-  addShipment: ({
-    shipType,
-    place,
-    latlong,
-    date,
-    product,
-    process,
-  }: {
-    shipType: ShipType;
-    place: string;
-    latlong: string;
-    date: string;
-    product: string;
-    process: string;
-    account?: string;
-  }) => void;
   shipType: ShipType;
   onShipAdd: () => void;
 }
 
-export default function AddShipment({ addShipment, shipType: _shipType, onShipAdd }: IAddShipmentProps) {
-  const { products, orders, contract, account } = useWeb3Store((state) => state);
+export default function AddShipment({ shipType: _shipType, onShipAdd }: IAddShipmentProps) {
+  const { orders, contract, account, user } = useWeb3Store((state) => state);
+
+  const animatedComponents = makeAnimated();
 
   const [date, setDate] = useState("");
   const [d, setD] = useState(true);
@@ -39,10 +30,8 @@ export default function AddShipment({ addShipment, shipType: _shipType, onShipAd
 
   // address of the current location
   const [place, setPlace] = useState<string>("");
-  const [product, setProduct] = useState("");
+  const [order, setOrder] = useState<Order>();
 
-  // A process of the product
-  const [process, setProcess] = useState("");
   const [shipmentCount, setShipmentCount] = useState<number>(0);
 
   useEffect(() => {
@@ -53,7 +42,7 @@ export default function AddShipment({ addShipment, shipType: _shipType, onShipAd
     })();
   }, [contract]);
 
-  const orderName = orders?.filter((obj) => obj.id.toString().includes(product)).map((order) => order.name);
+  // const orderName = orders?.filter((obj) => obj.id.toString().includes(product)).map((order) => order.name);
 
   useEffect(() => {
     setDate(getDate());
@@ -93,8 +82,33 @@ export default function AddShipment({ addShipment, shipType: _shipType, onShipAd
     }
   };
 
+  const addShipment = ({
+    shipType,
+    place,
+    latlong,
+    date,
+    product,
+    process,
+  }: {
+    shipType: string;
+    place: string;
+    latlong: string;
+    date: string;
+    product: string;
+    process: string;
+    account?: string;
+  }) => {
+    contract?.methods
+      .addShipment(shipType, place, latlong, date, product, process)
+      .send({ from: account })
+      .once("receipt", () => {
+        window.location.reload();
+      });
+  };
+
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!!!order || !!!user) return;
     setD(!d);
     const setLatlong = {
       id: (parseInt(shipmentCount + "") + 1).toString(),
@@ -102,50 +116,90 @@ export default function AddShipment({ addShipment, shipType: _shipType, onShipAd
       longitude: longitude,
     };
     const latlong = JSON.stringify(setLatlong);
-    addShipment({ shipType: _shipType, place, latlong, date, account, product, process });
+    addShipment({
+      shipType: _shipType,
+      place,
+      latlong,
+      date,
+      account,
+      product: order.product.id,
+      process: order.process.find((p) => p.supplier?.id === user.id)?.process.id ?? "",
+    });
   };
 
+  // useEffect(() => {
+  //   if (!!order) {
+  //     setSteps(
+  //       order.process.map((process) => ({
+  //         process,
+  //         supplier: null,
+  //       }))
+  //     );
+  //   }
+  // }, [order]);
+
   return (
-    <div className="center">
-      <form className="ship-form" onSubmit={onSubmit}>
-        <div className="form-header">
-          <h2>{_shipType === "Send" ? "Gửi hàng" : "Nhận hàng"}</h2>
-          <button className="btn form-close" style={{ background: "red", fontSize: "14px" }} onClick={onShipAdd}>
-            X
-          </button>
+    <>
+      <form
+        onSubmit={onSubmit}
+        className="!text-[#023047] bg-[#fdfdfd] flex flex-col justify-between gap-4 w-[65vw] border border-[#ab9797] rounded-xl p-8 ml-[5%]"
+      >
+        <div className="w-full flex justify-between items-center">
+          <h4 className="text-3xl font-semibold">{`${_shipType === "Send" ? "Gửi" : "Nhận"} đơn hàng`}</h4>
+          <CloseIcon
+            className="cursor-pointer"
+            fontSize="small"
+            onClick={() => {
+              onShipAdd();
+            }}
+          />
         </div>
-        <div className="product-center-form">
-          <div className="form-inputs">
-            <label className="order-label">Chọn đơn hàng</label>
-            <select className="order-product" required value={product} onChange={(e) => setProduct(e.target.value)}>
-              <option value="" disabled hidden></option>
-              {orders?.map((order, i) => {
-                return (
-                  <option key={i} value={Number(order.id)}>
-                    Đơn hàng # {order.id}: {order.name}{" "}
-                  </option>
-                );
-              })}
-            </select>
+
+        <div className="flex flex-col gap-10">
+          <div className="flex flex-col gap-3 w-[60%]">
+            <label htmlFor="processes-product" className="font-semibold">
+              Chọn đơn hàng
+            </label>
+
+            <Select
+              className="!z-[999]"
+              required
+              closeMenuOnSelect={true}
+              components={animatedComponents}
+              onChange={(e) => {
+                setOrder(orders?.find((order) => order.id === (e as { value: string; label: string })?.value));
+              }}
+              options={orders
+                ?.map((order) => ({ value: order.id, label: `Đơn hàng #${order.id}: ${order.product?.name}` }))
+                .filter(Boolean)}
+            />
           </div>
-          <div className="form-inputs">
-            <label className="order-label">Chọn quy trình của sản phẩm</label>
-            <select className="order-product" required value={process} onChange={(e) => setProcess(e.target.value)}>
-              <option value="" disabled hidden></option>
-              {products
-                ?.filter((obj) => orderName?.includes(obj.name))
-                .map((product, i) => (
-                  <option key={i} value={product.process}>
-                    {product.process}{" "}
-                  </option>
-                ))}
-            </select>
-          </div>
-          <button className="btn order-input-btn" type="submit">
-            {_shipType === "Send" ? "Gửi" : "Nhận"}
-          </button>
+          {order && (
+            <div className="flex flex-col gap-3 ">
+              <label htmlFor="processes-product" className="font-semibold">
+                Giai đoạn sản xuất
+              </label>
+
+              <CustomizedSteppers
+                steps={order.process.map((s) => ({
+                  icon: s.process.image,
+                  label: s.process.name,
+                  des: s.supplier?.name ?? "",
+                }))}
+                activeStep={
+                  order.process.findIndex((p) => p.supplier?.id === user?.id) === -1
+                    ? -1
+                    : order.process.findIndex((p) => p.supplier?.id === user?.id)
+                }
+              />
+            </div>
+          )}
         </div>
+
+        <Button disabled={!!!order} className="self-end w-[20%]" type="submit">
+          {_shipType === "Send" ? "Gửi" : "Nhận"}
+        </Button>
       </form>
-    </div>
+    </>
   );
 }

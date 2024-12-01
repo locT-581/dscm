@@ -1,8 +1,7 @@
 import Process from "./process";
 
-type Role = "Focal company" | "Supplier";
 export default interface Supplier {
-  role?: Role;
+  role?: "Focal company" | "Supplier" | undefined;
   id: string;
   name: string;
   productsProcesses: Process[];

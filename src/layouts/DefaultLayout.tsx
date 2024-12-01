@@ -2,6 +2,7 @@
 
 import Background from "@/components/Background";
 import Sidebar from "@/components/Sidebar";
+import { useWeb3Store } from "@/stores/storeProvider";
 import IconBreadcrumbs from "@/UI/Breadcrumbs";
 import SideBarIcon from "@/UI/Icons/SideBarIcon";
 import { SidebarData } from "@/utils/const";
@@ -10,6 +11,7 @@ import { useEffect, useMemo, useState } from "react";
 
 export default function DefaultLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user } = useWeb3Store((state) => state);
   const [[width, height], setSize] = useState([window.innerWidth, window.innerHeight]);
 
   const pathParts = useMemo(() => pathname.split("/").filter((part) => part !== ""), [pathname]);
@@ -30,9 +32,9 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
       <Sidebar />
       <div className="flex flex-col gap-3 w-full h-full p-4 !pr-8 overflow-auto">
         <header className="w-full flex items-center justify-between">
-          <span className="flex flex-col">
-            <p className="text-[20px] font-semibold">Xin chào,</p>
-            <p className="text-5xl font-semibold">
+          <span className="flex flex-col gap-1">
+            <p className="text-[20px] font-semibold">Xin chào, {user?.name}</p>
+            <p className="text-4xl font-semibold">
               Trang {SidebarData.find((path) => path.path.replace("/", "") == pathname.replace("/", ""))?.title}
             </p>
           </span>

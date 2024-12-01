@@ -34,6 +34,7 @@ export interface OrderFireStore {
   process: {
     processID: string;
     supplierID?: string | null;
+    status: "Done" | "Processing";
   }[];
   quantity: number;
   date: string;
@@ -48,10 +49,11 @@ export default interface Order {
   process: {
     process: Process;
     supplier?: Supplier | null;
+    status: "Done" | "Processing";
   }[];
   quantity: number;
   date: string;
   account: string;
   unit: Unit;
-  statusProcess: Process | null; // status of process
+  statusProcess: Process | null | "Done"; // status of process
 }

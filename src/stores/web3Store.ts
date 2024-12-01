@@ -76,9 +76,8 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
 
     // fetch Data
     getOrders: async () => {
-      const { contract, products } = get();
+      const { contract, products, user } = get();
       if (!contract) return;
-      console.log("🚀 ~ getOrders: ~ products:", products);
 
       const allOrders: OrderFireStore[] = await getAllOrders();
 
@@ -101,6 +100,7 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
             orderOffChain?.process.map((process) => ({
               process: get().processes?.find((p) => p.id == process.processID) as Process,
               supplier: get().suppliers?.find((s) => s.id == process.supplierID) as Supplier,
+              status: process.status,
             })) ?? [],
           statusProcess: get().processes?.find((p) => p.id == orderOffChain?.statusProcessID) ?? null,
         };
@@ -108,25 +108,64 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
         orders.push(newOrder);
       }
 
-      set(() => ({ orders }));
+      let filterOrder: Order[] = [];
+      if (user?.role == "Supplier") {
+        filterOrder = orders.filter((order) => {
+          // Check if process of product of order has supplier is current user
+          const listProcess = order?.product?.process.map((p) => p.id);
+          const processOfUser = user.productsProcesses.map((p) => p.id);
+          return (
+            order.process.find((process) => process.supplier?.id == user.id) ||
+            listProcess?.some((p) => processOfUser.includes(p))
+          );
+        });
+      } else if (user?.role == "Focal company") {
+        filterOrder = orders;
+      }
+      set(() => ({ orders: filterOrder }));
     },
 
     getShipments: async () => {
-      const { contract } = get();
+      const { contract, products, processes, user } = get();
       if (!contract) return;
 
-      // Get shipments from contract
       const shipmentCount: number = await contract.methods.shipmentCount().call();
       const shipments: Shipment[] = [];
+
       for (let i = 1; i <= shipmentCount; i++) {
         const newShipment: ShipmentBlockChainType = await contract.methods.shipments(i).call();
         shipments.push({
           ...newShipment,
           id: Number(newShipment.id).toString(),
           latlong: JSON.parse(newShipment.latlong),
+          product: products?.find((product) => product.id == newShipment.product) as Product,
+          process: processes?.find((process) => process.id == newShipment.process) as Process,
+          supplier: get().suppliers?.find((supplier) => {
+            console.log(supplier.account.toLocaleLowerCase() == newShipment.account.toLocaleLowerCase());
+            return supplier.account.toLocaleLowerCase() == newShipment.account.toLocaleLowerCase();
+          }) as Supplier,
         });
       }
-      set(() => ({ shipments }));
+
+      if (user?.role == "Supplier") {
+        // Những đơn hàng có sự tham gia của nhà cung cấp -> orders
+        // lọc những shipment có product thuộc orders
+
+        // từ 1 process của supplier -> lấy các product có process đó -> vói mỗi product -> lấy tất cả process của product đó
+        // với mỗi process -> lấy tất cả shipment có process đó
+        const listProductHaveProcessOfSupplier = products?.filter((p) => {
+          const listIDOfProcess = user?.productsProcesses.map((p) => p.id);
+          return p.process.some((p) => listIDOfProcess?.includes(p.id));
+        });
+
+        set(() => ({
+          shipments: shipments.filter((sh) => {
+            return listProductHaveProcessOfSupplier?.map((p) => p.id).includes(sh.product.id);
+          }),
+        }));
+      } else {
+        set(() => ({ shipments }));
+      }
     },
 
     getProducts: async () => {

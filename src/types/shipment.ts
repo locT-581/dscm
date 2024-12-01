@@ -1,6 +1,9 @@
 import { LatLong } from "./common";
+import Process from "./process";
+import Product from "./product";
+import Supplier from "./supplier";
 
-export default interface Shipment {
+export interface ShipmentOnChain {
   id: string;
   shipType: string;
   place: string;
@@ -24,4 +27,18 @@ export interface ShipmentBlockChainType {
   process: string;
   latitude: number;
   longitude: number;
+}
+
+export default interface Shipment {
+  id: string;
+  shipType: string;
+  place: string;
+  latlong: LatLong;
+  date: string;
+  account: string;
+  product: Product; // Product ID
+  process: Process;
+  latitude: number;
+  longitude: number;
+  supplier: Supplier;
 }

@@ -81,15 +81,16 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
   }, [contract, products, getProducts, processes, getProcess]);
 
   useEffect(() => {
-    if (contract && !!!orders && !!products) getOrders();
-  }, [contract, orders, getOrders, products]);
+    if (contract && !!!orders && !!products && !!suppliers) getOrders();
+  }, [contract, orders, getOrders, products, suppliers]);
 
   useEffect(() => {
-    if (contract && !!!shipments) getShipments();
-  }, [contract, shipments, getShipments]);
+    if (contract && !!!shipments && !!products && !!processes && !!suppliers && !!orders) getShipments();
+  }, [contract, shipments, getShipments, products, processes, suppliers, orders]);
 
   useEffect(() => {
-    if (user && user.role === "Focal company" && !!!suppliers) getSuppliers();
+    // if (user && user.role === "Focal company" && !!!suppliers) getSuppliers();
+    if (!!!suppliers) getSuppliers();
   }, [user, suppliers, getSuppliers]);
 
   if (!!!user) return <>Đăng nhập vào hệ thống</>;

@@ -13,6 +13,11 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Unit from "@/types/unit";
+import Link from "next/link";
+import Button from "../Button";
+import { useWeb3Store } from "@/stores/storeProvider";
+import Process from "@/types/process";
+import { Backdrop } from "@mui/material";
 // import { visuallyHidden } from "@mui/utils";
 
 interface Data {
@@ -21,15 +26,24 @@ interface Data {
   quantity: number;
   unit: Unit;
   date: string;
+  status: "Done" | "Processing" | Process;
 }
 
-function createData(id: number, name: string, quantity: number, unit: Unit, date: string): Data {
+function createData(
+  id: number,
+  name: string,
+  quantity: number,
+  unit: Unit,
+  date: string,
+  status: "Done" | "Processing" | Process
+): Data {
   return {
     id,
     name,
     quantity,
     unit,
     date,
+    status,
   };
 }
 
@@ -65,8 +79,8 @@ interface HeadCell {
 const headCells: readonly HeadCell[] = [
   {
     id: "id",
-    numeric: true,
-    disablePadding: true,
+    numeric: false,
+    disablePadding: false,
     label: "Mã đơn hàng",
   },
   {
@@ -77,7 +91,7 @@ const headCells: readonly HeadCell[] = [
   },
   {
     id: "quantity",
-    numeric: true,
+    numeric: false,
     disablePadding: false,
     label: "Số lượng",
   },
@@ -92,6 +106,12 @@ const headCells: readonly HeadCell[] = [
     numeric: false,
     disablePadding: false,
     label: "Ngày tạo",
+  },
+  {
+    id: "status",
+    numeric: false,
+    disablePadding: false,
+    label: "Trạng thái",
   },
 ];
 
@@ -113,7 +133,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align={headCell.numeric ? "right" : "left"}
+            align={"center"}
             padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
@@ -136,29 +156,27 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 export default function EnhancedTable({
-  rowList = [
-    createData(1, "Cupcake", 305, { id: "1", name: "kg" }, "67"),
-    createData(2, "Donut", 452, { id: "1", name: "kg" }, "554"),
-    createData(3, "Eclair", 262, { id: "1", name: "kg" }, "554"),
-    createData(4, "Frozen yoghurt", 159, { id: "1", name: "kg" }, "554"),
-    createData(5, "Gingerbread", 356, { id: "1", name: "kg" }, "554"),
-    createData(6, "Honeycomb", 408, { id: "1", name: "kg" }, "554"),
-    createData(7, "Ice cream sandwich", 237, { id: "1", name: "kg" }, "554"),
-    createData(8, "Jelly Bean", 375, { id: "1", name: "kg" }, "554"),
-    createData(9, "KitKat", 518, { id: "1", name: "kg" }, "554"),
-    createData(10, "Lollipop", 392, { id: "1", name: "kg" }, "554"),
-    createData(11, "Marshmallow", 392, { id: "1", name: "kg" }, "554"),
-    createData(12, "Nougat", 360, { id: "1", name: "kg" }, "554"),
-    createData(13, "Oreo", 437, { id: "1", name: "kg" }, "554"),
-  ],
+  rowList,
 }: {
-  rowList: { id: number; name: string; quantity: number; unit: Unit; date: string }[];
+  rowList: {
+    id: number;
+    name: string;
+    quantity: number;
+    unit: Unit;
+    date: string;
+    status: "Done" | "Processing" | Process;
+  }[];
 }) {
-  const [rows] = React.useState(rowList.map((row) => createData(row.id, row.name, row.quantity, row.unit, row.date)));
+  const { user } = useWeb3Store((state) => state);
+  const [rows] = React.useState(
+    rowList.map((row) => createData(row.id, row.name, row.quantity, row.unit, row.date, row.status))
+  );
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<keyof Data>("id");
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+  const [showDetail, setShowDetail] = React.useState(false);
 
   const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof Data) => {
     const isAsc = orderBy === property && order === "asc";
@@ -180,68 +198,151 @@ export default function EnhancedTable({
 
   const visibleRows = React.useMemo(() => {
     return [...rows]
-      .map((row) => ({ ...row, unit: row.unit.name }))
+      .map((row) => ({
+        ...row,
+        unit: row.unit.name,
+        status: typeof row.status === "string" ? row.status : row.status?.name ?? "",
+      }))
       .sort(getComparator(order, orderBy))
       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   }, [order, orderBy, page, rowsPerPage, rows]);
 
   return (
-    <Box sx={{ width: "100%" }}>
-      <Paper sx={{ width: "100%", mb: 2 }}>
-        <Toolbar
-          sx={[
-            {
-              pl: { sm: 2 },
-              pr: { xs: 1, sm: 1 },
-            },
-          ]}
-        >
-          <Typography sx={{ flex: "1 1 100%" }} variant="h6" id="tableTitle" component="div">
-            Nutrition
-          </Typography>
-        </Toolbar>
+    <>
+      <Box sx={{ width: "100%" }}>
+        <Paper sx={{ width: "100%", mb: 2 }}>
+          <Toolbar
+            sx={[
+              {
+                pl: { sm: 2 },
+                pr: { xs: 1, sm: 1 },
+              },
+            ]}
+          >
+            <Typography sx={{ flex: "1 1 100%" }} variant="h6" id="tableTitle" component="div">
+              Danh sách đơn hàng
+            </Typography>
 
-        <TableContainer>
-          <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={"medium"}>
-            <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
-            <TableBody>
-              {visibleRows.map((row, index) => {
-                const labelId = `enhanced-table-checkbox-${index}`;
+            {user?.role == "Focal company" && (
+              <Link className="w-fit flex flex-shrink-0" href="/tong-quan/tao-don-hang">
+                <Button>Tạo đơn hàng</Button>
+              </Link>
+            )}
+          </Toolbar>
 
-                return (
-                  <TableRow hover role="row" tabIndex={-1} key={row.id} sx={{ cursor: "pointer" }}>
-                    <TableCell component="th" id={labelId} scope="row" padding="none">
-                      {row.id}
-                    </TableCell>
-                    <TableCell align="right">{row.name}</TableCell>
-                    <TableCell align="right">{row.quantity}</TableCell>
-                    <TableCell align="right">{row.unit}</TableCell>
-                    <TableCell align="right">{row.date}</TableCell>
+          <TableContainer>
+            <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={"medium"}>
+              <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
+              <TableBody>
+                {visibleRows.map((row, index) => {
+                  const labelId = `enhanced-table-checkbox-${index}`;
+
+                  return (
+                    <TableRow
+                      hover
+                      role="row"
+                      tabIndex={-1}
+                      key={row.id}
+                      sx={{ cursor: "pointer", paddingBlock: "12px" }}
+                    >
+                      <TableCell component="th" align="center" id={labelId} scope="row" className="!w-[20%]">
+                        {row.id}
+                      </TableCell>
+                      <TableCell align="center">{row.name}</TableCell>
+                      <TableCell align="center">{row.quantity}</TableCell>
+                      <TableCell align="center">{row.unit}</TableCell>
+                      <TableCell align="center">{row.date}</TableCell>
+                      <TableCell align="center">{row.status}</TableCell>
+                      <TableCell align="center"></TableCell>
+                    </TableRow>
+                  );
+                })}
+                {emptyRows > 0 && (
+                  <TableRow
+                    style={{
+                      height: 53 * emptyRows,
+                    }}
+                  >
+                    <TableCell colSpan={6} />
                   </TableRow>
-                );
-              })}
-              {emptyRows > 0 && (
-                <TableRow
-                  style={{
-                    height: 53 * emptyRows,
-                  }}
-                >
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Paper>
-    </Box>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            labelRowsPerPage="Số đơn hàng trên trang"
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={rows.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Paper>
+      </Box>
+
+      <Backdrop
+        sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+        open={showDetail}
+        onClick={() => setShowDetail(false)}
+      >
+        <div
+          className="w-[70vw] h-[50v] flex flex-col gap-2"
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <h1>Chi tiết đơn hàng</h1>
+          <div className="flex gap-4">
+            <div className="flex flex-col gap-3 w-[60%]">
+              <label htmlFor="processes-product" className="font-semibold">
+                Chọn sản phẩm
+              </label>
+              <input type="text" className="rounded-md p-2 h-[36px]" placeholder="Nhập tên sản phẩm" />
+            </div>
+            <div className="flex flex-col gap-3 w-[30%]">
+              <label htmlFor="name-product" className="font-semibold">
+                Số lượng
+              </label>
+              <input type="number" className="rounded-md p-2 h-[36px]" placeholder="Nhập số lượng" />
+            </div>
+          </div>
+          <div className="flex gap-4">
+            <div className="flex flex-col gap-3 w-[60%]">
+              <label htmlFor="processes-product" className="font-semibold">
+                Chọn sản phẩm
+              </label>
+              <input type="text" className="rounded-md p-2 h-[36px]" placeholder="Nhập tên sản phẩm" />
+            </div>
+            <div className="flex flex-col gap-3 w-[30%]">
+              <label htmlFor="name-product" className="font-semibold">
+                Số lượng
+              </label>
+              <input type="number" className="rounded-md p-2 h-[36px]" placeholder="Nhập số lượng" />
+            </div>
+          </div>
+          <div className="flex gap-4">
+            <div className="flex flex-col gap-3 w-[60%]">
+              <label htmlFor="processes-product" className="font-semibold">
+                Chọn sản phẩm
+              </label>
+              <input type="text" className="rounded-md p-2 h-[36px]" placeholder="Nhập tên sản phẩm" />
+            </div>
+            <div className="flex flex-col gap-3 w-[30%]">
+              <label htmlFor="name-product" className="font-semibold">
+                Số lượng
+              </label>
+              <input type="number" className="rounded-md p-2 h-[36px]" placeholder="Nhập số lượng" />
+            </div>
+          </div>
+          <div className=" flex justify-end">
+            {/* <Button onClick={() => setShowDetail(false)}>Đóng</Button>
+
+            <Button onClick={() => {}}>Lưu</Button> */}
+          </div>
+        </div>
+      </Backdrop>
+    </>
   );
 }
