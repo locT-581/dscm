@@ -61,3 +61,277 @@ input:-webkit-autofill:active {
     @apply bg-slate-700;
   }
 }
+
+/* LCIs */
+
+.LCI-form {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding: 3%;
+  padding-bottom: 50px;
+}
+
+.LCI-form h3 {
+  padding-bottom: 20px;
+  text-align: center;
+}
+
+.LCI-form label {
+  font-size: 13px;
+}
+
+.LCI-form input,
+select {
+  margin-left: 10px;
+}
+
+.LCI-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.LCI-indicators {
+  z-index: 1; /* Sit on top */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: #f2f2f2;
+  align-self: center;
+  position: absolute;
+  padding: 40px;
+  top: 5%;
+  left: 22.5%;
+  border: 1px solid #fff;
+  width: 75%;
+  height: 100%;
+}
+
+.LCI-indicators h3 {
+  margin-bottom: 20px;
+  /* font-size: 15px; */
+}
+
+.LCI-table tr,
+th,
+td {
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+  font-size: 12px;
+  padding: 8px;
+}
+
+.LCI-table caption:not(.captwo) {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.LCI-x {
+  font-size: 20px;
+  cursor: pointer;
+  margin-left: 93%;
+}
+.LCI-table thead th:nth-of-type(4) {
+  text-align: center;
+}
+
+.LCI-table tbody th[rowspan]:not(.category) {
+  width: 20%;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.category {
+  width: 1%;
+  font-weight: 500;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.LCI-table tbody th:not(th[rowspan]) {
+  width: 55%;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: none;
+}
+
+.LCI-table tr td:nth-of-type(1) {
+  width: 1%;
+  font-weight: 500;
+  text-align: center;
+}
+.LCI-table tr td:nth-of-type(2) {
+  width: 25%;
+  font-weight: 500;
+}
+
+.LCI-table tr:nth-child(even) {
+  background-color: #f0efef;
+}
+
+.LCI-container Button {
+  margin-right: 20px;
+}
+
+.LCI-container legend {
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-left: 50px;
+}
+
+.wrap_text {
+  font-size: 14px;
+}
+
+.monthly-kpi {
+  border: 2px solid;
+  border-radius: 20px;
+  padding: 15px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.monthly-kpi-env {
+  border: 2px solid;
+  border-radius: 20px;
+  padding: 15px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.monthly-kpi label:not(.wrap_text) {
+  display: inline-block;
+  width: 520px;
+}
+
+.monthly-kpi-env label:not(.wrap_text) {
+  display: inline-block;
+  width: 400px;
+}
+
+.annual-kpi {
+  border: 2px solid;
+  border-radius: 20px;
+  padding: 15px;
+  margin-bottom: 20px;
+  width: 900px;
+  display: flex;
+  justify-content: center;
+}
+
+.annual-kpi label:not(.wrap_text) {
+  display: inline-block;
+  width: 560px;
+}
+
+.LCI-kpi {
+  border: 2px solid;
+  border-radius: 20px;
+  padding: 15px;
+  margin-bottom: 20px;
+  width: 1050px;
+  display: flex;
+  justify-content: center;
+}
+
+.LCI-kpi label:not(.wrap_text) {
+  display: inline-block;
+  width: 560px;
+}
+
+.center-chart {
+  display: flex; /* displays children (divs) inline by default thats why you need to change its direction */
+  justify-content: flex-start;
+  margin-left: 30%;
+}
+
+.label-sel {
+  margin-right: 80px;
+  margin-bottom: 20px;
+}
+
+.center-form {
+  margin-left: 250px;
+}
+
+.charts {
+  margin-left: 20%;
+  margin-bottom: 200px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  flex-direction: row;
+}
+
+.line {
+  margin: 30px;
+}
+
+.charts div {
+  width: 550px;
+}
+
+.charts-header {
+  margin-left: 20%;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  width: 100%;
+  padding: 20px;
+  background-color: #f2f2f2;
+}
+
+.charts-header h2 {
+  font-size: 18px;
+  margin-left: 28%;
+}
+
+.report {
+  display: flex;
+  flex-direction: column;
+  padding-top: 47%;
+  padding-left: 24%;
+}
+
+.report .btn {
+  margin-bottom: 20px;
+}
+
+.report-dashheader {
+  width: 32%;
+  height: 100%;
+  margin-left: 20%;
+  grid-template-columns: minmax(150px, 25%) 1 fr;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+}
+
+.assessChart {
+  width: 25%;
+  margin-left: 40%;
+  position: absolute;
+}
+
+.margin {
+  margin-left: 20%;
+}
+
+.cert-container {
+  width: 45%;
+  margin: 20px;
+  margin-top: 45px;
+  padding-top: 20px;
+  border: 1px solid #c3c3c3;
+  overflow: hidden;
+}
+
+.env-container {
+  width: 45%;
+  margin: 20px;
+  margin-top: 45px;
+  padding-top: 20px;
+  border: 1px solid #c3c3c3;
+  overflow: hidden;
+}

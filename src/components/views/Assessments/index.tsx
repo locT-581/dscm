@@ -1,95 +1,83 @@
 "use client";
 
-import Web3 from "web3";
-import { useEffect, useRef, useState } from "react";
-
-import Assessment from "../../../../build/contracts/Assessments.json";
-import LCIType from "@/types/LCI";
-import EnviroType from "@/types/enviro";
-import SocialType from "@/types/social";
-import Button from "@/components/Button";
 import Link from "next/link";
-import Enviro from "@/components/Enviro";
-import Social from "@/components/Social";
-import LCIIndicators from "@/components/LCI";
+
 import { useWeb3Store } from "@/stores/storeProvider";
+import TableAssessment from "@/UI/TableAssessment";
+import Tabs from "@/UI/Tabs";
+import Button from "@/UI/Button";
 
 export default function Assessments() {
-  const { account, shipments, orders, contract, web3 } = useWeb3Store((state) => state);
+  const { LCIs, socials, enviros } = useWeb3Store((state) => state);
 
-  const [LCIs, setLCIs] = useState<LCIType[]>([]);
-  const [LCIform, setLCIForm] = useState<LCIType[]>([]);
-
-  const [enviros, setEnviros] = useState<EnviroType[]>([]);
-  const [enviroform, setEnviroForm] = useState<EnviroType[]>([]);
-
-  const [socials, setSocials] = useState<SocialType[]>([]);
-  const [socialform, setSocialForm] = useState<SocialType[]>([]);
-
-  const merge = LCIs.map((t1) => ({ ...t1, ...LCIform.find((t2) => t2.id === t1.id) }));
-  const Emerge = enviros.map((t1) => ({ ...t1, ...enviroform.find((t2) => t2.id === t1.id) }));
-  const Smerge = socials.map((t1) => ({ ...t1, ...socialform.find((t2) => t2.id === t1.id) }));
-
-  useEffect(() => {
-    const loadBlockchainData = async () => {
-      if (!!!web3) return;
-      const networkId = await web3.eth.net.getId();
-      const networkData = Assessment.networks[networkId as unknown as keyof typeof Assessment.networks];
-      if (networkData) {
-        const contract = new web3.eth.Contract(Assessment.abi, networkData.address);
-        const LCICount: number = await contract.methods.LCICount().call();
-        const enviroCount: number = await contract.methods.enviroCount().call();
-        const socialCount: number = await contract.methods.socialCount().call();
-        //Load LCIs
-        for (let i = 1; i <= LCICount; i++) {
-          const newLCI = await contract.methods.LCIs(i).call();
-          setLCIs((LCIs) => [...LCIs, newLCI as unknown as LCIType]);
-        }
-        for (let i = 1; i <= LCICount; i++) {
-          const newLCI = await contract.methods.LCIs(i).call();
-          setLCIForm((LCIs) => [...LCIs, JSON.parse((newLCI as unknown as LCIType).document)]);
-        }
-        //Load Enviros
-        for (let i = 1; i <= enviroCount; i++) {
-          const newEnviro = await contract.methods.enviros(i).call();
-          setEnviros((enviros) => [...enviros, newEnviro as unknown as EnviroType]);
-        }
-        for (let i = 1; i <= enviroCount; i++) {
-          const newEnviro = await contract.methods.enviros(i).call();
-          setEnviroForm((enviros) => [...enviros, JSON.parse((newEnviro as unknown as EnviroType).document)]);
-        }
-        //Load Socials
-        for (let i = 1; i <= socialCount; i++) {
-          const newSocial = await contract.methods.socials(i).call();
-          setSocials((socials) => [...socials, newSocial as unknown as SocialType]);
-        }
-        for (let i = 1; i <= socialCount; i++) {
-          const newSocial = await contract.methods.socials(i).call();
-          setSocialForm((socials) => [...socials, JSON.parse((newSocial as unknown as SocialType).document)]);
-        }
-      } else {
-        window.alert("Assessment contract is not deployed to the detected network");
-      }
-    };
-    loadBlockchainData();
-  }, [web3]);
+  if (!!!LCIs || !!!socials || !!!enviros) return;
   return (
     <div>
-      <header className="assess-dashheader">
-        <Link href="/forms/enviro">
-          <Button className="btn" color="#279b48" text="Đánh giá môi trường" />
-        </Link>
-        <Link href="/forms/social">
-          <Button className="btn" color="#279b48" text="Đánh giá xã hội" />
-        </Link>
-        <Link href="/forms/lci">
-          <Button className="btn" color="#279b48" text="Vòng đời hàng tồn kho" />
-        </Link>
-      </header>
+      <Tabs>
+        {[
+          {
+            title: "Đánh giá vòng đời hàng tồn kho",
+            element: (
+              <TableAssessment
+                title="Các bảng đánh giá vòng đời hàng tồn kho"
+                button={
+                  <Link className="w-fit flex flex-shrink-0" href="/bieu-mau/lci">
+                    <Button>Tạo đánh giá mới</Button>
+                  </Link>
+                }
+                rowList={LCIs.map((i) => ({
+                  id: i.id,
+                  dated: i.date,
+                  account: i.account?.name ?? "Rỗng",
+                  period: `${i.month} ${i.year}`,
+                }))}
+              />
+            ),
+          },
+          {
+            title: "Đánh giá môi trường",
+            element: (
+              <TableAssessment
+                title="Các bảng dánh giá môi trường"
+                button={
+                  <Link className="w-fit flex flex-shrink-0" href="/bieu-mau/moi-truong">
+                    <Button>Tạo đánh giá mới</Button>
+                  </Link>
+                }
+                rowList={enviros.map((i) => ({
+                  id: i.id,
+                  dated: i.date,
+                  account: i.account?.name ?? "Rỗng",
+                  period: `${i.month} ${i.year}`,
+                }))}
+              />
+            ),
+          },
+          {
+            title: "Đánh giá xã hội",
+            element: (
+              <TableAssessment
+                title="Các bảng dánh giá xã hội"
+                button={
+                  <Link className="w-fit flex flex-shrink-0" href="/bieu-mau/xa-hoi">
+                    <Button>Tạo đánh giá mới</Button>
+                  </Link>
+                }
+                rowList={socials.map((i) => ({
+                  id: i.id,
+                  dated: i.date,
+                  account: i.account?.name ?? "Rỗng",
+                  period: `${i.month} ${i.year}`,
+                }))}
+              />
+            ),
+          },
+        ]}
+      </Tabs>
 
-      <Enviro Emerge={Emerge} />
-      <Social Smerge={Smerge} />
-      <LCIIndicators assessments={merge} />
+      {/* <Enviro Emerge={LCIs} />
+      <Social Smerge={socials} />
+      <LCIIndicators assessments={enviros} /> */}
     </div>
   );
 }

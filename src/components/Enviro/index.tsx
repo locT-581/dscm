@@ -37,7 +37,6 @@ const AssessList = ({ assessments }: IEnviroType) =>
     ));
 
 const Enviro = ({ Emerge }: { Emerge: EnviroType[] }) => {
-  console.log("🚀 ~ Enviro ~ Emerge:", Emerge);
   return (
     <>
       <h3 className="table-title">Environmental Sustainability Assessments</h3>

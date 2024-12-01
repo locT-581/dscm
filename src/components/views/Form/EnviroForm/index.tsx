@@ -1,21 +1,18 @@
 "use client";
 
-import Web3 from "web3";
-import { useEffect, useRef, useState } from "react";
-import { Contract } from "web3-eth-contract"; // Import kiểu Contract từ Web3.js
+import { useEffect, useState } from "react";
 
-import { OriginAbi } from "@/types/common";
 import { ContractDocument } from "@/types/enviro";
 import getDate from "@/utils/getDate";
-import { Assessment } from "@/lib/abis";
+import Button from "@/UI/Button";
+import { useWeb3Store } from "@/stores/storeProvider";
+import { monthNumber, months } from "@/utils/const";
+import { useRouter } from "next/navigation";
 
 export default function EnviroForm() {
-  const web3instance = useRef<Web3 | null>(null);
+  const router = useRouter();
+  const { assessmentContract, account, enviros, getEnviros } = useWeb3Store((state) => state);
 
-  // const {register} = useForm();
-  const [contract, setContract] = useState<Contract<OriginAbi> | undefined>(undefined);
-  const [account, setAccount] = useState<string>();
-  const [enviroCount, setEnviroCount] = useState<number>(0);
   const [date, setDate] = useState("");
   const [d, setD] = useState("");
 
@@ -52,39 +49,6 @@ export default function EnviroForm() {
   const [clean, setClean] = useState<string[]>([]);
   const [envirosus, setEnvirosus] = useState("");
   const [suppliers, setSuppliers] = useState("");
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
-  const monthNumber = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
-      web3instance.current = new Web3(window.ethereum);
-      window.ethereum.request({ method: "eth_requestAccounts" });
-    } else if (window.web3) {
-      window.web3 = new Web3(window.web3.currentProvider);
-    } else {
-      console.log("Please install MetaMask!");
-    }
-  }, []);
-
-  useEffect(() => {
-    const loadBlockchainData = async () => {
-      if (!web3instance.current) return;
-      const accounts = await web3instance.current.eth.getAccounts();
-      setAccount(accounts[0]);
-      const networkId = await web3instance.current.eth.net.getId();
-      const networkData = Assessment.networks[networkId as unknown as keyof typeof Assessment.networks];
-      if (networkData) {
-        //Fetch contract
-        const contract = new web3instance.current.eth.Contract(Assessment.abi, networkData.address);
-        setContract(contract);
-        const enviroCount: number = Number(await contract.methods.enviroCount().call());
-        setEnviroCount(enviroCount as unknown as number);
-      } else {
-        window.alert("Assessment contract is not deployed to the detected network");
-      }
-    };
-    loadBlockchainData();
-  }, []);
 
   useEffect(() => {
     const date = getDate();
@@ -105,8 +69,10 @@ export default function EnviroForm() {
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!account || !!!enviros) return;
+
     const enviroForm: ContractDocument = {
-      id: (parseInt(enviroCount.toString()) + 1).toString(), // id is the next number of the last id
+      id: (enviros.length + 1).toString(),
       energy: energy,
       renewenergy: renewenergy,
       water: water,
@@ -154,10 +120,13 @@ export default function EnviroForm() {
     month: string;
     year: string;
   }) => {
-    contract?.methods.addEnviro(date, document, month, year).send({ from: account });
-    // .once("receipt", () => {
-    //   window.location.assign("http://localhost:3000/assessments");
-    // });
+    assessmentContract?.methods
+      .addEnviro(date, document, month, year)
+      .send({ from: account })
+      .once("receipt", () => {
+        getEnviros();
+        router.push("/danh-gia");
+      });
   };
 
   const handleChange = (name: string, checked: boolean, set: React.Dispatch<React.SetStateAction<string[]>>) => {
@@ -173,17 +142,24 @@ export default function EnviroForm() {
       <div className="LCI-container">
         <form className="LCI-form" onSubmit={onSubmit}>
           <div>
-            <h3>Enviromental Sustainability Assessment</h3>
-            <div className="center">
-              <div>
-                <label>Select Month/ Year</label>
-                <input type="month" required value={monthYear} onChange={(e) => setMonthYear(e.target.value)} />
+            <div className="flex flex-col gap-2 mb-6">
+              <h3 className="text-2xl font-semibold mb-6">Biểu mẫu đánh giá Tính bền vững môi trường</h3>
+              <div className="flex justify-end gap-2 items-center pr-4">
+                <label>Chọn Tháng/Năm</label>
+                <input
+                  type="month"
+                  lang="vi"
+                  required
+                  value={monthYear}
+                  onChange={(e) => setMonthYear(e.target.value)}
+                />
               </div>
             </div>
+
             <fieldset className="monthly-kpi-env">
-              <legend>Monthly KPI Update</legend>
+              <legend>Cập nhật KPI hàng tháng</legend>
               <div className="center-form-input">
-                <label className="form-label">1 - Total amount of energy used per month</label>
+                <label className="form-label">1 - Tổng lượng năng lượng sử dụng mỗi tháng</label>
                 <input
                   type="number"
                   min="0"
@@ -192,10 +168,10 @@ export default function EnviroForm() {
                   value={energy}
                   onChange={(e) => setEnergy(e.target.value)}
                 />
-                <label className="wrap_text"> kWh/ month</label>
-                <div></div>
+                <label className="wrap_text"> kWh/ tháng</label>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  2 - Total amount of renewable energy used in energy consumption per month
+                  2 - Tổng lượng năng lượng tái tạo sử dụng trong năng lượng tiêu thụ mỗi tháng
                 </label>
                 <input
                   type="number"
@@ -205,9 +181,9 @@ export default function EnviroForm() {
                   value={renewenergy}
                   onChange={(e) => setRenewenergy(e.target.value)}
                 />
-                <label className="wrap_text"> kWh/ month</label>
-                <div></div>
-                <label className="form-label">3 - Total amount of water used per month</label>
+                <label className="wrap_text"> kWh/ tháng</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">3 - Tổng lượng nước sử dụng mỗi tháng</label>
                 <input
                   type="number"
                   min="0"
@@ -216,10 +192,10 @@ export default function EnviroForm() {
                   value={water}
                   onChange={(e) => setWater(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> m3/ month</label>
-                <div></div>
+                <label className="wrap_text"> m3/ tháng</label>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  4 - Total amount of recycled or reused water used in water consumption per month
+                  4 - Tổng lượng nước tái chế hoặc tái sử dụng được sử dụng trong lượng nước tiêu thụ mỗi tháng
                 </label>
                 <input
                   type="number"
@@ -229,9 +205,9 @@ export default function EnviroForm() {
                   value={waterrec}
                   onChange={(e) => setWaterrec(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> m3/ month</label>
-                <div></div>
-                <label className="form-label">5 - Total amount of materials other than water used per month</label>
+                <label className="wrap_text"> m3/ tháng</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">5 - Tổng lượng vật liệu ngoài nước sử dụng trong tháng</label>
                 <input
                   type="number"
                   min="0"
@@ -240,10 +216,10 @@ export default function EnviroForm() {
                   value={material}
                   onChange={(e) => setMaterial(e.target.value)}
                 />{" "}
-                <label className="wrap_text">kg/ month</label>
-                <div></div>
+                <label className="wrap_text">kg/ tháng</label>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  6 - Total amount of recycled or reused materials used in material consumption per month
+                  6 - Tổng lượng vật liệu tái chế hoặc tái sử dụng được sử dụng trong tiêu hao vật liệu mỗi tháng
                 </label>
                 <input
                   type="number"
@@ -253,10 +229,10 @@ export default function EnviroForm() {
                   value={materialrec}
                   onChange={(e) => setMaterialrec(e.target.value)}
                 />{" "}
-                <label className="wrap_text">kg/ month</label>
-                <div></div>
+                <label className="wrap_text">kg/ tháng</label>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  7 - Total amount of greenhouse gas emission (CO2, CH4, N2O, HFCs, PFCs, SF6) generated per month
+                  7 - Tổng lượng phát thải khí nhà kính (CO2, CH4, N2O, HFC, PFC, SF6) phát sinh mỗi tháng
                 </label>
                 <input
                   type="number"
@@ -266,9 +242,9 @@ export default function EnviroForm() {
                   value={ghg}
                   onChange={(e) => setGhg(e.target.value)}
                 />
-                <label className="wrap_text"> tonnes of CO2e/ month</label>
-                <div></div>
-                <label className="form-label">8 - Total amount of water pollution generated per month</label>
+                <label className="wrap_text"> tấn of CO2e/ tháng</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">8 - Tổng lượng ô nhiễm nước phát sinh mỗi tháng</label>
                 <input
                   type="number"
                   min="0"
@@ -277,34 +253,34 @@ export default function EnviroForm() {
                   value={waterpol}
                   onChange={(e) => setWaterpol(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> m3/ month</label>
-                <div></div>
-                <label className="form-label">9 - Choose the type(s) of water pollution</label>
+                <label className="wrap_text"> m3/ tháng</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">9 - Chọn (các) loại ô nhiễm nước</label>
                 <input
                   type="checkbox"
                   name="Oil"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
-                <label className="wrap_text"> Oil</label>
+                <label className="wrap_text"> Dầu</label>
                 <input
                   type="checkbox"
                   name="Fuel"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
-                <label className="wrap_text"> Fuel</label>
+                <label className="wrap_text"> Nhiên liệu</label>
                 <input
                   type="checkbox"
                   name="Wastes"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
-                <label className="wrap_text"> Wastes</label>
+                <label className="wrap_text"> Chất thải</label>
                 <input
                   type="checkbox"
                   name="Chemical"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
-                <label className="wrap_text"> Chemical</label>
-                <div></div>
+                <label className="wrap_text"> Hóa chất</label>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">10 - Total amount of land pollution generated per month</label>
                 <input
                   type="number"
@@ -314,35 +290,35 @@ export default function EnviroForm() {
                   value={landpol}
                   onChange={(e) => setLandpol(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> m²/ month</label>
-                <div></div>
-                <label className="form-label">11 - Choose the type(s) of land pollution</label>
+                <label className="wrap_text"> m²/ tháng</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">11 - Chọn (các) loại ô nhiễm đất</label>
                 <input
                   type="checkbox"
                   name="Oil"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setLandpoltype)}
                 />
-                <label className="wrap_text"> Oil</label>
+                <label className="wrap_text"> Dầu</label>
                 <input
                   type="checkbox"
                   name="Fuel"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setLandpoltype)}
                 />
-                <label className="wrap_text"> Fuel</label>
+                <label className="wrap_text"> Nhiên liệu</label>
                 <input
                   type="checkbox"
                   name="Wastes"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setLandpoltype)}
                 />
-                <label className="wrap_text"> Wastes</label>
+                <label className="wrap_text"> Chất thải</label>
                 <input
                   type="checkbox"
                   name="Chemical"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setLandpoltype)}
                 />
-                <label className="wrap_text"> Chemical</label>
-                <div></div>
-                <label className="form-label">12 - Total amount of air emission (NOx, SOx) generated per month</label>
+                <label className="wrap_text"> Hóa chất</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">12 -Tổng lượng khí thải (NOx, SOx) phát sinh mỗi tháng</label>
                 <input
                   type="number"
                   min="0"
@@ -351,10 +327,10 @@ export default function EnviroForm() {
                   value={air}
                   onChange={(e) => setAir(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> tonnes/ month</label>
-                <div></div>
+                <label className="wrap_text"> tấn/ tháng</label>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  13 - Total amount of hazardous materials used per month
+                  13 - Tổng lượng vật liệu nguy hiểm được sử dụng mỗi tháng
                   {/* <AiIcons.AiOutlineQuestionCircle style={{fontSize: "15px", color:"#2F4050"}} /> */}
                 </label>
                 <input
@@ -365,9 +341,9 @@ export default function EnviroForm() {
                   value={hazmat}
                   onChange={(e) => setHazmat(e.target.value)}
                 />{" "}
-                <label className="wrap_text">kg/ month</label>
-                <div></div>
-                <label className="form-label">14 - Total amount of hazardous waste generated per month</label>
+                <label className="wrap_text">kg/ tháng</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">14 - Tổng lượng chất thải nguy hại phát sinh mỗi tháng</label>
                 <input
                   type="number"
                   min="0"
@@ -376,9 +352,9 @@ export default function EnviroForm() {
                   value={hazwaste}
                   onChange={(e) => setHazwaste(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> kg/ month</label>
-                <div></div>
-                <label className="form-label">15 - Total amount of solid waste generated per month</label>
+                <label className="wrap_text"> kg/ tháng</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">15 - Tổng lượng chất thải rắn phát sinh/tháng</label>
                 <input
                   type="number"
                   min="0"
@@ -387,9 +363,9 @@ export default function EnviroForm() {
                   value={solidwaste}
                   onChange={(e) => setSolidwaste(e.target.value)}
                 />{" "}
-                <label className="wrap_text">kg/ month</label>
-                <div></div>
-                <label className="form-label">16 - Total amount of solid waste recycled or reused per month</label>
+                <label className="wrap_text">kg/ tháng</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">16 - Tổng lượng chất thải rắn tái chế, tái sử dụng/tháng</label>
                 <input
                   type="number"
                   min="0"
@@ -398,48 +374,48 @@ export default function EnviroForm() {
                   value={solidwasterec}
                   onChange={(e) => setSolidwasterec(e.target.value)}
                 />{" "}
-                <label className="wrap_text">kg/ month</label>
-                <div></div>
-                <label className="form-label">17 - Choose the type(s) of solid waste destination</label>
-                <div></div>
+                <label className="wrap_text">kg/ tháng</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">17 - Chọn (các) loại điểm đến của chất thải rắn</label>
+                <div className="py-2 w-full"></div>
                 <input
                   type="checkbox"
                   name="Recycling"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
-                <label className="wrap_text"> Recycling</label>
+                <label className="wrap_text"> Tái chế</label>
                 <input
                   type="checkbox"
                   name="Reuse"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
-                <label className="wrap_text"> Reuse</label>
+                <label className="wrap_text"> Tái sử dụng</label>
                 <input
                   type="checkbox"
                   name="Recovery"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
-                <label className="wrap_text"> Recovery</label>
+                <label className="wrap_text"> Sự hồi phục</label>
                 <input
                   type="checkbox"
                   name="Incineration"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
-                <label className="wrap_text"> Incineration</label>
+                <label className="wrap_text"> Thiêu đốt</label>
                 <input
                   type="checkbox"
                   name="Landfilling"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
-                <label className="wrap_text"> Landfilling</label>
+                <label className="wrap_text"> Chôn lấp</label>
                 <input
                   type="checkbox"
                   name="Composting"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
-                <label className="wrap_text"> Composting</label>
-                <div></div>
-                <label className="form-label">18 - Total amount of wastewater generated per month</label>
+                <label className="wrap_text"> Ủ phân</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">18 - Tổng lượng nước thải phát sinh/tháng</label>
                 <input
                   type="number"
                   min="0"
@@ -448,9 +424,9 @@ export default function EnviroForm() {
                   value={waterwaste}
                   onChange={(e) => setWaterwaste(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> m3/ month</label>
-                <div></div>
-                <label className="form-label">19 - Total amount of wastewater recycled or reused per month</label>
+                <label className="wrap_text"> m3/ tháng</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">19 - Tổng lượng nước thải tái chế hoặc tái sử dụng/tháng</label>
                 <input
                   type="number"
                   min="0"
@@ -459,48 +435,48 @@ export default function EnviroForm() {
                   value={waterwasterec}
                   onChange={(e) => setWaterwasterec(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> m3/ month</label>
-                <div></div>
-                <label className="form-label">20 - Choose the type(s) of wastewater destination</label>
-                <div></div>
+                <label className="wrap_text"> m3/ tháng</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">20 - Chọn (các) loại nơi xử lý nước thải</label>
+                <div className="py-2 w-full"></div>
                 <input
                   type="checkbox"
                   name="Recycling"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
-                <label className="wrap_text"> Recycling</label>
+                <label className="wrap_text"> Tái chế</label>
                 <input
                   type="checkbox"
                   name="Reuse"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
-                <label className="wrap_text"> Reuse</label>
+                <label className="wrap_text"> Tái sử dụng</label>
                 <input
                   type="checkbox"
                   name="Recovery"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
-                <label className="wrap_text"> Recovery</label>
+                <label className="wrap_text"> Sự hồi phục</label>
                 <input
                   type="checkbox"
                   name="Incineration"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
-                <label className="wrap_text"> Incineration</label>
+                <label className="wrap_text"> Thiêu đốt</label>
                 <input
                   type="checkbox"
                   name="Landfilling"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
-                <label className="wrap_text"> Landfilling</label>
+                <label className="wrap_text"> Chôn lấp</label>
                 <input
                   type="checkbox"
                   name="Composting"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
-                <label className="wrap_text"> Composting</label>
-                <div></div>
-                <label className="form-label">21 - Total number of products produced per month</label>
+                <label className="wrap_text"> Ủ phân</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">21 - Tổng số sản phẩm sản xuất mỗi tháng</label>
                 <input
                   type="number"
                   min="0"
@@ -508,9 +484,9 @@ export default function EnviroForm() {
                   value={product.join(", ")}
                   onChange={(e) => setProduct(e.target.value.split(", ").map((item) => item.trim()))}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  22 - Total number of products produced that are recyclable or reusable per month
+                  22 -Tổng số sản phẩm được sản xuất có thể tái chế hoặc tái sử dụng mỗi tháng
                 </label>
                 <input
                   type="number"
@@ -519,9 +495,9 @@ export default function EnviroForm() {
                   value={productrec}
                   onChange={(e) => setProductrec(e.target.value)}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  23 - Total number of products produced with eco-friendly packaging and labeling per month
+                  23 - Tổng số sản phẩm được sản xuất bằng bao bì và nhãn mác thân thiện với môi trường mỗi tháng
                 </label>
                 <input
                   type="number"
@@ -530,16 +506,16 @@ export default function EnviroForm() {
                   value={ecolabel}
                   onChange={(e) => setEcolabel(e.target.value)}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
               </div>
             </fieldset>
             <fieldset className="annual-kpi">
-              <legend>Annual KPI Update</legend>
+              <legend>Cập nhật KPI hàng năm</legend>
               <div>
                 <label className="form-label">
-                  1 - Total amount of land owned, leased, or managed for production activities or extractive use
+                  1 - Tổng diện tích đất sở hữu, cho thuê, quản lý để sử dụng cho hoạt động sản xuất, khai thác
                 </label>
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <input
                   type="number"
                   min="0"
@@ -548,9 +524,9 @@ export default function EnviroForm() {
                   onChange={(e) => setLand(e.target.value)}
                 />
                 <label className="wrap_text"> m2</label>
-                <div></div>
-                <label className="form-label">2 - Is there a biodiversity policy?</label>
-                <div></div>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">2 - Có chính sách đa dạng sinh học không?</label>
+                <div className="py-2 w-full"></div>
                 <input
                   type="radio"
                   value="Yes"
@@ -558,7 +534,7 @@ export default function EnviroForm() {
                   checked={bio === "Yes"}
                   onChange={(e) => setBio(e.target.value)}
                 />
-                <label className="wrap_text"> Yes</label>
+                <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
                   value="No"
@@ -566,14 +542,14 @@ export default function EnviroForm() {
                   checked={bio === "No"}
                   onChange={(e) => setBio(e.target.value)}
                 />
-                <label className="wrap_text"> No</label>
-                <div></div>
+                <label className="wrap_text"> Không</label>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  3 - Are there activities and operations on protected and sensitive areas? (e.g., IUCN protected area
-                  categories 1–4, world heritage sites, and biosphere reserves)
+                  3 - Có các hoạt động và hoạt động trên các khu vực được bảo vệ và nhạy cảm không? (ví dụ: khu vực được
+                  bảo vệ của IUCN loại 1–4, di sản thế giới và khu dự trữ sinh quyển)
                   {/* <AiIcons.AiOutlineQuestionCircle style={{fontSize: "15px", color:"#2F4050"}} /> */}
                 </label>
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <input
                   type="radio"
                   value="Yes"
@@ -581,7 +557,7 @@ export default function EnviroForm() {
                   checked={sensitive === "Yes"}
                   onChange={(e) => setSensitive(e.target.value)}
                 />
-                <label className="wrap_text"> Yes</label>
+                <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
                   value="No"
@@ -589,12 +565,10 @@ export default function EnviroForm() {
                   checked={sensitive === "No"}
                   onChange={(e) => setSensitive(e.target.value)}
                 />
-                <label className="wrap_text"> No</label>
-                <div></div>
-                <label className="form-label">
-                  4 - Is there ISO 14000 certification regarding environmental standards?
-                </label>
-                <div></div>
+                <label className="wrap_text"> không</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">4 - Có chứng nhận ISO 14000 về tiêu chuẩn môi trường không?</label>
+                <div className="py-2 w-full"></div>
                 <input
                   type="radio"
                   value="Yes"
@@ -602,7 +576,7 @@ export default function EnviroForm() {
                   checked={envirostand === "Yes"}
                   onChange={(e) => setEnvirostand(e.target.value)}
                 />
-                <label className="wrap_text"> Yes</label>
+                <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
                   value="No"
@@ -610,58 +584,58 @@ export default function EnviroForm() {
                   checked={envirostand === "No"}
                   onChange={(e) => setEnvirostand(e.target.value)}
                 />
-                <label className="wrap_text"> No</label>
-                <div></div>
-                <label className="form-label">5 - Choose the type(s) of clean technology used</label>
-                <div></div>
+                <label className="wrap_text"> Không</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">5 -Chọn (các) loại công nghệ sạch được sử dụng</label>
+                <div className="py-2 w-full"></div>
                 <input
                   type="checkbox"
                   name="Recycling"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
                 />
-                <label className="wrap_text"> Recycling</label>
+                <label className="wrap_text"> Tái chế</label>
                 <input
                   type="checkbox"
                   name="Renewable energy"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
                 />
-                <label className="wrap_text"> Renewable energy</label>
+                <label className="wrap_text"> Năng lượng tái tạo</label>
                 <input
                   type="checkbox"
                   name="Green transportation"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
                 />
-                <label className="wrap_text"> Green transportation</label>
+                <label className="wrap_text"> Giao thông xanh</label>
                 <input
                   type="checkbox"
                   name="Electric motors"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
                 />
-                <label className="wrap_text"> Electric motors</label>
-                <div></div>
+                <label className="wrap_text"> Động cơ điện</label>
+                <div className="py-2 w-full"></div>
                 <input
                   type="checkbox"
                   name="Green chemistry"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
                 />
-                <label className="wrap_text"> Green chemistry</label>
+                <label className="wrap_text">Hóa học xanh</label>
                 <input
                   type="checkbox"
                   name="Green lighting"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
                 />
-                <label className="wrap_text"> Green lighting</label>
+                <label className="wrap_text"> Chiếu sáng xanh</label>
                 <input
                   type="checkbox"
                   name="Grey water"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
                 />
-                <label className="wrap_text"> Grey water</label>
-                <div></div>
+                <label className="wrap_text"> Nước xám</label>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  6 - Total number of suppliers monitored on environmental sustainability per year
+                  6 - Tổng số nhà cung cấp được giám sát về tính bền vững môi trường mỗi năm
                 </label>
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <input
                   type="number"
                   min="0"
@@ -669,9 +643,9 @@ export default function EnviroForm() {
                   value={envirosus}
                   onChange={(e) => setEnvirosus(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">7 - Total number of suppliers per year</label>
-                <div></div>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">7 - Tổng số nhà cung cấp mỗi năm</label>
+                <div className="py-2 w-full"></div>
                 <input
                   type="number"
                   min="0"
@@ -681,10 +655,10 @@ export default function EnviroForm() {
                 />
               </div>
             </fieldset>
-            <div className="center-btn">
-              <button className="btn form-input-LCI" type="submit">
-                Calculate Assessment
-              </button>
+            <div className="flex items-end justify-end">
+              <Button className="btn form-input-LCI !w-[20%] !self-end" type="submit">
+                Gửi
+              </Button>
             </div>
           </div>
         </form>

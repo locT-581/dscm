@@ -46,7 +46,7 @@ export const getAllSupplier = async (): Promise<Supplier[]> => {
       console.log("Error getting documents: ", error);
       return [];
     });
-  return suppliers.filter((s) => s.role != "Focal company");
+  return suppliers;
 };
 
 /**

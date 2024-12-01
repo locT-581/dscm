@@ -8,13 +8,13 @@ import { Contract } from "web3-eth-contract"; // Import kiểu Contract từ Web
 import { OriginAbi } from "@/types/common";
 import getDate from "@/utils/getDate";
 import { monthNumber, months } from "@/utils/const";
+import { useWeb3Store } from "@/stores/storeProvider";
+import { useRouter } from "next/navigation";
+import Button from "@/UI/Button";
 
 const SocialForm = () => {
-  const web3instance = useRef<Web3 | null>(null);
+  const { assessmentContract, account, socials, getSocials } = useWeb3Store((state) => state);
 
-  const [contract, setContract] = useState<Contract<OriginAbi> | undefined>();
-  const [account, setAccount] = useState<string>("");
-  const [socialCount, setSocialCount] = useState<number>(0);
   const [date, setDate] = useState("");
   const [d, setD] = useState("");
 
@@ -70,45 +70,12 @@ const SocialForm = () => {
   const [leaks, setLeaks] = useState("");
   const [cuscomp, setCuscomp] = useState("");
 
-  useEffect(() => {
-    const loadWeb3 = async () => {
-      if (window.ethereum) {
-        web3instance.current = new Web3(window.ethereum);
-        window.ethereum.request({ method: "eth_requestAccounts" });
-      }
-      if (window.web3) {
-        window.web3 = new Web3(window.web3.currentProvider);
-      } else {
-        window.alert("Please use Metamask!");
-      }
-    };
-    loadWeb3();
-  }, []);
-
-  useEffect(() => {
-    const loadBlockchainData = async () => {
-      const web3 = window.web3;
-      const accounts = await web3.eth.getAccounts();
-      setAccount(accounts[0]);
-      const networkId = await web3.eth.net.getId();
-      const networkData = Assessment.networks[networkId as unknown as keyof typeof Assessment.networks];
-      if (networkData) {
-        //Fetch contract
-        const contract = new web3.eth.Contract(Assessment.abi, networkData.address);
-        setContract(contract);
-        const socialCount = await contract.methods.socialCount().call();
-        setSocialCount(socialCount);
-      } else {
-        window.alert("Assessment contract is not deployed to the detected network");
-      }
-    };
-    loadBlockchainData();
-  }, []);
-
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    if (!!!socials || !account) return;
+
     e.preventDefault();
     const socialForm = {
-      id: (parseInt(socialCount.toString()) + 1).toString(),
+      id: (+1).toString(),
       trainh: trainh,
       trainemp: trainemp,
       emp: emp,
@@ -160,7 +127,7 @@ const SocialForm = () => {
     };
     const document = JSON.stringify(socialForm);
     setD("now");
-    await addSocial({ date, document, month, year });
+    addSocial({ date, document, month, year });
   };
 
   useEffect(() => {
@@ -180,6 +147,7 @@ const SocialForm = () => {
     }
   };
 
+  const router = useRouter();
   const addSocial = ({
     date,
     document,
@@ -191,11 +159,12 @@ const SocialForm = () => {
     month: string;
     year: string;
   }) => {
-    contract?.methods
+    assessmentContract?.methods
       .addSocial(date, document, month, year)
       .send({ from: account })
       .once("receipt", () => {
-        // window.location.assign("http://localhost:3000/assessments");
+        getSocials();
+        router.push("/danh-gia");
       });
   };
 
@@ -212,17 +181,24 @@ const SocialForm = () => {
       <div className="LCI-container">
         <form className="LCI-form" onSubmit={onSubmit}>
           <div>
-            <h3>Social Sustainability Assessment</h3>
-            <div className="center">
-              <div>
-                <label>Select Month/ Year</label>
-                <input type="month" required value={monthYear} onChange={(e) => setMonthYear(e.target.value)} />
+            <div className="flex flex-col gap-2 mb-6">
+              <h3 className="text-2xl font-semibold mb-6">Biểu mẫu đánh giá Tính bền vững xã hội</h3>
+              <div className="flex justify-end gap-2 items-center pr-4">
+                <label>Chọn Tháng/Năm</label>
+                <input
+                  type="month"
+                  lang="vi"
+                  required
+                  value={monthYear}
+                  onChange={(e) => setMonthYear(e.target.value)}
+                />
               </div>
             </div>
+
             <fieldset className="monthly-kpi">
-              <legend>Monthly KPI Update</legend>
+              <legend>Cập nhật KPI hàng tháng</legend>
               <div className="center-form-input">
-                <label className="form-label">1 - Total number of employees</label>
+                <label className="form-label">1 - Tổng số nhân viên</label>
                 <input
                   type="number"
                   min="0"
@@ -230,8 +206,8 @@ const SocialForm = () => {
                   value={emp}
                   onChange={(e) => setEmp(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">2 - Total number of full-time employees</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">2 - Tổng số nhân viên toàn thời gian</label>
                 <input
                   type="number"
                   min="0"
@@ -239,9 +215,9 @@ const SocialForm = () => {
                   value={fullemp}
                   onChange={(e) => setFullemp(e.target.value)}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  3 - Average weekly contractual working hours per full-time employee per month
+                  3 - Số giờ làm việc theo hợp đồng trung bình hàng tuần của mỗi nhân viên toàn thời gian mỗi tháng
                 </label>
                 <input
                   type="number"
@@ -251,8 +227,10 @@ const SocialForm = () => {
                   value={workh}
                   onChange={(e) => setWorkh(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">4 - Average weekly overtime hours per employee per month</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">
+                  4 - Số giờ làm thêm trung bình hàng tuần của mỗi nhân viên mỗi tháng
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -261,8 +239,8 @@ const SocialForm = () => {
                   value={overtimeh}
                   onChange={(e) => setOvertimeh(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">5 - Average employee wage</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">5 - Lương trung bình của nhân viên</label>
                 <input
                   type="number"
                   min="0"
@@ -272,8 +250,10 @@ const SocialForm = () => {
                   onChange={(e) => setEmpwage(e.target.value)}
                 />{" "}
                 <label className="wrap_text"> TL</label>
-                <div></div>
-                <label className="form-label">6 - Total number of full-time employees earning below minimum wage</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">
+                  6 - Tổng số nhân viên toàn thời gian có thu nhập dưới mức lương tối thiểu
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -281,10 +261,10 @@ const SocialForm = () => {
                   value={minwage}
                   onChange={(e) => setMinwage(e.target.value)}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  7 - Total number of employees entitled for health insurance, parental leave, unemployment, disability
-                  and invalidity coverage, retirement provision
+                  7 -Tổng số lao động được hưởng bảo hiểm y tế, nghỉ thai sản, thất nghiệp, tàn tật và bảo hiểm tàn tật,
+                  điều khoản hưu trí
                 </label>
                 <input
                   type="number"
@@ -293,8 +273,8 @@ const SocialForm = () => {
                   value={insurance}
                   onChange={(e) => setInsurance(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">8 - Average female employee wage</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">8 - Mức lương trung bình của lao động nữ</label>
                 <input
                   type="number"
                   min="0"
@@ -304,8 +284,8 @@ const SocialForm = () => {
                   onChange={(e) => setFemwage(e.target.value)}
                 />{" "}
                 <label className="wrap_text"> TL</label>
-                <div></div>
-                <label className="form-label">9 - Average male employee wage</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">9 - Mức lương trung bình của nhân viên nam</label>
                 <input
                   type="number"
                   min="0"
@@ -315,8 +295,8 @@ const SocialForm = () => {
                   onChange={(e) => setMalwage(e.target.value)}
                 />{" "}
                 <label className="wrap_text"> TL</label>
-                <div></div>
-                <label className="form-label">10 - Total number of female employees</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">10 - Tổng số lao động nữ</label>
                 <input
                   type="number"
                   min="0"
@@ -324,8 +304,8 @@ const SocialForm = () => {
                   value={fem}
                   onChange={(e) => setFem(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">11 - Total number of male employees</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">11 - Tổng số nhân viên nam</label>
                 <input
                   type="number"
                   min="0"
@@ -333,8 +313,8 @@ const SocialForm = () => {
                   value={male}
                   onChange={(e) => setMale(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">12 - Total number of disabled employees</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">12 - Tổng số nhân viên khuyết tật</label>
                 <input
                   type="number"
                   min="0"
@@ -342,8 +322,8 @@ const SocialForm = () => {
                   value={disabled}
                   onChange={(e) => setDisabled(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">13 - Total number of minority employees</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">13 - Tổng số lao động thiểu số</label>
                 <input
                   type="number"
                   min="0"
@@ -351,8 +331,8 @@ const SocialForm = () => {
                   value={minority}
                   onChange={(e) => setMinority(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">14 - Total number of older employees</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">14 - Tổng số nhân viên lớn tuổi</label>
                 <input
                   type="number"
                   min="0"
@@ -360,8 +340,8 @@ const SocialForm = () => {
                   value={older}
                   onChange={(e) => setOlder(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">15- Total number of local employees</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">15- Tổng số lao động địa phương</label>
                 <input
                   type="number"
                   min="0"
@@ -369,8 +349,8 @@ const SocialForm = () => {
                   value={localemp}
                   onChange={(e) => setLocalemp(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">16 - Total number of local suppliers</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">16 - Tổng số nhà cung cấp địa phương</label>
                 <input
                   type="number"
                   min="0"
@@ -378,8 +358,8 @@ const SocialForm = () => {
                   value={localsup}
                   onChange={(e) => setLocalsup(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">17 - Total number of suppliers</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">17 - Tổng số nhà cung cấp</label>
                 <input
                   type="number"
                   min="0"
@@ -387,8 +367,8 @@ const SocialForm = () => {
                   value={suppliers}
                   onChange={(e) => setSuppliers(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">18 - Total number of products and services</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">18 - Tổng số sản phẩm và dịch vụ</label>
                 <input
                   type="number"
                   min="0"
@@ -396,8 +376,8 @@ const SocialForm = () => {
                   value={product}
                   onChange={(e) => setProduct(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">19 - Total number of customer complaints per month</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">19 - Tổng số khiếu nại của khách hàng mỗi tháng</label>
                 <input
                   type="number"
                   min="0"
@@ -405,13 +385,13 @@ const SocialForm = () => {
                   value={cuscomp}
                   onChange={(e) => setCuscomp(e.target.value)}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
               </div>
             </fieldset>
             <fieldset className="annual-kpi">
-              <legend>Annual KPI Update</legend>
+              <legend>Cập nhật KPI hàng năm</legend>
               <div className="center-form-input">
-                <label className="form-label">1 - Total number of training hours provided to employees per year</label>
+                <label className="form-label">1 - Tổng số giờ đào tạo cho nhân viên mỗi năm</label>
                 <input
                   type="number"
                   min="0"
@@ -420,7 +400,7 @@ const SocialForm = () => {
                   value={trainh}
                   onChange={(e) => setTrainh(e.target.value)}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">2 - Total number of trained employees per year</label>
                 <input
                   type="number"
@@ -429,7 +409,7 @@ const SocialForm = () => {
                   value={trainemp}
                   onChange={(e) => setTrainemp(e.target.value)}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
                   3 - Total number of employees who resigned or have been made redundant per year
                 </label>
@@ -440,8 +420,8 @@ const SocialForm = () => {
                   value={resemp}
                   onChange={(e) => setResemp(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">4 - Total number of hired employees per year</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">4 - Tổng số lao động được tuyển dụng/năm</label>
                 <input
                   type="number"
                   min="0"
@@ -449,10 +429,8 @@ const SocialForm = () => {
                   value={hiredemp}
                   onChange={(e) => setHiredemp(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">
-                  5 - Total number of female employees in board of director and management positions
-                </label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">5 -Tổng số lao động nữ giữ các chức vụ trong HĐQT và quản lý</label>
                 <input
                   type="number"
                   min="0"
@@ -460,10 +438,8 @@ const SocialForm = () => {
                   value={femboard}
                   onChange={(e) => setFemboard(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">
-                  6 - Total number of employees in board of director and management positions
-                </label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">6 - Tổng số nhân sự trong HĐQT và các chức vụ quản lý</label>
                 <input
                   type="number"
                   min="0"
@@ -471,11 +447,11 @@ const SocialForm = () => {
                   value={empboard}
                   onChange={(e) => setEmpboard(e.target.value)}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
                   {"7 - Choose the external certification(s) regarding social standards and supplier's code of conduct"}
                 </label>
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <input
                   name="ISO26000"
                   onChange={(e) => handleChange(e.target.name, e.target.checked)}
@@ -484,11 +460,11 @@ const SocialForm = () => {
                 <label className="wrap_text"> ISO26000</label>
                 <input name="SA8000" onChange={(e) => handleChange(e.target.name, e.target.checked)} type="checkbox" />
                 <label className="wrap_text"> SA8000</label>
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  8 - Is there compliance with ILO Guidelines for Occupational Health Management Systems?
+                  8 -Có tuân thủ Hướng dẫn của ILO về Hệ thống Quản lý Sức khỏe Nghề nghiệp không?
                 </label>
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <input
                   type="radio"
                   value="Yes"
@@ -496,7 +472,7 @@ const SocialForm = () => {
                   checked={ilo === "Yes"}
                   onChange={(e) => setIlo(e.target.value)}
                 />
-                <label className="wrap_text"> Yes</label>
+                <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
                   value="No"
@@ -504,10 +480,10 @@ const SocialForm = () => {
                   checked={ilo === "No"}
                   onChange={(e) => setIlo(e.target.value)}
                 />
-                <label className="wrap_text"> No</label>
-                <div></div>
-                <label className="form-label">9 - Is there fire-fighting equipment and emergency exits?</label>
-                <div></div>
+                <label className="wrap_text"> Không</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">9 - Có thiết bị chữa cháy và lối thoát hiểm không?</label>
+                <div className="py-2 w-full"></div>
                 <input
                   type="radio"
                   value="Yes"
@@ -515,7 +491,7 @@ const SocialForm = () => {
                   checked={fire === "Yes"}
                   onChange={(e) => setFire(e.target.value)}
                 />
-                <label className="wrap_text"> Yes</label>
+                <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
                   value="No"
@@ -523,10 +499,10 @@ const SocialForm = () => {
                   checked={fire === "No"}
                   onChange={(e) => setFire(e.target.value)}
                 />
-                <label className="wrap_text"> No</label>
-                <div></div>
-                <label className="form-label">10 - Is there provision of medical assistance and first aid?</label>
-                <div></div>
+                <label className="wrap_text"> Không</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">10 - Có cung cấp hỗ trợ y tế và sơ cứu không?</label>
+                <div className="py-2 w-full"></div>
                 <input
                   type="radio"
                   value="Yes"
@@ -534,7 +510,7 @@ const SocialForm = () => {
                   checked={medical === "Yes"}
                   onChange={(e) => setMedical(e.target.value)}
                 />
-                <label className="wrap_text"> Yes</label>
+                <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
                   value="No"
@@ -542,10 +518,10 @@ const SocialForm = () => {
                   checked={medical === "No"}
                   onChange={(e) => setMedical(e.target.value)}
                 />
-                <label className="wrap_text"> No</label>
-                <div></div>
-                <label className="form-label">11 - Is there access to water and sanitation?</label>
-                <div></div>
+                <label className="wrap_text"> Không</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">11 - Có được tiếp cận với nước và vệ sinh không?</label>
+                <div className="py-2 w-full"></div>
                 <input
                   type="radio"
                   value="Yes"
@@ -553,7 +529,7 @@ const SocialForm = () => {
                   checked={sanitation === "Yes"}
                   onChange={(e) => setSanitation(e.target.value)}
                 />
-                <label className="wrap_text"> Yes</label>
+                <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
                   value="No"
@@ -561,10 +537,10 @@ const SocialForm = () => {
                   checked={sanitation === "No"}
                   onChange={(e) => setSanitation(e.target.value)}
                 />
-                <label className="wrap_text"> No</label>
-                <div></div>
-                <label className="form-label">12 - Is there provision of protective gear?</label>
-                <div></div>
+                <label className="wrap_text"> Không</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">12 - Có cung cấp đồ bảo hộ không?</label>
+                <div className="py-2 w-full"></div>
                 <input
                   type="radio"
                   value="Yes"
@@ -572,7 +548,7 @@ const SocialForm = () => {
                   checked={gear === "Yes"}
                   onChange={(e) => setGear(e.target.value)}
                 />
-                <label className="wrap_text"> Yes</label>
+                <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
                   value="No"
@@ -580,9 +556,9 @@ const SocialForm = () => {
                   checked={gear === "No"}
                   onChange={(e) => setGear(e.target.value)}
                 />
-                <label className="wrap_text"> No</label>
-                <div></div>
-                <label className="form-label">13 - Total number of work accidents per year</label>
+                <label className="wrap_text"> Không</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">13 -Tổng số vụ tai nạn lao động mỗi năm</label>
                 <input
                   type="number"
                   min="0"
@@ -590,9 +566,9 @@ const SocialForm = () => {
                   value={workacc}
                   onChange={(e) => setWorkacc(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">14 - Are there union(s) within the organization?</label>
-                <div></div>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">14 - Có (các) công đoàn trong tổ chức không?</label>
+                <div className="py-2 w-full"></div>
                 <input
                   type="radio"
                   value="Yes"
@@ -600,7 +576,7 @@ const SocialForm = () => {
                   checked={union === "Yes"}
                   onChange={(e) => setUnion(e.target.value)}
                 />
-                <label className="wrap_text"> Yes</label>
+                <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
                   value="No"
@@ -608,9 +584,9 @@ const SocialForm = () => {
                   checked={union === "No"}
                   onChange={(e) => setUnion(e.target.value)}
                 />
-                <label className="wrap_text"> No</label>
-                <div></div>
-                <label className="form-label">15 - Total number of employees joined to labor unions</label>
+                <label className="wrap_text"> Không</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">15 -Tổng số lao động tham gia công đoàn</label>
                 <input
                   type="number"
                   min="0"
@@ -618,9 +594,9 @@ const SocialForm = () => {
                   value={empunion}
                   onChange={(e) => setEmpunion(e.target.value)}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  16 - Total number of employees covered by collective bargaining agreements
+                  16 - Tổng số nhân viên được bảo vệ bởi các thỏa thuận thương lượng tập thể
                 </label>
                 <input
                   type="number"
@@ -629,10 +605,10 @@ const SocialForm = () => {
                   value={bargain}
                   onChange={(e) => setBargain(e.target.value)}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  17 - Total number of discrimination incidents in terms of race, gender, sexual orientation, religion,
-                  disability, and age per year
+                  17 - Tổng số vụ việc phân biệt đối xử về chủng tộc, giới tính, khuynh hướng tình dục, tôn giáo, khuyết
+                  tật và tuổi mỗi năm
                 </label>
                 <input
                   type="number"
@@ -641,8 +617,8 @@ const SocialForm = () => {
                   value={discri}
                   onChange={(e) => setDiscri(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">18 - Total number of child labor</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">18 -Tổng số lao động trẻ em</label>
                 <input
                   type="number"
                   min="0"
@@ -650,8 +626,8 @@ const SocialForm = () => {
                   value={child}
                   onChange={(e) => setChild(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">19 - Total number of forced labor</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">19 -Tổng số lao động cưỡng bức</label>
                 <input
                   type="number"
                   min="0"
@@ -659,10 +635,8 @@ const SocialForm = () => {
                   value={forced}
                   onChange={(e) => setForced(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">
-                  20 - Total number of incidents of violating the rights of indigenous people per year
-                </label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">20 -Tổng số vụ vi phạm quyền lợi của người bản địa mỗi năm</label>
                 <input
                   type="number"
                   min="0"
@@ -670,8 +644,8 @@ const SocialForm = () => {
                   value={indig}
                   onChange={(e) => setIndig(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">21 - Total amount of money donated to charity per year</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">21 - Tổng số tiền quyên góp từ thiện mỗi năm</label>
                 <input
                   type="number"
                   min="0"
@@ -681,8 +655,8 @@ const SocialForm = () => {
                   onChange={(e) => setDonation(e.target.value)}
                 />{" "}
                 <label className="wrap_text"> TL</label>
-                <div></div>
-                <label className="form-label">22 - Total amount of pre-tax earnings per year</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">22 -Tổng thu nhập trước thuế mỗi năm</label>
                 <input
                   type="number"
                   min="0"
@@ -692,8 +666,8 @@ const SocialForm = () => {
                   onChange={(e) => setEarning(e.target.value)}
                 />{" "}
                 <label className="wrap_text"> TL</label>
-                <div></div>
-                <label className="form-label">23 - Total number of incidents of corruption per year</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">23 - Tổng số vụ tham nhũng mỗi năm</label>
                 <input
                   type="number"
                   min="0"
@@ -701,9 +675,9 @@ const SocialForm = () => {
                   value={corrup}
                   onChange={(e) => setCorrup(e.target.value)}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  24 - Total number of legal actions pending or completed regarding anti-competitive behavior per year
+                  24 - Tổng số vụ kiện đang chờ xử lý hoặc đã hoàn thành liên quan đến hành vi phản cạnh tranh mỗi năm
                 </label>
                 <input
                   type="number"
@@ -712,9 +686,9 @@ const SocialForm = () => {
                   value={anticomp}
                   onChange={(e) => setAnticomp(e.target.value)}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  25 - Total number of suppliers monitored on social sustainability per year
+                  25 -Tổng số nhà cung cấp được theo dõi về tính bền vững xã hội mỗi năm
                 </label>
                 <input
                   type="number"
@@ -723,9 +697,9 @@ const SocialForm = () => {
                   value={socialsus}
                   onChange={(e) => setSocialsus(e.target.value)}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  26 - Total number of products and services for which health and safety impacts are assessed
+                  26 - Tổng số sản phẩm và dịch vụ được đánh giá tác động đến sức khỏe và an toàn
                 </label>
                 <input
                   type="number"
@@ -734,9 +708,9 @@ const SocialForm = () => {
                   value={productassess}
                   onChange={(e) => setProductassess(e.target.value)}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  27 - Total number of health and safety incidents concerning products and services per year
+                  27 - Tổng số sự cố về sức khỏe và an toàn liên quan đến sản phẩm và dịch vụ mỗi năm
                 </label>
                 <input
                   type="number"
@@ -745,8 +719,8 @@ const SocialForm = () => {
                   value={productincident}
                   onChange={(e) => setProductincident(e.target.value)}
                 />
-                <div></div>
-                <label className="form-label">28 - Total number of customer privacy complaints per year</label>
+                <div className="py-2 w-full"></div>
+                <label className="form-label">28 - Tổng số khiếu nại về quyền riêng tư của khách hàng mỗi năm</label>
                 <input
                   type="number"
                   min="0"
@@ -754,9 +728,9 @@ const SocialForm = () => {
                   value={privacy}
                   onChange={(e) => setPrivacy(e.target.value)}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  29 - Total number of leaks, thefts, or losses of customer data per year
+                  29 - Tổng số lần rò rỉ, đánh cắp hoặc mất dữ liệu khách hàng mỗi năm
                 </label>
                 <input
                   type="number"
@@ -765,13 +739,13 @@ const SocialForm = () => {
                   value={leaks}
                   onChange={(e) => setLeaks(e.target.value)}
                 />
-                <div></div>
+                <div className="py-2 w-full"></div>
               </div>
             </fieldset>
-            <div className="center-btn">
-              <button className="btn form-input-LCI" type="submit">
-                Calculate Assessment
-              </button>
+            <div className="flex items-end justify-end">
+              <Button className="btn form-input-LCI !w-[20%] !self-end" type="submit">
+                Gửi
+              </Button>
             </div>
           </div>
         </form>

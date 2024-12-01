@@ -1,32 +1,34 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Web3 from "web3";
+import { useEffect, useState } from "react";
+import Select from "react-select";
+import makeAnimated from "react-select/animated";
 
 import getDate from "@/utils/getDate";
 import { monthNumber, months } from "@/utils/const";
 
-import { Contract } from "web3-eth-contract"; // Import kiểu Contract từ Web3.js
-import { OriginAbi } from "@/types/common";
-import Product, { ProductBlockChain } from "@/types/product";
-import { Assessment, Origin } from "@/lib/abis";
+import Product from "@/types/product";
+import { useWeb3Store } from "@/stores/storeProvider";
+import { useRouter } from "next/navigation";
+import Process from "@/types/process";
+import Button from "@/UI/Button";
 
 export default function LCIForm() {
-  const web3instance = useRef<Web3 | null>(null);
+  const animatedComponents = makeAnimated();
+  const router = useRouter();
+  const { account, LCIs, getCLIs, products, assessmentContract } = useWeb3Store((state) => state);
 
-  const [contract, setContract] = useState<Contract<OriginAbi> | undefined>();
-  const [account, setAccount] = useState<string>("");
-  const [LCICount, setLCICount] = useState<number>(0);
   const [date, setDate] = useState("");
   const [d, setD] = useState("");
-  const [products, setProducts] = useState<Product[]>([]);
   const [product, setProduct] = useState<Product | undefined>();
-  const [process, setProcess] = useState("");
+
+  const [process, setProcess] = useState<Process | undefined>(undefined);
+
   const [monthYear, setMonthYear] = useState("");
   const [month, setMonth] = useState("");
   const [year, setYear] = useState("");
   const [energy, setEnergy] = useState("");
-  const [batch, setBatch] = useState("");
+  const [lô, setlô] = useState("");
   const [renewenergy, setRenewenergy] = useState("");
   const [water, setWater] = useState("");
   const [waterrec, setWaterrec] = useState("");
@@ -50,54 +52,6 @@ export default function LCIForm() {
   const [ecolabel, setEcolabel] = useState("");
 
   useEffect(() => {
-    if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
-      web3instance.current = new Web3(window.ethereum);
-      window.ethereum.request({ method: "eth_requestAccounts" });
-    } else if (window.web3) {
-      window.web3 = new Web3(window.web3.currentProvider);
-    } else {
-      console.log("Please install MetaMask!");
-    }
-  }, []);
-
-  useEffect(() => {
-    const loadBlockchainData = async () => {
-      if (!web3instance.current) return;
-      const accounts = await web3instance.current.eth.getAccounts();
-      setAccount(accounts[0]);
-      const networkId = await web3instance.current.eth.net.getId();
-      const networkData = Assessment.networks[networkId as unknown as keyof typeof Assessment.networks];
-      const networkDataO = Origin.networks[networkId as unknown as keyof typeof Origin.networks];
-
-      if (networkData) {
-        //Fetch contract
-        const contract = new web3instance.current.eth.Contract(Assessment.abi, networkData.address);
-        setContract(contract);
-        const LCICount: number = await contract.methods.LCICount().call();
-        setLCICount(LCICount);
-        const contractO = new web3instance.current.eth.Contract(Origin.abi, networkDataO.address);
-        const productCount: number = await contractO.methods.productCount().call();
-
-        //Load products
-        for (let i = 1; i <= productCount; i++) {
-          const newProduct: ProductBlockChain = await contractO.methods.products(i).call();
-          setProducts((products) => [
-            ...products,
-            {
-              ...newProduct,
-              id: Number(newProduct.id).toString(),
-              process: JSON.parse(newProduct.process),
-            } as Product,
-          ]);
-        }
-      } else {
-        window.alert("Assessment contract is not deployed to the detected network");
-      }
-    };
-    loadBlockchainData();
-  }, []);
-
-  useEffect(() => {
     const date = getDate();
     setDate(date);
     getMonth();
@@ -116,10 +70,12 @@ export default function LCIForm() {
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!!!LCIs || !!!process) return;
+
     const LCIForm = {
-      id: (parseInt((Number(LCICount) ?? 0).toString()) + 1).toString(),
+      id: LCIs.length + 1,
       product: product?.id,
-      batch: batch,
+      lô: lô,
       energy: energy,
       renewenergy: renewenergy,
       water: water,
@@ -145,7 +101,7 @@ export default function LCIForm() {
     };
     const document = JSON.stringify(LCIForm);
     setD("now");
-    addLCI({ date, document, month, year, process });
+    addLCI({ date, document, month, year, process: process?.id });
   };
 
   const addLCI = ({
@@ -161,11 +117,12 @@ export default function LCIForm() {
     year: string;
     process: string;
   }) => {
-    contract?.methods
+    assessmentContract?.methods
       .addLCI(date, document, month, year, process)
       .send({ from: account })
       .once("receipt", () => {
-        window.location.assign("http://localhost:3000/assessments");
+        getCLIs();
+        // router.push("/danh-gia");
       });
   };
 
@@ -179,61 +136,71 @@ export default function LCIForm() {
 
   return (
     <div>
-      <div className="LCI-container text-black">
+      <div className="LCI-container ">
         <form className="LCI-form" onSubmit={onSubmit}>
           <div>
-            <h3>Chu kì hàng tồn kho</h3>
-            <div className="center">
-              <div>
-                <label>Lựa chọn tháng/năm</label>
-                <input type="month" value={monthYear} onChange={(e) => setMonthYear(e.target.value)} />
+            <h3 className="text-2xl font-semibold mb-6">Biểu mẫu đánh giá Vòng đời sản phẩm</h3>
+
+            <div className="center w-full flex justify-between mb-6 items-start">
+              <div className="w-1/2 flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <label className="!text-base font-semibold ">Sản phẩm</label>
+                  <Select
+                    placeholder="Chọn sản phẩm"
+                    className="!z-[999] w-3/4"
+                    required
+                    closeMenuOnSelect={true}
+                    components={animatedComponents}
+                    onChange={(e) => {
+                      setProduct(products?.find((p) => p.id === (e as { value: string; label: string })?.value));
+                    }}
+                    options={products?.map((p) => ({ value: p.id, label: p.name })).filter(Boolean)}
+                  />
+                </div>
+                {product && (
+                  <div>
+                    <label className="!text-base font-semibold">Quy trình sản xuất</label>
+                    <Select
+                      placeholder="Chọn quy trình sản xuất"
+                      className="!z-[99] w-3/4"
+                      required
+                      closeMenuOnSelect={true}
+                      components={animatedComponents}
+                      onChange={(e) => {
+                        setProcess(
+                          product?.process?.find((p) => p.id === (e as { value: string; label: string })?.value)
+                        );
+                      }}
+                      options={product.process?.map((p) => ({ value: p.id, label: p.name })).filter(Boolean)}
+                    />
+                  </div>
+                )}
               </div>
-              <div>
-                <label>Lựa chọn sản phẩm</label>
-                <select
-                  value={product?.name ?? ""}
-                  onChange={(e) => setProduct(products.find((p) => p.id == e.target.value))}
-                >
-                  <option value="" disabled hidden></option>
-                  {products.map((product, key) => {
-                    return (
-                      <option key={key} value={product.id}>
-                        {product.name}{" "}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-              <div>
-                <label>Lựa chọn quy trình sản xuất</label>
-                <select value={process} onChange={(e) => setProcess(e.target.value)}>
-                  <option value="" disabled hidden></option>
-                  {!!product
-                    ? product.process.map((process, i) => (
-                        <option key={i} value={process}>
-                          {product.process}{" "}
-                        </option>
-                      ))
-                    : null}
-                </select>
+
+              <div className="w-1/2 flex items-center gap-2">
+                <label className="!text-base font-semibold">Tháng/năm</label>
+                <input required type="month" value={monthYear} onChange={(e) => setMonthYear(e.target.value)} />
               </div>
             </div>
+
             <fieldset className="monthly-kpi">
               <legend>Cập nhật thông tin vòng đời sản phẩm</legend>
-              <div className="center-form-input">
+              <div className="">
                 <label>1 - Tổng số sản phẩm trong một lô sản phẩm</label>
                 <input
-                  type="number"
                   required
+                  type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   step=".001"
-                  value={batch}
-                  onChange={(e) => setBatch(e.target.value)}
+                  value={lô}
+                  onChange={(e) => setlô(e.target.value)}
                 />
-                <div></div>
+                <label className="wrap_text">{product?.unit.name}</label>
+                <div className="w-full my-2"></div>
                 <label>2 - Tổng số năng lượng sử dụng cho mỗi lô sản phẩm</label>
                 <input
+                  required
                   type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
@@ -242,31 +209,12 @@ export default function LCIForm() {
                   onChange={(e) => setEnergy(e.target.value)}
                 />
                 <label className="wrap_text"> kWh/Lô</label>
-                <div></div>
-                {/* <label>
-                4- Choose the type(s) of renewable energy used in the product production
-                </label>
-                <div></div> 
-                    <input 
-                        name = "Solar energy" onChange={(e) => handleChange(e.target.name, e.target.checked)}
-                        type="checkbox" /><label className="wrap_text"> Solar energy</label> 
-                    <input 
-                        name = "Hydropower" onChange={(e) => handleChange(e.target.name, e.target.checked)}
-                        type="checkbox"/><label className="wrap_text"> Hydropower</label> 
-                    <input 
-                        name = "Wind energy" onChange={(e) => handleChange(e.target.name, e.target.checked)}
-                        type="checkbox"/><label className="wrap_text"> Wind energy</label>
-                    <input 
-                        name = "Biomass" onChange={(e) => handleChange(e.target.name, e.target.checked)}
-                        type="checkbox"/><label className="wrap_text"> Biomass</label> 
-                    <input 
-                        name = "Geothermal energy" onChange={(e) => handleChange(e.target.name, e.target.checked)}
-                        type="checkbox"/><label className="wrap_text"> Geothermal energy</label> 
-            <div></div>  */}
+                <div className="w-full my-2"></div>
                 <label>
                   3 - Công suất năng lượng tái tạo được sử dụng trong tiêu thụ năng lượng cho mỗi lô sản phẩm.
                 </label>
                 <input
+                  required
                   type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
@@ -275,9 +223,10 @@ export default function LCIForm() {
                   onChange={(e) => setRenewenergy(e.target.value)}
                 />{" "}
                 <label className="wrap_text"> kWh/Lô</label>
-                <div></div>
+                <div className="w-full my-2"></div>
                 <label>4 - Tổng lượng nước đã sử dụng cho mỗi lô sản phẩm. </label>
                 <input
+                  required
                   type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
@@ -286,11 +235,12 @@ export default function LCIForm() {
                   onChange={(e) => setWater(e.target.value)}
                 />{" "}
                 <label className="wrap_text"> m3/Lô</label>
-                <div></div>
+                <div className="w-full my-2"></div>
                 <label>
                   5 - Tổng lượng nước tái chế hoặc tái sử dụng được sử dụng trong lượng nước tiêu thụ mỗi lô sản phẩm
                 </label>
                 <input
+                  required
                   type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
@@ -299,9 +249,10 @@ export default function LCIForm() {
                   onChange={(e) => setWaterrec(e.target.value)}
                 />{" "}
                 <label className="wrap_text"> m3/Lô</label>
-                <div></div>
+                <div className="w-full my-2"></div>
                 <label>6 - Tổng lượng vật liệu không phải nước sử dụng cho mỗi lô sản phẩm.</label>
                 <input
+                  required
                   type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
@@ -309,10 +260,11 @@ export default function LCIForm() {
                   value={material}
                   onChange={(e) => setMaterial(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> kg/ batch</label>
-                <div></div>
+                <label className="wrap_text"> kg/ lô</label>
+                <div className="w-full my-2"></div>
                 <label>7 - Tổng lượng vật liệu tái chế hoặc tái sử dụng được sử dụng trong mỗi lô</label>
                 <input
+                  required
                   type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
@@ -320,10 +272,11 @@ export default function LCIForm() {
                   value={materialrec}
                   onChange={(e) => setMaterialrec(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> kg/ batch</label>
-                <div></div>
-                <label>8 - Tổng lượng phát thải khí nhà kính (CO2, CH4, N2O, HFC, PFC, SF6) được tạo ra mỗi mẻ</label>
+                <label className="wrap_text"> kg/ lô</label>
+                <div className="w-full my-2"></div>
+                <label>8 - Tổng lượng phát thải khí nhà kính (CO2, CH4, N2O, HFC, PFC, SF6) được tạo ra mỗi lô</label>
                 <input
+                  required
                   type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
@@ -331,10 +284,11 @@ export default function LCIForm() {
                   value={ghg}
                   onChange={(e) => setGhg(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> tonnes of CO2e/ batch</label>
-                <div></div>
-                <label>9 - Tổng lượng ô nhiễm nước phát sinh mỗi mẻ</label>
+                <label className="wrap_text"> tấn CO2e/ lô</label>
+                <div className="w-full my-2"></div>
+                <label>9 - Tổng lượng ô nhiễm nước phát sinh mỗi lô</label>
                 <input
+                  required
                   type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
@@ -342,9 +296,9 @@ export default function LCIForm() {
                   value={waterpol}
                   onChange={(e) => setWaterpol(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> m3/ batch</label>
-                <div></div>
-                <label className="form-label">10 - Chọn (các) loại ô nhiễm nước cho mỗi mẻ</label>
+                <label className="wrap_text"> m3/ lô</label>
+                <div className="w-full my-2"></div>
+                <label className="form-label">10 - Chọn (các) loại ô nhiễm nước cho mỗi lô</label>
                 <input
                   type="checkbox"
                   name="Oil"
@@ -369,9 +323,10 @@ export default function LCIForm() {
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
                 <label className="wrap_text"> Hoá chất</label>
-                <div></div>
-                <label>11 - Total amount of land pollution generated per batch</label>
+                <div className="w-full my-2"></div>
+                <label>11 - Tổng lượng ô nhiễm đất phát sinh mỗi lô</label>
                 <input
+                  required
                   type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
@@ -379,36 +334,37 @@ export default function LCIForm() {
                   value={landpol}
                   onChange={(e) => setLandpol(e.target.value)}
                 />
-                <label className="wrap_text"> m2/ batch</label>
-                <div></div>
-                <label className="form-label">12 - Choose the type(s) of land pollution per batch</label>
+                <label className="wrap_text"> m2/ lô</label>
+                <div className="w-full my-2"></div>
+                <label className="form-label">12 - Chọn (các) loại ô nhiễm đất cho mỗi lô</label>
                 <input
                   type="checkbox"
                   name="Oil"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setLandpoltype)}
                 />
-                <label className="wrap_text"> Oil</label>
+                <label className="wrap_text"> Dầu</label>
                 <input
                   type="checkbox"
                   name="Fuel"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setLandpoltype)}
                 />
-                <label className="wrap_text"> Fuel</label>
+                <label className="wrap_text"> Nhiên liệu</label>
                 <input
                   type="checkbox"
                   name="Wastes"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setLandpoltype)}
                 />
-                <label className="wrap_text"> Wastes</label>
+                <label className="wrap_text"> Chất thải</label>
                 <input
                   type="checkbox"
                   name="Chemical"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setLandpoltype)}
                 />
-                <label className="wrap_text"> Chemical</label>
-                <div></div>
-                <label>13 - Total amount of air emission (NOx, SOx) generated per batch</label>
+                <label className="wrap_text"> Hóa chất</label>
+                <div className="w-full my-2"></div>
+                <label>13 - Tổng lượng khí thải (NOx, SOx) phát sinh mỗi lô</label>
                 <input
+                  required
                   type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
@@ -416,10 +372,11 @@ export default function LCIForm() {
                   value={air}
                   onChange={(e) => setAir(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> tonnes/ batch</label>
-                <div></div>
-                <label>14 - Total amount of hazardous materials used per batch</label>
+                <label className="wrap_text"> tấn/ lô</label>
+                <div className="w-full my-2"></div>
+                <label>14 - Tổng lượng vật liệu nguy hiểm được sử dụng mỗi lô</label>
                 <input
+                  required
                   type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
@@ -427,10 +384,11 @@ export default function LCIForm() {
                   value={hazmat}
                   onChange={(e) => setHazmat(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> kg/ batch</label>
-                <div></div>
-                <label className="form-label">15 - Total amount of hazardous waste generated per batch</label>
+                <label className="wrap_text"> kg/ lô</label>
+                <div className="w-full my-2"></div>
+                <label className="form-label">15 - Tổng lượng chất thải nguy hại phát sinh mỗi lô</label>
                 <input
+                  required
                   type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
@@ -438,10 +396,11 @@ export default function LCIForm() {
                   value={hazwaste}
                   onChange={(e) => setHazwaste(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> kg/ batch</label>
-                <div></div>
-                <label>16 - Total amount of solid waste generated per batch</label>
+                <label className="wrap_text"> kg/ lô</label>
+                <div className="w-full my-2"></div>
+                <label>16 - Tổng lượng chất thải rắn phát sinh mỗi lô</label>
                 <input
+                  required
                   type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
@@ -449,10 +408,11 @@ export default function LCIForm() {
                   value={solidwaste}
                   onChange={(e) => setSolidwaste(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> kg/ batch</label>
-                <div></div>
-                <label className="form-label">17 - Total amount of solid waste recycled or reused per batch</label>
+                <label className="wrap_text"> kg/ lô</label>
+                <div className="w-full my-2"></div>
+                <label className="form-label">17 - Tổng lượng chất thải rắn tái chế hoặc tái sử dụng mỗi lô</label>
                 <input
+                  required
                   type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
@@ -460,49 +420,50 @@ export default function LCIForm() {
                   value={solidwasterec}
                   onChange={(e) => setSolidwasterec(e.target.value)}
                 />{" "}
-                <label className="wrap_text">kg/ batch</label>
-                <div></div>
-                <label className="form-label">18 - Choose the type(s) of solid waste destination</label>
-                <div></div>
+                <label className="wrap_text">kg/ lô</label>
+                <div className="w-full my-2"></div>
+                <label className="form-label">18 - Chọn (các) loại điểm đến của chất thải rắn</label>
+                <div className="w-full my-2"></div>
                 <input
                   type="checkbox"
                   name="Recycling"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
-                <label className="wrap_text"> Recycling</label>
+                <label className="wrap_text"> Tái chế</label>
                 <input
                   type="checkbox"
                   name="Reuse"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
-                <label className="wrap_text"> Reuse</label>
+                <label className="wrap_text"> Tái sử dụng</label>
                 <input
                   type="checkbox"
                   name="Recovery"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
-                <label className="wrap_text"> Recovery</label>
+                <label className="wrap_text"> Phục hồi</label>
                 <input
                   type="checkbox"
                   name="Incineration"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
-                <label className="wrap_text"> Incineration</label>
+                <label className="wrap_text"> Đốt cháy</label>
                 <input
                   type="checkbox"
                   name="Landfilling"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
-                <label className="wrap_text"> Landfilling</label>
+                <label className="wrap_text"> Chôn lấp</label>
                 <input
                   type="checkbox"
                   name="Composting"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
-                <label className="wrap_text"> Composting</label>
-                <div></div>
-                <label className="form-label">19 - Total amount of wastewater generated per batch</label>
+                <label className="wrap_text"> Ủ phân</label>
+                <div className="w-full my-2"></div>
+                <label className="form-label">19 - Tổng lượng nước thải phát sinh mỗi lô</label>
                 <input
+                  required
                   type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
@@ -510,10 +471,11 @@ export default function LCIForm() {
                   value={waterwaste}
                   onChange={(e) => setWaterwaste(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> m3/ batch</label>
-                <div></div>
-                <label className="form-label">20 - Total amount of wastewater recycled or reused per batch</label>
+                <label className="wrap_text"> m3/ lô</label>
+                <div className="w-full my-2"></div>
+                <label className="form-label">20 - Tổng lượng nước thải tái chế hoặc tái sử dụng mỗi lô</label>
                 <input
+                  required
                   type="number"
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
@@ -521,85 +483,91 @@ export default function LCIForm() {
                   value={waterwasterec}
                   onChange={(e) => setWaterwasterec(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> m3/ batch</label>
-                <div></div>
-                <label className="form-label">21 - Choose the type(s) of wastewater destination</label>
-                <div></div>
+                <label className="wrap_text"> m3/ lô</label>
+                <div className="w-full my-2"></div>
+                <label className="form-label">21 - Chọn (các) loại nơi xử lý nước thải</label>
+                <div className="w-full my-2"></div>
                 <input
                   type="checkbox"
                   name="Recycling"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
-                <label className="wrap_text"> Recycling</label>
+                <label className="wrap_text"> Tái chế</label>
                 <input
                   type="checkbox"
                   name="Reuse"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
-                <label className="wrap_text"> Reuse</label>
+                <label className="wrap_text"> Tái sử dụng</label>
                 <input
                   type="checkbox"
                   name="Recovery"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
-                <label className="wrap_text"> Recovery</label>
+                <label className="wrap_text"> Hồi phục</label>
                 <input
                   type="checkbox"
                   name="Incineration"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
-                <label className="wrap_text"> Incineration</label>
+                <label className="wrap_text"> Đốt cháy</label>
                 <input
                   type="checkbox"
                   name="Landfilling"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
-                <label className="wrap_text"> Landfilling</label>
+                <label className="wrap_text"> Chôn lấp</label>
                 <input
                   type="checkbox"
                   name="Composting"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
-                <label className="wrap_text"> Composting</label>
-                <div></div>
-                <label className="form-label">22 - Is the product recyclable or reusable?</label>
+                <label className="wrap_text"> Ủ phân</label>
+                <div className="w-full my-2"></div>
+                <label className="form-label">22 - Sản phẩm có thể tái chế hoặc tái sử dụng được không?</label>
                 <input
+                  required
                   type="radio"
                   value="Yes"
                   checked={productrec === "Yes"}
                   onChange={(e) => setProductrec(e.target.value)}
                 />
-                <label className="wrap_text"> Yes</label>
+                <label className="wrap_text"> Có</label>
                 <input
+                  required
                   type="radio"
                   value="No"
                   checked={productrec === "No"}
                   onChange={(e) => setProductrec(e.target.value)}
                 />
-                <label className="wrap_text"> No</label>
-                <div></div>
-                <label className="form-label">23 - Does the product has eco-friendly packaging and labeling?</label>
+                <label className="wrap_text"> Không</label>
+                <div className="w-full my-2"></div>
+                <label className="form-label">
+                  23 - Sản phẩm có bao bì và nhãn mác thân thiện với môi trường không?
+                </label>
                 <input
+                  required
                   type="radio"
                   value="Yes"
                   checked={ecolabel === "Yes"}
                   onChange={(e) => setEcolabel(e.target.value)}
                 />
-                <label className="wrap_text"> Yes</label>
+                <label className="wrap_text"> Có</label>
                 <input
+                  required
                   type="radio"
                   value="No"
                   checked={ecolabel === "No"}
                   onChange={(e) => setEcolabel(e.target.value)}
                 />
-                <label className="wrap_text"> No</label>
-                <div></div>
+                <label className="wrap_text"> không</label>
+                <div className="w-full my-2"></div>
               </div>
             </fieldset>
-            <div className="center-btn">
-              <button className="btn form-input-LCI" type="submit">
-                Calculate LCI
-              </button>
+            <div className="flex items-end justify-end">
+              <Button className="btn form-input-LCI !w-[20%] !self-end" type="submit">
+                Gửi
+              </Button>
             </div>
           </div>
         </form>

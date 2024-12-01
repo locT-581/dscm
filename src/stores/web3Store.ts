@@ -10,12 +10,14 @@ import { units } from "@/utils/const";
 import { getAllOrders, getAllProcesses, getAllProducts, getAllSupplier } from "@/app/apis";
 import Process from "@/types/process";
 import Supplier from "@/types/supplier";
+import Assessment, { AssessmentOnChain, AssessmentType } from "@/types/assessment";
 
 export type StoreState = {
   web3: Web3 | undefined;
   account: string | undefined;
   networkId: number | undefined;
   contract: Contract<OriginAbi> | undefined;
+  assessmentContract: Contract<OriginAbi> | undefined;
 
   user: Supplier | undefined;
 
@@ -24,6 +26,10 @@ export type StoreState = {
   products: Product[] | undefined;
   processes: Process[] | undefined;
   suppliers: Supplier[] | undefined;
+
+  LCIs: Assessment[] | undefined;
+  enviros: Assessment[] | undefined;
+  socials: Assessment[] | undefined;
 };
 
 export type StoreAction = {
@@ -31,17 +37,23 @@ export type StoreAction = {
   setAccount: (account: StoreState["account"]) => void;
   setNetWorkId: (networkId: StoreState["networkId"]) => void;
   setContract: (contract: StoreState["contract"]) => void;
+  setAssessmentContract: (contract: StoreState["assessmentContract"]) => void;
 
   setOrders: (orders: StoreState["orders"]) => void;
   setShipments: (shipments: StoreState["shipments"]) => void;
   setProducts: (products: StoreState["products"]) => void;
   setUser: (user: StoreState["user"]) => void;
+  setLCIs: (LCIs: StoreState["LCIs"]) => void;
 
   getOrders: () => Promise<void>;
   getShipments: () => Promise<void>;
   getProducts: () => Promise<void>;
   getProcess: () => Promise<void>;
   getSuppliers: () => Promise<void>;
+
+  getCLIs: () => Promise<void>;
+  getEnviros: () => Promise<void>;
+  getSocials: () => Promise<void>;
 };
 
 export type StoreType = StoreState & StoreAction;
@@ -59,6 +71,11 @@ export const defaultInitState: StoreState = {
   products: undefined,
   processes: undefined,
   suppliers: undefined,
+
+  LCIs: undefined,
+  enviros: undefined,
+  socials: undefined,
+  assessmentContract: undefined,
 };
 
 export const createWeb3Store = (initState: StoreState = defaultInitState) => {
@@ -68,11 +85,13 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
     setAccount: (account: string | undefined) => set(() => ({ account: account?.toLocaleLowerCase() })),
     setNetWorkId: (networkId: number | undefined) => set(() => ({ networkId })),
     setContract: (contract: Contract<OriginAbi> | undefined) => set(() => ({ contract })),
+    setAssessmentContract: (contract: Contract<OriginAbi> | undefined) => set(() => ({ assessmentContract: contract })),
 
     setOrders: (orders: Order[] | undefined) => set(() => ({ orders })),
     setShipments: (shipments: Shipment[] | undefined) => set(() => ({ shipments })),
     setProducts: (products: Product[] | undefined) => set(() => ({ products })),
     setUser: (user: Supplier | undefined) => set(() => ({ user })),
+    setLCIs: (LCIs: Assessment[] | undefined) => set(() => ({ LCIs })),
 
     // fetch Data
     getOrders: async () => {
@@ -201,6 +220,74 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
     getSuppliers: async () => {
       const suppliers = await getAllSupplier();
       set(() => ({ suppliers }));
+    },
+
+    getCLIs: async () => {
+      const { assessmentContract } = get();
+      if (!assessmentContract) return;
+
+      const LCICount: number = await assessmentContract.methods.LCICount().call();
+      const LCIs: Assessment[] = [];
+
+      for (let i = 1; i <= LCICount; i++) {
+        const newLCI: AssessmentOnChain = await assessmentContract.methods.LCIs(i).call();
+        LCIs.push({
+          ...newLCI,
+          id: Number(newLCI.id).toString(),
+          document: JSON.parse(newLCI.document),
+          assessType: newLCI.assessType as AssessmentType,
+          process: get().processes?.find((p) => p.id == newLCI.process) as Process,
+          account: get().suppliers?.find(
+            (s) => s.account.toLocaleLowerCase() == newLCI.account.toLocaleLowerCase()
+          ) as Supplier,
+        });
+      }
+      set(() => ({ LCIs }));
+    },
+
+    getEnviros: async () => {
+      const { assessmentContract } = get();
+      if (!assessmentContract) return;
+
+      const enviroCount: number = await assessmentContract.methods.enviroCount().call();
+      const enviros: Assessment[] = [];
+
+      for (let i = 1; i <= enviroCount; i++) {
+        const newEnviro: AssessmentOnChain = await assessmentContract.methods.enviros(i).call();
+        enviros.push({
+          ...newEnviro,
+          id: Number(newEnviro.id).toString(),
+          document: JSON.parse(newEnviro.document),
+          assessType: newEnviro.assessType as AssessmentType,
+          process: get().processes?.find((p) => p.id == newEnviro.process) as Process,
+          account: get().suppliers?.find(
+            (s) => s.account.toLocaleLowerCase() == newEnviro.account.toLocaleLowerCase()
+          ) as Supplier,
+        });
+      }
+      set(() => ({ enviros }));
+    },
+    getSocials: async () => {
+      const { assessmentContract } = get();
+      if (!assessmentContract) return;
+
+      const socialCount: number = await assessmentContract.methods.socialCount().call();
+      const socials: Assessment[] = [];
+
+      for (let i = 1; i <= socialCount; i++) {
+        const newSocial: AssessmentOnChain = await assessmentContract.methods.socials(i).call();
+        socials.push({
+          ...newSocial,
+          id: Number(newSocial.id).toString(),
+          document: JSON.parse(newSocial.document),
+          assessType: newSocial.assessType as AssessmentType,
+          process: get().processes?.find((p) => p.id == newSocial.process) as Process,
+          account: get().suppliers?.find(
+            (s) => s.account.toLocaleLowerCase() == newSocial.account.toLocaleLowerCase()
+          ) as Supplier,
+        });
+      }
+      set(() => ({ socials }));
     },
   }));
 };

@@ -5,11 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { useWeb3Store } from "@/stores/storeProvider";
 import LogoutIcon from "@mui/icons-material/Logout";
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { user } = useWeb3Store((state) => state);
 
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
@@ -34,6 +36,15 @@ export default function Sidebar() {
     ],
     [{ x: 0, y: 0 }],
   ]);
+
+  const [sidebar, setSidebar] = useState(SidebarData);
+  useEffect(() => {
+    if (user?.role == "Focal company") {
+      setSidebar(SidebarData.filter((i) => i.isShow));
+    } else {
+      setSidebar(SidebarData.filter((i) => i.isShow && !i.onlyAdmin));
+    }
+  }, [user]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -143,23 +154,25 @@ export default function Sidebar() {
             }}
             className="relative flex flex-col items-center justify-center w-full"
           >
-            {SidebarData.filter((i) => i.isShow).map((item, index) => {
-              return (
-                <Link
-                  key={index}
-                  style={{
-                    backgroundColor:
-                      pathname.replace("/", "") === item.path.replace("/", "") ? "#DEE2FF" : "transparent",
-                    color: pathname.replace("/", "") === item.path.replace("/", "") ? "#028090" : "#D6EADF",
-                  }}
-                  className="flex gap-1 w-full aspect-square items-center justify-center rounded-xl !hover:bg-[#DEE2FF] !hover:text-[#028090] transition-all"
-                  href={item.path}
-                >
-                  <SideBarIcon width="170%" keyIcon={item.icon} />
-                  {isFullSize && <span>{item.title}</span>}
-                </Link>
-              );
-            })}
+            {sidebar
+              .filter((i) => i.isShow)
+              .map((item, index) => {
+                return (
+                  <Link
+                    key={index}
+                    style={{
+                      backgroundColor:
+                        pathname.replace("/", "") === item.path.replace("/", "") ? "#DEE2FF" : "transparent",
+                      color: pathname.replace("/", "") === item.path.replace("/", "") ? "#028090" : "#D6EADF",
+                    }}
+                    className="flex gap-1 w-full aspect-square items-center justify-center rounded-xl !hover:bg-[#DEE2FF] !hover:text-[#028090] transition-all"
+                    href={item.path}
+                  >
+                    <SideBarIcon width="170%" keyIcon={item.icon} />
+                    {isFullSize && <span>{item.title}</span>}
+                  </Link>
+                );
+              })}
           </div>
           <button>
             <LogoutIcon sx={{ fontSize: 36 }} />
