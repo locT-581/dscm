@@ -282,7 +282,11 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
         socials.push({
           ...newSocial,
           id: Number(newSocial.id).toString(),
-          document: JSON.parse(newSocial.document),
+          document: {
+            ...JSON.parse(newSocial.document),
+            product: get().products?.find((p) => p.id == JSON.parse(newSocial.document).product),
+            suppliers: get().suppliers?.find((s) => s.id == JSON.parse(newSocial.document).suppliers),
+          },
           assessType: newSocial.assessType as AssessmentType,
           process: get().processes?.find((p) => p.id == newSocial.process) as Process,
           account: get().suppliers?.find(
