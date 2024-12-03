@@ -162,7 +162,7 @@ export default function TableAssessment({
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Paper sx={{ width: "100%", mb: 2 }}>
+      <Paper sx={{ width: "100%", mb: 2, background: "transparent" }}>
         <Toolbar
           sx={[
             {

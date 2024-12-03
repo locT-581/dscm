@@ -29,7 +29,7 @@ export default function Dashboard() {
               setShowCreateShip(!showCreateShip);
               setShipType("Send");
             }}
-            color="orange"
+            color="#8E9AAF"
             text="Gửi hàng"
           />
           <Button
@@ -37,7 +37,7 @@ export default function Dashboard() {
               setShowCreateShip(!showCreateShip);
               setShipType("Receive");
             }}
-            color="gold"
+            color="#809BCE"
             text="Nhận hàng"
           />
         </div>
@@ -50,12 +50,15 @@ export default function Dashboard() {
             title: "Danh sách đơn hàng",
             element: (
               <EnhancedTable
-                rowList={orders.map((order) => ({
-                  ...order,
-                  name: order?.product?.name ?? "Rỗng",
-                  id: +order.id,
-                  status: "Processing",
-                }))}
+                rowList={orders
+                  .filter((o) => !!o.product)
+                  .map((order) => ({
+                    ...order,
+                    name: order?.product?.name ?? "Rỗng",
+                    id: +order.id,
+                    status: "Processing",
+                    image: order?.product?.image ?? "",
+                  }))}
               />
             ),
           },
@@ -63,15 +66,19 @@ export default function Dashboard() {
             title: "Danh sách vận chuyển",
             element: (
               <TableShipment
-                rowList={shipments.map((shipment) => ({
-                  shipmentStatus: shipment.shipType == "Send" ? "Đã gửi" : "Đã nhận",
-                  shippedOrder: shipment?.product?.name ?? "Rỗng",
-                  name: shipment?.product?.name ?? "Rỗng",
-                  location: shipment?.place ?? "Rỗng",
-                  dated: shipment?.date ?? "Rỗng",
-                  addBy: shipment?.supplier?.name ?? "Rỗng",
-                  processes: processes.find((process) => process.id === shipment?.process?.id)?.name ?? "Rỗng",
-                }))}
+                rowList={shipments
+                  .filter((o) => !!o.process)
+                  .map((shipment) => ({
+                    shipmentStatus: shipment.shipType == "Send" ? "Đã gửi" : "Đã nhận",
+                    shippedOrder: shipment?.product?.name ?? "Rỗng",
+                    name: shipment?.product?.name ?? "Rỗng",
+                    location: shipment?.place ?? "Rỗng",
+                    dated: shipment?.date ?? "Rỗng",
+                    addBy: shipment?.supplier?.name ?? "Rỗng",
+                    processes: processes.find((process) => process.id === shipment?.process?.id)?.name ?? "Rỗng",
+                    image: shipment?.product?.image ?? "",
+                    imageProcess: processes.find((process) => process.id === shipment?.process?.id)?.image ?? "",
+                  }))}
               />
             ),
           },

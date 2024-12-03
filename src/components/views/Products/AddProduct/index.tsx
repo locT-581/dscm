@@ -11,14 +11,14 @@ import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
 import getDate from "@/utils/getDate";
 import useToast from "@/hook/useToast";
 import { useWeb3Store } from "@/stores/storeProvider";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+// import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { units } from "@/utils/const";
 
-import CheckIcon from "@mui/icons-material/Check";
-import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+// import CheckIcon from "@mui/icons-material/Check";
+// import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import CustomizedSteppers from "@/components/HorizontalStepper";
 import Process from "@/types/process";
-import { Property } from "@/types/product";
+// import { Property } from "@/types/product";
 import { addProduct as addProductToFireStore } from "@/app/apis/index";
 import Unit from "@/types/unit";
 export interface ColourOption {
@@ -44,8 +44,8 @@ export default function AddProduct() {
   const [name, setName] = useState("");
   const [selectedProcesses, setSelectedProcesses] = useState<Process[]>([]);
 
-  const [properties, setProperties] = useState<Property[] | undefined>([]);
-  const [propertiesTabActive, setPropertiesTabActive] = useState<number>(0);
+  // const [properties, setProperties] = useState<Property[] | undefined>([]);
+  // const [propertiesTabActive, setPropertiesTabActive] = useState<number>(0);
 
   const [unit, setUnit] = useState<Unit | null>(null);
 
@@ -78,7 +78,7 @@ export default function AddProduct() {
             offChainId: Number(e.events?.ProductAdded.returnValues.id).toString() ?? (products!.length - 1).toString(),
             process: selectedProcesses,
             unit: unit!,
-            properties,
+            // properties,
           },
           Number(e.events?.ProductAdded.returnValues.id).toString() ?? (products!.length - 1).toString()
         );
@@ -109,10 +109,10 @@ export default function AddProduct() {
     addProduct({ name, image: ipfsUrl, process, date });
   };
 
-  const [isEditing, setIsEditing] = useState<number | null>(null);
-  const handleDoubleClick = (id: number) => {
-    setIsEditing(id);
-  };
+  // const [isEditing, setIsEditing] = useState<number | null>(null);
+  // const handleDoubleClick = (id: number) => {
+  //   setIsEditing(id);
+  // };
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col w-full h-full gap-2">
@@ -148,7 +148,7 @@ export default function AddProduct() {
             </label>
             {selectedProcesses.length > 0 && (
               <CustomizedSteppers
-                steps={selectedProcesses.map((p) => ({ label: p.name, icon: p.image }))}
+                steps={selectedProcesses?.map((p) => ({ label: p.name, icon: p.image }))}
                 activeStep={-1}
               />
             )}
@@ -169,7 +169,7 @@ export default function AddProduct() {
               options={processes?.map((process) => ({ value: process.id, label: process.name })).filter(Boolean)}
             />
           </div>
-
+          {/* 
           <div className="flex flex-col justify-between gap-3">
             <div className="flex justify-between">
               <div className="flex flex-col gap-1">
@@ -327,7 +327,7 @@ export default function AddProduct() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className="w-[40%] h-full flex flex-col gap-3">

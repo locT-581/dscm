@@ -21,6 +21,8 @@ interface Data {
   location: string;
   dated: string;
   addBy: string;
+  image: string;
+  imageProcess: string;
 }
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -60,6 +62,13 @@ const headCells: readonly HeadCell[] = [
     disablePadding: false,
     label: "Trạng thái",
     allowSort: true,
+  },
+  {
+    id: "image",
+    numeric: false,
+    disablePadding: false,
+    label: "Hình ảnh",
+    allowSort: false,
   },
   {
     id: "shippedOrder",
@@ -168,7 +177,7 @@ export default function TableShipment({ rowList }: { rowList: Data[] }) {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Paper sx={{ width: "100%", mb: 2 }}>
+      <Paper sx={{ width: "100%", mb: 2, background: "transparent" }}>
         <Toolbar
           sx={[
             {
@@ -194,8 +203,28 @@ export default function TableShipment({ rowList }: { rowList: Data[] }) {
                     <TableCell component="th" id={labelId} scope="row" align="center">
                       {row.shipmentStatus}
                     </TableCell>
+                    <TableCell align="center" className="overflow-hidden !flex !justify-center !items-center">
+                      <img
+                        onClick={() => {
+                          window.open(row.image, "_blank");
+                        }}
+                        src={row.image}
+                        alt=""
+                        className="w-[5vw] aspect-square object-cover"
+                      />
+                    </TableCell>
                     <TableCell align="center">{row.shippedOrder}</TableCell>
-                    <TableCell align="center">{row.processes}</TableCell>
+                    <TableCell align="center" className="flex gap-2 items-center ">
+                      <img
+                        onClick={() => {
+                          window.open(row.image, "_blank");
+                        }}
+                        src={row.imageProcess}
+                        alt=""
+                        className="w-[3vw] aspect-square object-cover"
+                      />{" "}
+                      {row.processes}
+                    </TableCell>
                     <TableCell align="center">{row.location}</TableCell>
                     <TableCell align="center">{row.dated}</TableCell>
                     <TableCell align="center">{row.addBy}</TableCell>

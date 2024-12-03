@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import * as React from "react";
 
 import Box from "@mui/material/Box";
@@ -23,6 +24,7 @@ import { Backdrop } from "@mui/material";
 interface Data {
   id: number;
   name: string;
+  image: string;
   quantity: number;
   unit: Unit;
   date: string;
@@ -31,6 +33,7 @@ interface Data {
 
 function createData(
   id: number,
+  image: string,
   name: string,
   quantity: number,
   unit: Unit,
@@ -44,6 +47,7 @@ function createData(
     unit,
     date,
     status,
+    image,
   };
 }
 
@@ -82,6 +86,12 @@ const headCells: readonly HeadCell[] = [
     numeric: false,
     disablePadding: false,
     label: "Mã đơn hàng",
+  },
+  {
+    id: "image",
+    numeric: false,
+    disablePadding: false,
+    label: "Hình ảnh",
   },
   {
     id: "name",
@@ -159,6 +169,7 @@ export default function EnhancedTable({
   rowList,
 }: {
   rowList: {
+    image: string;
     id: number;
     name: string;
     quantity: number;
@@ -169,7 +180,7 @@ export default function EnhancedTable({
 }) {
   const { user } = useWeb3Store((state) => state);
   const [rows] = React.useState(
-    rowList.map((row) => createData(row.id, row.name, row.quantity, row.unit, row.date, row.status))
+    rowList.map((row) => createData(row.id, row.image, row.name, row.quantity, row.unit, row.date, row.status))
   );
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<keyof Data>("id");
@@ -210,7 +221,7 @@ export default function EnhancedTable({
   return (
     <>
       <Box sx={{ width: "100%" }}>
-        <Paper sx={{ width: "100%", mb: 2 }}>
+        <Paper sx={{ width: "100%", mb: 2, background: "transparent" }}>
           <Toolbar
             sx={[
               {
@@ -247,6 +258,16 @@ export default function EnhancedTable({
                     >
                       <TableCell component="th" align="center" id={labelId} scope="row" className="!w-[20%]">
                         {row.id}
+                      </TableCell>
+                      <TableCell align="center" className="overflow-hidden !flex !justify-center !items-center">
+                        <img
+                          onClick={() => {
+                            window.open(row.image, "_blank");
+                          }}
+                          src={row.image}
+                          alt=""
+                          className="w-[5vw] aspect-square object-cover"
+                        />
                       </TableCell>
                       <TableCell align="center">{row.name}</TableCell>
                       <TableCell align="center">{row.quantity}</TableCell>

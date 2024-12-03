@@ -43,7 +43,7 @@ export default function AddSupplier() {
     notify("Đang thêm nhà cung cấp...");
     addSupplier({
       ...form,
-      productsProcesses: selectedProcesses.map((process) => process),
+      productsProcesses: selectedProcesses?.map((process) => process),
       account: form.account.toLowerCase(),
       role: "Supplier",
     }).then(() => {

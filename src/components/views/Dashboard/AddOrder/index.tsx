@@ -193,7 +193,7 @@ export default function AddOrder() {
                     );
                   }}
                   options={suppliers
-                    ?.filter((supplier) => supplier.productsProcesses.map((p) => p.id).includes(process.id))
+                    ?.filter((supplier) => supplier?.productsProcesses?.map((p) => p.id).includes(process.id))
                     .map((supplier) => ({
                       value: supplier.id,
                       label: supplier.name,

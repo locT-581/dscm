@@ -18,7 +18,7 @@ const Journey = () => {
   useEffect(() => {
     if (!!shipments) {
       shipments.forEach((shipment) => {
-        setOrderIDs((orderIDs) => [...orderIDs, shipment.product.id]);
+        setOrderIDs((orderIDs) => [...orderIDs, shipment?.product?.id]);
       });
     }
   }, [shipments]);
@@ -27,7 +27,7 @@ const Journey = () => {
    * List of unique product IDs
    */
   const [orderIDs, setOrderIDs] = useState<string[]>([]);
-  const [formProduct, setFormProduct] = useState<Product | undefined>(products?.[0]);
+  const [formProduct, setFormProduct] = useState<Product | undefined>();
 
   const unique = [...new Set(orderIDs.map((item) => item))];
 
@@ -61,7 +61,7 @@ const Journey = () => {
       <Map
         markers={
           shipments
-            ?.filter((s) => s.product.id == formProduct?.id)
+            ?.filter((s) => s.product?.id == formProduct?.id)
             .map((a) => ({ lat: Number(a.latlong.latitude), long: Number(a.latlong.longitude) })) ?? [
             { lat: 10, long: 105 },
           ]

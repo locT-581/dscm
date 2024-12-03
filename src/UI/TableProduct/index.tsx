@@ -188,7 +188,7 @@ export default function TableProduct({ rowList }: { rowList: Data[] }) {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Paper sx={{ width: "100%", mb: 2 }}>
+      <Paper sx={{ width: "100%", mb: 2, background: "transparent" }}>
         <Toolbar
           sx={[
             {

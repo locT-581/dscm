@@ -112,7 +112,7 @@ export const SocialList = ({ assessments }: { assessments: Assessment[] }) =>
               <td>giờ/tháng</td>
             </tr>
             <tr>
-              <th>Average weekly overtime hours per employee per month</th>
+              <th>Số giờ làm thêm trung bình hàng tuần của mỗi nhân viên mỗi thángth</th>
               <td>{+(a.document as SocialFormType).overtimeh}</td>
               <td>giờ/tháng</td>
             </tr>

@@ -179,7 +179,7 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
 
         set(() => ({
           shipments: shipments.filter((sh) => {
-            return listProductHaveProcessOfSupplier?.map((p) => p.id).includes(sh.product.id);
+            return listProductHaveProcessOfSupplier?.map((p) => p.id).includes(sh?.product?.id);
           }),
         }));
       } else {
@@ -210,7 +210,7 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
 
         products.push(newProduct);
       }
-      set(() => ({ products }));
+      set(() => ({ products: products.filter((p) => p.process.length != 0 && p.name != "45") }));
     },
 
     getProcess: async () => {

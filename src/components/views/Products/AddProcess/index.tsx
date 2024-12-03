@@ -100,7 +100,7 @@ export default function AddProcess() {
           </div>
         </div>
 
-        <div className=" w-[40%] border border-[#f00] rounded-xl flex flex-col gap-4 p-4 max-h-[50vh] h-full">
+        <div className=" w-[40%] border border-green-300 rounded-xl flex flex-col gap-4 p-4 max-h-[50vh] h-full">
           <h4 className="text-xl font-semibold">Hình ảnh</h4>
 
           <div

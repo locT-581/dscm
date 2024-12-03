@@ -171,6 +171,7 @@ export default function AddShipment({ shipType: _shipType, onShipAdd }: IAddShip
                 setOrder(orders?.find((order) => order.id === (e as { value: string; label: string })?.value));
               }}
               options={orders
+                ?.filter((o) => !!o.product)
                 ?.map((order) => ({ value: order.id, label: `Đơn hàng #${order.id}: ${order.product?.name}` }))
                 .filter(Boolean)}
             />
