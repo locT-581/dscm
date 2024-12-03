@@ -41,9 +41,17 @@ input:-webkit-autofill:active {
 }
 
 ::selection {
-  background-color: #ffcfd280;
+  background-color: #95b8d189;
 }
 
+.Toastify__toast-icon {
+  width: fit-content !important;
+  height: fit-content !important;
+}
+.Toastify__toast-body {
+  margin: 0 !important;
+  padding: 0 !important;
+}
 @layer base {
   /* body {
     @apply bg-background font-fontCodePro;
@@ -55,7 +63,7 @@ input:-webkit-autofill:active {
     @apply bg-white;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-red-400 rounded-full;
+    @apply bg-[#05668D] rounded-full;
   }
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-slate-700;

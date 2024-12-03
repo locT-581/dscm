@@ -13,14 +13,16 @@ import Order from "@/types/order";
 import CustomizedSteppers from "../HorizontalStepper";
 import Button from "@/UI/Button";
 import CloseIcon from "@mui/icons-material/Close";
+import useToast from "@/hook/useToast";
 export interface IAddShipmentProps {
   shipType: ShipType;
   onShipAdd: () => void;
 }
 
 export default function AddShipment({ shipType: _shipType, onShipAdd }: IAddShipmentProps) {
-  const { orders, contract, account, user } = useWeb3Store((state) => state);
+  const { orders, contract, account, user, getShipments, getOrders } = useWeb3Store((state) => state);
 
+  const { notify, update } = useToast();
   const animatedComponents = makeAnimated();
 
   const [date, setDate] = useState("");
@@ -99,11 +101,14 @@ export default function AddShipment({ shipType: _shipType, onShipAdd }: IAddShip
     process: string;
     account?: string;
   }) => {
+    notify("Đang thêm...");
     contract?.methods
       .addShipment(shipType, place, latlong, date, product, process)
       .send({ from: account })
-      .once("receipt", () => {
-        window.location.reload();
+      .once("receipt", async () => {
+        await getShipments();
+        await getOrders();
+        update(true, "Thêm thành công");
       });
   };
 
@@ -117,7 +122,7 @@ export default function AddShipment({ shipType: _shipType, onShipAdd }: IAddShip
       longitude: longitude,
     };
     const latlong = JSON.stringify(setLatlong);
-    addShipment({
+    await addShipment({
       shipType: _shipType,
       place,
       latlong,

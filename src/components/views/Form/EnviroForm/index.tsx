@@ -8,6 +8,7 @@ import Button from "@/UI/Button";
 import { useWeb3Store } from "@/stores/storeProvider";
 import { monthNumber, months } from "@/utils/const";
 import { useRouter } from "next/navigation";
+import useToast from "@/hook/useToast";
 
 export default function EnviroForm() {
   const router = useRouter();
@@ -109,6 +110,7 @@ export default function EnviroForm() {
     addEnviro({ date, document, month, year });
   };
 
+  const { notify, update } = useToast();
   const addEnviro = ({
     date,
     document,
@@ -120,11 +122,13 @@ export default function EnviroForm() {
     month: string;
     year: string;
   }) => {
+    notify("Đang thêm...");
     assessmentContract?.methods
       .addEnviro(date, document, month, year)
       .send({ from: account })
-      .once("receipt", () => {
-        getEnviros();
+      .once("receipt", async () => {
+        update(true, "Thêm thành công");
+        await getEnviros();
         router.push("/danh-gia");
       });
   };

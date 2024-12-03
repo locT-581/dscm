@@ -220,6 +220,7 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
 
     getSuppliers: async () => {
       const suppliers = await getAllSupplier();
+      console.log("🚀 ~ getSuppliers: ~ suppliers:", suppliers)
       set(() => ({ suppliers }));
     },
 

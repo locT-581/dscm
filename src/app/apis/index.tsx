@@ -75,6 +75,7 @@ export const getSupplierByAddress = async (id: string): Promise<Supplier | null>
       website: doc.data().website,
     };
   });
+  console.log("🚀 ~ getSupplierByAddress ~ supplier:", supplier)
 
   return supplier;
 };

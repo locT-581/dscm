@@ -21,8 +21,8 @@ export default function useToast() {
       mss,
       toastConfig({
         icon: (
-          <div>
-            <CircularProgress sx={{ fontSize: "20px" }} />
+          <div className="flex justify-center items-center">
+            <CircularProgress size="16px" />
           </div>
         ),
         autoClose: false,
@@ -46,13 +46,17 @@ export default function useToast() {
         icon: (
           <div>
             {success ? (
-              <CheckCircleOutlineIcon sx={{ color: "#3eb049", fontSize: "20px" }} />
+              <CheckCircleOutlineIcon sx={{ color: "#3eb049", fontSize: "24px" }} />
             ) : (
-              <ErrorOutlineIcon sx={{ color: "#3eb049", fontSize: "20px" }} />
+              <ErrorOutlineIcon sx={{ color: "#F37482", fontSize: "24px" }} />
             )}
           </div>
         ),
         autoClose: 2000,
+        style: {
+          color: success ? "#3eb049" : "#F37482",
+          ...params?.style,
+        },
         ...params,
       })
     );

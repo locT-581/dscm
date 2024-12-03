@@ -7,6 +7,7 @@ import { monthNumber, months } from "@/utils/const";
 import { useWeb3Store } from "@/stores/storeProvider";
 import { useRouter } from "next/navigation";
 import Button from "@/UI/Button";
+import useToast from "@/hook/useToast";
 
 const SocialForm = () => {
   const { assessmentContract, account, socials, getSocials } = useWeb3Store((state) => state);
@@ -143,6 +144,7 @@ const SocialForm = () => {
     }
   };
 
+  const { notify, update } = useToast();
   const router = useRouter();
   const addSocial = ({
     date,
@@ -155,11 +157,13 @@ const SocialForm = () => {
     month: string;
     year: string;
   }) => {
+    notify("Đang thêm...");
     assessmentContract?.methods
       .addSocial(date, document, month, year)
       .send({ from: account })
-      .once("receipt", () => {
-        getSocials();
+      .once("receipt", async () => {
+        update(true, "Thêm thành công");
+        await getSocials();
         router.push("/danh-gia");
       });
   };

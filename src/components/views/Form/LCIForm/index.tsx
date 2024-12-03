@@ -11,6 +11,7 @@ import Product from "@/types/product";
 import { useWeb3Store } from "@/stores/storeProvider";
 import Process from "@/types/process";
 import Button from "@/UI/Button";
+import useToast from "@/hook/useToast";
 
 export default function LCIForm() {
   const animatedComponents = makeAnimated();
@@ -102,6 +103,8 @@ export default function LCIForm() {
     addLCI({ date, document, month, year, process: process?.id });
   };
 
+  const { notify, update } = useToast();
+
   const addLCI = ({
     date,
     document,
@@ -115,11 +118,13 @@ export default function LCIForm() {
     year: string;
     process: string;
   }) => {
+    notify("Đang thêm...");
     assessmentContract?.methods
       .addLCI(date, document, month, year, process)
       .send({ from: account })
-      .once("receipt", () => {
-        getCLIs();
+      .once("receipt", async () => {
+        await getCLIs();
+        update(true, "Thêm thành công");
         // router.push("/danh-gia");
       });
   };

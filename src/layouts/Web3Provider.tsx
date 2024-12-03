@@ -54,6 +54,7 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
         setAccount(accountList[0]);
 
         const user = await getSupplierByAddress(accountList[0].toLocaleLowerCase());
+        console.log("🚀 ~ window.ethereum.request ~ user:", user)
         setUser(user ?? undefined);
       });
     } else if (window.web3) {
