@@ -18,6 +18,7 @@ export type StoreState = {
   networkId: number | undefined;
   contract: Contract<OriginAbi> | undefined;
   assessmentContract: Contract<OriginAbi> | undefined;
+  loading: boolean;
 
   user: Supplier | undefined;
 
@@ -44,7 +45,7 @@ export type StoreAction = {
   setProducts: (products: StoreState["products"]) => void;
   setUser: (user: StoreState["user"]) => void;
   setLCIs: (LCIs: StoreState["LCIs"]) => void;
-
+  setLoading: (loading: StoreState["loading"]) => void;
   getOrders: () => Promise<void>;
   getShipments: () => Promise<void>;
   getProducts: () => Promise<void>;
@@ -59,6 +60,7 @@ export type StoreAction = {
 export type StoreType = StoreState & StoreAction;
 
 export const defaultInitState: StoreState = {
+  loading: false,
   web3: undefined,
   account: undefined,
   networkId: undefined,
@@ -92,11 +94,13 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
     setProducts: (products: Product[] | undefined) => set(() => ({ products })),
     setUser: (user: Supplier | undefined) => set(() => ({ user })),
     setLCIs: (LCIs: Assessment[] | undefined) => set(() => ({ LCIs })),
+    setLoading: (loading: boolean) => set(() => ({ loading })),
 
     // fetch Data
     getOrders: async () => {
       const { contract, products, user } = get();
       if (!contract) return;
+      set(() => ({ loading: true }));
 
       const allOrders: OrderFireStore[] = await getAllOrders();
 
@@ -141,6 +145,7 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
       } else if (user?.role == "Focal company") {
         filterOrder = orders;
       }
+      set(() => ({ loading: false }));
       set(() => ({ orders: filterOrder }));
     },
 
@@ -220,7 +225,7 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
 
     getSuppliers: async () => {
       const suppliers = await getAllSupplier();
-      console.log("🚀 ~ getSuppliers: ~ suppliers:", suppliers)
+      console.log("🚀 ~ getSuppliers: ~ suppliers:", suppliers);
       set(() => ({ suppliers }));
     },
 

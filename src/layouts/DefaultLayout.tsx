@@ -1,34 +1,35 @@
 "use client";
 
-import Background from "@/components/Background";
+import Image from "next/image";
 import Sidebar from "@/components/Sidebar";
 import { useWeb3Store } from "@/stores/storeProvider";
 import IconBreadcrumbs from "@/UI/Breadcrumbs";
 import SideBarIcon from "@/UI/Icons/SideBarIcon";
 import { SidebarData } from "@/utils/const";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 export default function DefaultLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user } = useWeb3Store((state) => state);
-  const [[width, height], setSize] = useState([window.innerWidth, window.innerHeight]);
+  // const [[width, height], setSize] = useState([window.innerWidth, window.innerHeight]);
 
   const pathParts = useMemo(() => pathname.split("/").filter((part) => part !== ""), [pathname]);
 
-  useEffect(() => {
-    const onWindowResize = () => {
-      setSize([window.innerWidth, window.innerHeight]);
-    };
-    onWindowResize();
+  // useEffect(() => {
+  //   const onWindowResize = () => {
+  //     setSize([window.innerWidth, window.innerHeight]);
+  //   };
+  //   onWindowResize();
 
-    window.addEventListener("resize", onWindowResize);
-    return () => window.removeEventListener("resize", onWindowResize);
-  }, []);
+  //   window.addEventListener("resize", onWindowResize);
+  //   return () => window.removeEventListener("resize", onWindowResize);
+  // }, []);
 
   return (
     <div className="flex justify-between h-screen w-screen overflow-auto relative">
-      <Background className="absolute top-0 left-0 -z-[1]" width={width} height={height} />
+      {/* <Background className="absolute top-0 left-0 -z-[1]" width={width} height={height} /> */}
+      <Image src="icons/background.svg" alt="background" fill className="absolute top-0 left-0 -z-[1] object-cover" />
       <Sidebar />
       <div className="flex flex-col gap-3 w-full h-full p-4 !pr-8 overflow-auto">
         <header className="w-full flex items-center justify-between">

@@ -62,5 +62,18 @@ export default function useToast() {
     );
   };
 
-  return { notify, update };
+  const _toast = (mss: string, params?: ToastOptions) =>
+    toast(
+      mss,
+      toastConfig({
+        ...params,
+        icon: (
+          <div>
+            <CheckCircleOutlineIcon sx={{ color: "#3eb049", fontSize: "24px" }} />
+          </div>
+        ),
+      })
+    );
+
+  return { notify, update, _toast };
 }

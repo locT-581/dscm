@@ -1,12 +1,15 @@
 "use client";
 
 import Web3 from "web3";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { Assessment, Origin } from "@/lib/abis";
 import { useWeb3Store } from "@/stores/storeProvider";
 import { getSupplierByAddress } from "@/app/apis";
-import { Backdrop, CircularProgress } from "@mui/material";
+import Welcome from "@/components/views/Welcome";
+import { CircularProgress } from "@mui/material";
+import { Backdrop } from "@mui/material";
+import useToast from "@/hook/useToast";
 
 export interface IWeb3ProviderProps {
   children: React.ReactNode;
@@ -15,6 +18,8 @@ export interface IWeb3ProviderProps {
 export default function Web3Provider({ children }: IWeb3ProviderProps) {
   const {
     web3,
+    loading,
+    setLoading,
     contract,
     assessmentContract,
     setAssessmentContract,
@@ -40,6 +45,9 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
     socials,
     getSocials,
   } = useWeb3Store((state) => state);
+  const [isFirstTimeLogin, setIsFirstTimeLogin] = useState<boolean | null>(null);
+
+  const { _toast } = useToast();
 
   // get Web3
   useEffect(() => {
@@ -49,20 +57,50 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
       const web3Instance = new Web3(window.ethereum);
       setWeb3(web3Instance);
 
-      window.ethereum.request({ method: "eth_requestAccounts" }).then(async (accounts) => {
-        const accountList = accounts as string[];
-        setAccount(accountList[0]);
-
-        const user = await getSupplierByAddress(accountList[0].toLocaleLowerCase());
-        console.log("🚀 ~ window.ethereum.request ~ user:", user)
-        setUser(user ?? undefined);
+      window.ethereum.on("accountsChanged", () => {
+        window.location.reload();
       });
+      window.ethereum.on("disconnect", () => {
+        window.location.reload();
+      });
+
+      if (window.ethereum.selectedAddress?.length > 0) {
+        requestAccounts(window);
+        setIsFirstTimeLogin(false);
+      } else {
+        setIsFirstTimeLogin(true);
+      }
+
+      // window.ethereum.request({ method: "eth_requestAccounts" }).then(async (accounts: ProviderAccounts) => {
+      //   const accountList = accounts as string[];
+      //   setAccount(accountList[0]);
+
+      //   const user = await getSupplierByAddress(accountList[0].toLocaleLowerCase());
+      //   setUser(user ?? undefined);
+      // });
     } else if (window.web3) {
       window.web3 = new Web3(window.web3.currentProvider);
     } else {
       console.log("Please install MetaMask!");
     }
   }, [setWeb3, setAccount, setUser, web3]);
+
+  const requestAccounts = async (window: Window & typeof globalThis) => {
+    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+    setAccount(accounts[0]);
+
+    setLoading(true);
+    const user = await getSupplierByAddress(accounts[0].toLocaleLowerCase());
+    setUser(user ?? undefined);
+    setLoading(false);
+    setIsFirstTimeLogin(false);
+    _toast("Đăng nhập thành công!", {
+      style: {
+        padding: "8px",
+        color: "#3eb049",
+      },
+    });
+  };
 
   // get contract
   useEffect(() => {
@@ -121,7 +159,7 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
     if (contract && !!processes && !!suppliers && !!!socials) getSocials();
   }, [contract, socials, , processes, suppliers, getSocials]);
 
-  if (!!!user)
+  if (isFirstTimeLogin == null || loading)
     return (
       <>
         <Backdrop sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })} open={true}>
@@ -129,5 +167,10 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
         </Backdrop>
       </>
     );
-  return <>{children}</>;
+
+  return isFirstTimeLogin != null && isFirstTimeLogin == true ? (
+    <Welcome onConnect={requestAccounts} />
+  ) : (
+    <>{children}</>
+  );
 }

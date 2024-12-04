@@ -1,5 +1,6 @@
 "use client";
 
+// import Welcome from "@/components/views/Welcome";
 import { useWeb3Store } from "@/stores/storeProvider";
 import { SidebarData } from "@/utils/const";
 import { usePathname } from "next/navigation";
@@ -21,6 +22,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     });
   }, [pathname, user]);
 
-  if (!!!user) return <div>Yêu cầu đăng nhập</div>;
+  // if (!!!user)
+  // return <Welcome onConnect={() => {}} />;
   return <>{children}</>;
 }
