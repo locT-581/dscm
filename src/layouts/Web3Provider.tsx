@@ -1,6 +1,6 @@
 "use client";
 
-import Web3 from "web3";
+import Web3, { ProviderAccounts } from "web3";
 import { useEffect, useState } from "react";
 
 import { Assessment, Origin } from "@/lib/abis";
@@ -64,12 +64,15 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
         window.location.reload();
       });
 
-      if (window.ethereum.selectedAddress?.length > 0) {
-        requestAccounts(window);
-        setIsFirstTimeLogin(false);
-      } else {
-        setIsFirstTimeLogin(true);
-      }
+      window.ethereum.request({ method: "eth_accounts" }).then(async (accounts: ProviderAccounts) => {
+        const accountList = accounts as string[];
+        if (accountList?.length > 0) {
+          requestAccounts(window);
+          setIsFirstTimeLogin(false);
+        } else {
+          setIsFirstTimeLogin(true);
+        }
+      });
 
       // window.ethereum.request({ method: "eth_requestAccounts" }).then(async (accounts: ProviderAccounts) => {
       //   const accountList = accounts as string[];
@@ -86,6 +89,7 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
   }, [setWeb3, setAccount, setUser, web3]);
 
   const requestAccounts = async (window: Window & typeof globalThis) => {
+    console.log("🚀 ~ requestAccounts ~ window:", window);
     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
     setAccount(accounts[0]);
 

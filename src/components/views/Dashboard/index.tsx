@@ -18,7 +18,7 @@ export default function Dashboard() {
 
   const [showCreateShip, setShowCreateShip] = useState(false);
 
-  if (!!!orders || !!!shipments || !!!processes) return null;
+  if (!!!orders || !!!shipments || !!!processes) return <>Loading...</>;
 
   return (
     <>
