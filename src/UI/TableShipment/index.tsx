@@ -138,6 +138,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
             </TableSortLabel>
           </TableCell>
         ))}
+        <TableCell align="center"></TableCell>
       </TableRow>
     </TableHead>
   );

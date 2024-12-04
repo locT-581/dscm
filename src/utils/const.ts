@@ -15,6 +15,12 @@ export const SidebarData: {
     isShow: true,
   },
   {
+    title: "Tổng quan",
+    path: "/tong-quan",
+    icon: "DashboardIcon",
+    isShow: false,
+  },
+  {
     title: "Sản phẩm",
     path: "/san-pham",
     icon: "ProductionQuantityLimitsIcon",

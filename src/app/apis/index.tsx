@@ -15,6 +15,7 @@ import {
   setDoc,
   query,
   where,
+  updateDoc,
 } from "firebase/firestore";
 
 /**
@@ -75,9 +76,19 @@ export const getSupplierByAddress = async (id: string): Promise<Supplier | null>
       website: doc.data().website,
     };
   });
-  console.log("🚀 ~ getSupplierByAddress ~ supplier:", supplier)
+  console.log("🚀 ~ getSupplierByAddress ~ supplier:", supplier);
 
   return supplier;
+};
+
+/**
+ * Update supplier to firestore
+ * @param supplier - Supplier
+ * @returns {Promise} - Promise<DocumentData>
+ */
+export const updateSupplier = async (supplier: Supplier): Promise<void> => {
+  const userDocRef = doc(db, "supplier", supplier.id); 
+  await updateDoc(userDocRef, {...supplier}); 
 };
 
 /**

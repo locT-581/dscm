@@ -6,28 +6,30 @@ import { useState } from "react";
 import makeAnimated from "react-select/animated";
 import Select from "react-select";
 import Process from "@/types/process";
-import { addSupplier } from "@/app/apis";
+import { addSupplier, updateSupplier } from "@/app/apis";
 import useToast from "@/hook/useToast";
+import Button from "@/UI/Button";
+import Title from "@/components/Title";
 
-const init: Supplier = {
-  id: "",
-  email: "",
-  phoneNumber: "",
-  address: "",
-  account: "",
-  name: "",
-  productsProcesses: [],
-  role: undefined,
-  taxCode: "",
-  type: "Doanh nghiệp",
-  website: "",
-};
-
-export default function AddSupplier() {
+export default function AddSupplier({ supplier }: { supplier?: Supplier }) {
   const { processes, getSuppliers } = useWeb3Store((state) => state);
   const animatedComponents = makeAnimated();
 
-  const [selectedProcesses, setSelectedProcesses] = useState<Process[]>([]);
+  const init: Supplier = {
+    id: supplier?.id ?? "",
+    email: supplier?.email ?? "",
+    phoneNumber: supplier?.phoneNumber ?? "",
+    address: supplier?.address ?? "",
+    account: supplier?.account ?? "",
+    name: supplier?.name ?? "",
+    productsProcesses: supplier?.productsProcesses ?? [],
+    role: supplier?.role ?? undefined,
+    taxCode: supplier?.taxCode ?? "",
+    type: supplier?.type ?? "Doanh nghiệp",
+    website: supplier?.website ?? "",
+  };
+
+  const [selectedProcesses, setSelectedProcesses] = useState<Process[]>(init.productsProcesses);
 
   const { update, notify } = useToast();
 
@@ -40,19 +42,30 @@ export default function AddSupplier() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    notify("Đang thêm nhà cung cấp...");
-    addSupplier({
-      ...form,
-      productsProcesses: selectedProcesses?.map((process) => process),
-      account: form.account.toLowerCase(),
-      role: "Supplier",
-    }).then(() => {
-      getSuppliers();
 
-      setForm(init);
-      setSelectedProcesses([]);
-      update(true, "Thêm nhà cung cấp thành công");
-    });
+    if (supplier) {
+      notify("Đang cập nhật nhà cung cấp...");
+      updateSupplier({
+        ...form,
+        productsProcesses: selectedProcesses?.map((process) => process),
+        account: form.account.toLowerCase(),
+        role: "Supplier",
+      });
+    } else {
+      notify("Đang thêm nhà cung cấp...");
+      addSupplier({
+        ...form,
+        productsProcesses: selectedProcesses?.map((process) => process),
+        account: form.account.toLowerCase(),
+        role: "Supplier",
+      }).then(() => {
+        getSuppliers();
+
+        setForm(init);
+        setSelectedProcesses([]);
+        update(true, "Thêm nhà cung cấp thành công");
+      });
+    }
   };
 
   return (
@@ -60,16 +73,14 @@ export default function AddSupplier() {
       onClick={(e) => {
         e.stopPropagation();
       }}
-      className="bg-slate-100 p-4 rounded-3xl flex flex-col gap-4"
+      className=" p-4 pl-5 rounded-3xl flex flex-col gap-6"
     >
-      <div className="flex w-full justify-between">
-        <h2 className="w-full text-start text-4xl text-[#2D3581] font-semibold">Thêm nhà cung cấp</h2>
-      </div>
+      <Title>{`${!supplier ? "Thêm" : "Sửa"}  nhà cung cấp`}</Title>
 
       <form onSubmit={handleSubmit} className=" flex flex-col gap-5">
         <div className="flex items-center gap-3">
           <div className="flex gap-4 items-center">
-            <label htmlFor="name" className="text-lg font-medium text-black flex flex-shrink-0">
+            <label htmlFor="name" className="text-lg font-medium  flex flex-shrink-0">
               Tên nhà cung cấp
             </label>
             <input
@@ -81,12 +92,12 @@ export default function AddSupplier() {
               id="name"
               name="name"
               type="text"
-              className="text-black !bg-transparent w-full border border-[#D9DBE9] rounded-lg py-1 px-4 mt-1"
+              className=" !bg-transparent w-full border border-[#D9DBE9] rounded-lg py-1 px-4 mt-1"
             />
           </div>
 
           <div className="flex gap-1 items-center">
-            <label htmlFor="type" className="text-lg font-medium text-black flex flex-shrink-0">
+            <label htmlFor="type" className="text-lg font-medium  flex flex-shrink-0">
               Loại
             </label>
             <select
@@ -96,7 +107,7 @@ export default function AddSupplier() {
               value={form.type}
               name="type"
               id="type"
-              className="cursor-pointer !bg-transparent max-w-[300px] !border !border-[#D9DBE9] rounded-lg py-1 px-4  text-black"
+              className="cursor-pointer !bg-transparent max-w-[300px] !border !border-[#D9DBE9] rounded-lg py-1 px-4  "
             >
               {["Doanh nghiệp", "Cá nhân"].map((type, i) => (
                 <option key={type ?? i} value={type}>
@@ -109,7 +120,7 @@ export default function AddSupplier() {
 
         <div className="flex justify-between items-center gap-2">
           <div className="flex gap-4 items-center">
-            <label htmlFor="email" className="text-lg font-medium text-black flex flex-shrink-0">
+            <label htmlFor="email" className="text-lg font-medium  flex flex-shrink-0">
               Email
             </label>
             <input
@@ -120,12 +131,12 @@ export default function AddSupplier() {
               id="email"
               name="email"
               type="email"
-              className="text-black !bg-transparent w-full border border-[#D9DBE9] rounded-lg py-1 px-4 mt-1"
+              className=" !bg-transparent w-full border border-[#D9DBE9] rounded-lg py-1 px-4 mt-1"
             />
           </div>
 
           <div className="flex gap-4 items-center">
-            <label htmlFor="phoneNumber" className="text-lg font-medium text-black flex flex-shrink-0">
+            <label htmlFor="phoneNumber" className="text-lg font-medium  flex flex-shrink-0">
               Số điện thoại
             </label>
             <input
@@ -137,13 +148,13 @@ export default function AddSupplier() {
               id="phoneNumber"
               name="phoneNumber"
               type="text"
-              className="text-black !bg-transparent w-full border border-[#D9DBE9] rounded-lg py-1 px-4 mt-1"
+              className=" !bg-transparent w-full border border-[#D9DBE9] rounded-lg py-1 px-4 mt-1"
             />
           </div>
         </div>
 
         <div className="flex gap-4 items-center">
-          <label htmlFor="address" className="text-lg font-medium text-black flex flex-shrink-0">
+          <label htmlFor="address" className="text-lg font-medium  flex flex-shrink-0">
             Địa chỉ
           </label>
           <input
@@ -155,13 +166,13 @@ export default function AddSupplier() {
             id="address"
             name="address"
             type="text"
-            className="text-black !bg-transparent w-full border border-[#D9DBE9] rounded-lg py-1 px-4 mt-1"
+            className=" !bg-transparent w-full border border-[#D9DBE9] rounded-lg py-1 px-4 mt-1"
           />
         </div>
 
         <div className="flex justify-between items-center gap-2">
           <div className="flex gap-4 items-center">
-            <label htmlFor="taxCode" className="text-lg font-medium text-black flex flex-shrink-0">
+            <label htmlFor="taxCode" className="text-lg font-medium  flex flex-shrink-0">
               Mã số thuế
             </label>
             <input
@@ -172,12 +183,12 @@ export default function AddSupplier() {
               id="taxCode"
               name="taxCode"
               type="text"
-              className="text-black !bg-transparent w-full border border-[#D9DBE9] rounded-lg py-1 px-4 mt-1"
+              className=" !bg-transparent w-full border border-[#D9DBE9] rounded-lg py-1 px-4 mt-1"
             />
           </div>
 
           <div className="flex gap-4 items-center">
-            <label htmlFor="website" className="text-lg font-medium text-black flex flex-shrink-0">
+            <label htmlFor="website" className="text-lg font-medium  flex flex-shrink-0">
               Website
             </label>
             <input
@@ -189,13 +200,13 @@ export default function AddSupplier() {
               id="website"
               name="website"
               type="text"
-              className="text-black !bg-transparent w-full border border-[#D9DBE9] rounded-lg py-1 px-4 mt-1"
+              className=" !bg-transparent w-full border border-[#D9DBE9] rounded-lg py-1 px-4 mt-1"
             />
           </div>
         </div>
 
         <div className="flex gap-4 items-center">
-          <label htmlFor="account" className="text-lg font-medium text-black flex flex-shrink-0">
+          <label htmlFor="account" className="text-lg font-medium  flex flex-shrink-0">
             Địa chỉ ví
           </label>
           <input
@@ -207,7 +218,7 @@ export default function AddSupplier() {
             id="account"
             name="account"
             type="text"
-            className="text-black !bg-transparent w-full border border-[#D9DBE9] rounded-lg py-1 px-4 mt-1"
+            className=" !bg-transparent w-full border border-[#D9DBE9] rounded-lg py-1 px-4 mt-1"
           />
         </div>
 
@@ -217,6 +228,7 @@ export default function AddSupplier() {
           </label>
 
           <Select
+            defaultValue={init.productsProcesses.map((process) => ({ value: process.id, label: process.name }))}
             required
             closeMenuOnSelect={false}
             components={animatedComponents}
@@ -234,10 +246,8 @@ export default function AddSupplier() {
           />
         </div>
 
-        <div className="w-full py-4">
-          <button type="submit" className=" w-fit text-white bg-[#2D3581] rounded-full !py-2 !px-6 float-right">
-            Xác nhận
-          </button>
+        <div className="w-full flex justify-end py-4">
+          <Button>Xác nhận</Button>
         </div>
       </form>
     </div>

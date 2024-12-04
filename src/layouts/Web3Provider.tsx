@@ -58,9 +58,11 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
       setWeb3(web3Instance);
 
       window.ethereum.on("accountsChanged", () => {
+        console.log("accountsChanged");
         window.location.reload();
       });
       window.ethereum.on("disconnect", () => {
+        console.log("disconnect");
         window.location.reload();
       });
 
@@ -86,10 +88,9 @@ export default function Web3Provider({ children }: IWeb3ProviderProps) {
     } else {
       console.log("Please install MetaMask!");
     }
-  }, [setWeb3, setAccount, setUser, web3]);
+  }, [setWeb3, web3]);
 
   const requestAccounts = async (window: Window & typeof globalThis) => {
-    console.log("🚀 ~ requestAccounts ~ window:", window);
     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
     setAccount(accounts[0]);
 

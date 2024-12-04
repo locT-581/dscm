@@ -14,6 +14,7 @@ import getDate from "@/utils/getDate";
 import { addOrder as addOrderToFireStore } from "@/app/apis";
 import Process from "@/types/process";
 import Supplier from "@/types/supplier";
+import Title from "@/components/Title";
 
 export default function AddOrder() {
   const { update, notify } = useToast();
@@ -98,9 +99,10 @@ export default function AddOrder() {
   };
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col w-full h-full gap-2">
+    <form onSubmit={onSubmit} className="flex flex-col w-full h-full gap-6">
       <div className="flex items-center justify-between">
-        <h4 className="text-2xl font-semibold">Tạo đơn hàng</h4>
+        <Title>Tạo đơn hàng</Title>
+
         <Button type="submit">
           <AddCircleOutlineIcon />
           <p className="ml-1">Tạo</p>

@@ -17,6 +17,8 @@ import Link from "next/link";
 import Button from "../Button";
 import { Tooltip } from "@mui/material";
 import Process from "@/types/process";
+import Option from "@/components/Option";
+import { useRouter } from "next/navigation";
 
 interface Data {
   name: string;
@@ -24,6 +26,7 @@ interface Data {
   address: string;
   processes: Process[];
   phoneNumber: string;
+  id: string;
 }
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -162,6 +165,7 @@ export default function TableSuppliers({ rowList }: { rowList: Data[] }) {
       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   }, [order, orderBy, page, rowsPerPage, rows]);
 
+  const router = useRouter();
   return (
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2, background: "transparent" }}>
@@ -202,6 +206,15 @@ export default function TableSuppliers({ rowList }: { rowList: Data[] }) {
                     <TableCell align="center">{row.processes}</TableCell>
                     <TableCell align="center">{row.address}</TableCell>
                     <TableCell align="center">{row.phoneNumber}</TableCell>
+                    <TableCell align="center">
+                      <Option
+                        onEdit={() => {
+                          console.log(row.id);
+                          router.push("/nha-cung-cap/chinh-sua?id=" + row.id);
+                        }}
+                        onDelete={() => {}}
+                      />
+                    </TableCell>
                   </TableRow>
                 );
               })}

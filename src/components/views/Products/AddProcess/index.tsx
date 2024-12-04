@@ -9,6 +9,7 @@ import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
 import { addProcess } from "@/app/apis";
 import useToast from "@/hook/useToast";
 import { useWeb3Store } from "@/stores/storeProvider";
+import Title from "@/components/Title";
 
 export interface ColourOption {
   readonly value: string;
@@ -55,9 +56,10 @@ export default function AddProcess() {
   };
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col w-full h-full gap-3">
+    <form onSubmit={onSubmit} className="flex flex-col w-full h-full gap-6">
       <div className="flex items-center justify-between">
-        <h4 className="text-2xl font-semibold">Thêm quy trình sản phẩm</h4>
+        <Title>Thêm quy trình sản phẩm</Title>
+
         <Button type="submit">
           <FileDownloadDoneIcon />
           <p className="ml-1">Lưu</p>
@@ -66,7 +68,7 @@ export default function AddProcess() {
 
       <div className="flex justify-between pr-8 gap-4 ">
         <div className="w-full flex justify-between pr-8 gap-4 ">
-          <div className="flex flex-col gap-4 w-full border border-[#ab9797] rounded-xl p-4">
+          <div className="flex flex-col gap-4 w-full rounded-xl p-4">
             <h4 className="text-xl font-semibold">Thông tin chung</h4>
 
             <div className="flex flex-col gap-1">

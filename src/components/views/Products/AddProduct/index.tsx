@@ -21,6 +21,7 @@ import Process from "@/types/process";
 // import { Property } from "@/types/product";
 import { addProduct as addProductToFireStore } from "@/app/apis/index";
 import Unit from "@/types/unit";
+import Title from "@/components/Title";
 export interface ColourOption {
   readonly value: string;
   readonly label: string;
@@ -115,9 +116,10 @@ export default function AddProduct() {
   // };
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col w-full h-full gap-2">
+    <form onSubmit={onSubmit} className="flex flex-col w-full h-full gap-6">
       <div className="flex items-center justify-between">
-        <h4 className="text-2xl font-semibold">Thêm sản phẩm mới</h4>
+        <Title>Thêm sản phẩm mới</Title>
+
         <Button type="submit">
           <FileDownloadDoneIcon />
           <p className="ml-1">Lưu</p>
@@ -331,7 +333,7 @@ export default function AddProduct() {
         </div>
 
         <div className="w-[40%] h-full flex flex-col gap-3">
-          <div className="border border-[#f00] rounded-xl flex flex-col gap-4 p-4 max-h-[50vh] h-full">
+          <div className="border border-[#f00] rounded-xl flex flex-col gap-4 p-4 max-h-[50vh] min-h-[35vh] h-full">
             <h4 className="text-xl font-semibold">Hình ảnh</h4>
 
             <div
@@ -339,7 +341,7 @@ export default function AddProduct() {
                 if (!!file) return;
                 inputRef.current?.click();
               }}
-              className="flex items-center justify-center h-full w-full cursor-pointer"
+              className="flex items-center justify-center h-[82%] w-full cursor-pointer "
             >
               <input
                 ref={inputRef}
