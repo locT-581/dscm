@@ -15,18 +15,22 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Link from "next/link";
 import Button from "../Button";
+import Option from "@/components/Option";
+import { useRouter } from "next/navigation";
 
 interface Data {
   id: string;
+  _id: string;
   image: string;
   name: string;
   description: string;
   date: string;
 }
 
-function createData(id: string, image: string, name: string, description: string, date: string): Data {
+function createData(id: string, _id: string, image: string, name: string, description: string, date: string): Data {
   return {
     id,
+    _id,
     name,
     image,
     date,
@@ -144,7 +148,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 export default function TableProcesses({ rowList }: { rowList: Data[] }) {
   const [rows] = React.useState(
-    rowList.map((row) => createData(row.id, row.image, row.name, row.description, row.date))
+    rowList.map((row) => createData(row.id, row._id, row.image, row.name, row.description, row.date))
   );
   const [order, setOrder] = React.useState<Order>("desc");
   const [orderBy, setOrderBy] = React.useState<keyof Data>("date");
@@ -176,6 +180,7 @@ export default function TableProcesses({ rowList }: { rowList: Data[] }) {
       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   }, [order, orderBy, page, rowsPerPage, rows]);
 
+  const router = useRouter();
   return (
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2, background: "transparent" }}>
@@ -221,6 +226,14 @@ export default function TableProcesses({ rowList }: { rowList: Data[] }) {
                     <TableCell align="center">{row.name}</TableCell>
                     <TableCell align="center">{row.description}</TableCell>
                     <TableCell align="center">{row.date}</TableCell>
+                    <TableCell align="center">
+                      <Option
+                        onDelete={() => {}}
+                        onEdit={() => {
+                          router.push(`/san-pham/sua-quy-trinh?id=${row._id}`);
+                        }}
+                      />
+                    </TableCell>
                   </TableRow>
                 );
               })}

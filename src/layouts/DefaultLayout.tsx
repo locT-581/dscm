@@ -29,7 +29,7 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
   return (
     <div className="flex justify-between h-screen w-screen overflow-auto relative">
       {/* <Background className="absolute top-0 left-0 -z-[1]" width={width} height={height} /> */}
-      <Image src="icons/background.svg" alt="background" fill className="absolute top-0 left-0 -z-[1] object-cover" />
+      <Image src="/icons/background.svg" alt="background" fill className="absolute top-0 left-0 -z-[1] object-cover" />
       <Sidebar />
       <div className="flex flex-col gap-3 w-full h-full p-4 !pr-8 overflow-auto">
         <header className="w-full flex items-center justify-between">

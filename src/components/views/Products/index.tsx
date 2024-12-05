@@ -39,6 +39,7 @@ export default function Products() {
                   image: p.image,
                   description: p.description ?? "",
                   date: p.date,
+                  _id: p.id,
                 }))}
               />
             ),

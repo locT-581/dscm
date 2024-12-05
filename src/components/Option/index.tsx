@@ -7,11 +7,14 @@ import { useState } from "react";
 import MenuItem from "@mui/material/MenuItem";
 
 export interface IOptionProps {
-  onEdit: () => void;
-  onDelete: () => void;
+  options: {
+    label: string;
+    onClick: () => void;
+    className?: string;
+  }[];
 }
 
-export default function Option({ onEdit, onDelete }: IOptionProps) {
+export default function Option({ options }: IOptionProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -19,7 +22,6 @@ export default function Option({ onEdit, onDelete }: IOptionProps) {
   };
   const handleClose = () => {
     setAnchorEl(null);
-    onDelete();
   };
   return (
     <div>
@@ -49,23 +51,11 @@ export default function Option({ onEdit, onDelete }: IOptionProps) {
           },
         }}
       >
-        <MenuItem
-          onClick={() => {
-            onEdit();
-            handleClose();
-          }}
-        >
-          Sửa
-        </MenuItem>
-        {/* <MenuItem
-          className="text-red-500"
-          onClick={() => {
-            onDelete();
-            handleClose();
-          }}
-        >
-          Xoá
-        </MenuItem> */}
+        {options.map((option) => (
+          <MenuItem key={option.label} onClick={option.onClick} className={option.className}>
+            {option.label}
+          </MenuItem>
+        ))}
       </Menu>
     </div>
   );

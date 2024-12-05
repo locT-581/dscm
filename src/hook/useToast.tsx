@@ -66,12 +66,12 @@ export default function useToast() {
     toast(
       mss,
       toastConfig({
-        ...params,
         icon: (
           <div>
             <CheckCircleOutlineIcon sx={{ color: "#3eb049", fontSize: "24px" }} />
           </div>
         ),
+        ...params,
       })
     );
 

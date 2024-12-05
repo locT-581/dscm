@@ -3,13 +3,14 @@
 
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Button from "@/UI/Button";
 import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
-import { addProcess } from "@/app/apis";
+import { addProcess, updateProcess } from "@/app/apis";
 import useToast from "@/hook/useToast";
 import { useWeb3Store } from "@/stores/storeProvider";
 import Title from "@/components/Title";
+import Process from "@/types/process";
 
 export interface ColourOption {
   readonly value: string;
@@ -19,7 +20,7 @@ export interface ColourOption {
   readonly isDisabled?: boolean;
 }
 
-export default function AddProcess() {
+export default function AddProcess({ process }: { process?: Process }) {
   const { update, notify } = useToast();
   const { getProcess } = useWeb3Store((state) => state);
 
@@ -29,8 +30,29 @@ export default function AddProcess() {
     setFile(e.target?.files?.[0]);
   };
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState<string>("");
+  useEffect(() => {
+    (async () => {
+      if (process) {
+        const response = await fetch(process.image);
+        const blob = await response.blob();
+
+        // Tạo một đối tượng File từ blob
+        const file = new File([blob], "default-image.jpg", { type: "image/jpeg" });
+
+        // Tạo một DataTransfer để gán file vào input
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        inputRef.current!.files = dataTransfer.files;
+
+        setFile(dataTransfer.files[0]);
+      }
+    })();
+  }, []);
+
+  const [name, setName] = useState(process?.name ?? "");
+  const [description, setDescription] = useState<string>(process?.description ?? "");
+
+  const [disabled, setDisabled] = useState(false);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,27 +62,36 @@ export default function AddProcess() {
     data.set("file", file);
 
     notify("Đang lưu quy trình...");
+    setDisabled(true);
+
     const uploadRequest = await fetch("/api/files", {
       method: "POST",
       body: data,
     });
     const ipfsUrl = await uploadRequest.json();
-    addProcess({ id: "", name, description, image: ipfsUrl }).then(() => {
-      setName("");
-      setDescription("");
-      setFile(undefined);
 
-      getProcess();
-      update(true, "Đã thêm quy trình sản phẩm thành công!");
-    });
+    if (process) {
+      updateProcess({ ...process, name, description, image: ipfsUrl }).then(() => {
+        update(true, "Đã sửa quy trình sản phẩm thành công!");
+      });
+    } else {
+      addProcess({ id: "", name, description, image: ipfsUrl }).then(() => {
+        setName("");
+        setDescription("");
+        setFile(undefined);
+        getProcess();
+        update(true, "Đã thêm quy trình sản phẩm thành công!");
+      });
+    }
+    setDisabled(false);
   };
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col w-full h-full gap-6">
       <div className="flex items-center justify-between">
-        <Title>Thêm quy trình sản phẩm</Title>
+        <Title>{`${process ? "Sửa" : "Thêm"} quy trình sản phẩm`}</Title>
 
-        <Button type="submit">
+        <Button type="submit" disabled={disabled || !name || !description || !file}>
           <FileDownloadDoneIcon />
           <p className="ml-1">Lưu</p>
         </Button>

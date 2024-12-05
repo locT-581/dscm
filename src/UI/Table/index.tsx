@@ -19,6 +19,7 @@ import Button from "../Button";
 import { useWeb3Store } from "@/stores/storeProvider";
 import Process from "@/types/process";
 import { Backdrop } from "@mui/material";
+import Option from "@/components/Option";
 // import { visuallyHidden } from "@mui/utils";
 
 interface Data {
@@ -28,6 +29,7 @@ interface Data {
   quantity: number;
   unit: Unit;
   date: string;
+  dateCreate: string;
   status: "Done" | "Processing" | Process;
 }
 
@@ -38,7 +40,8 @@ function createData(
   quantity: number,
   unit: Unit,
   date: string,
-  status: "Done" | "Processing" | Process
+  status: "Done" | "Processing" | Process,
+  dateCreate: string
 ): Data {
   return {
     id,
@@ -48,6 +51,7 @@ function createData(
     date,
     status,
     image,
+    dateCreate,
   };
 }
 
@@ -129,10 +133,11 @@ interface EnhancedTableProps {
   onRequestSort: (event: React.MouseEvent<unknown>, property: keyof Data) => void;
   order: Order;
   orderBy: string;
+  isAdmin: boolean;
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
-  const { order, orderBy, onRequestSort } = props;
+  const { order, orderBy, onRequestSort, isAdmin } = props;
   const createSortHandler = (property: keyof Data) => (event: React.MouseEvent<unknown>) => {
     onRequestSort(event, property);
   };
@@ -152,7 +157,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
               direction={orderBy === headCell.id ? order : "asc"}
               onClick={createSortHandler(headCell.id)}
             >
-              {headCell.label}
+              {headCell.id == "date" ? (isAdmin ? "Ngày tạo" : "Ngày giao hàng dự kiến") : headCell.label}
               {/* {orderBy === headCell.id ? (
                 // <Box component="span" sx={visuallyHidden}>
                 <Box component="span">{order === "desc" ? "Giảm dần" : "sorted ascending"}</Box>
@@ -175,12 +180,15 @@ export default function EnhancedTable({
     quantity: number;
     unit: Unit;
     date: string;
+    dateCreate: string;
     status: "Done" | "Processing" | Process;
   }[];
 }) {
   const { user } = useWeb3Store((state) => state);
   const [rows] = React.useState(
-    rowList.map((row) => createData(row.id, row.image, row.name, row.quantity, row.unit, row.date, row.status))
+    rowList.map((row) =>
+      createData(row.id, row.image, row.name, row.quantity, row.unit, row.date, row.status, row.dateCreate)
+    )
   );
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<keyof Data>("id");
@@ -243,7 +251,12 @@ export default function EnhancedTable({
 
           <TableContainer>
             <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={"medium"}>
-              <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
+              <EnhancedTableHead
+                isAdmin={user?.role == "Focal company"}
+                order={order}
+                orderBy={orderBy}
+                onRequestSort={handleRequestSort}
+              />
               <TableBody>
                 {visibleRows.map((row, index) => {
                   const labelId = `enhanced-table-checkbox-${index}`;
@@ -273,6 +286,14 @@ export default function EnhancedTable({
                       <TableCell align="center">{row.quantity}</TableCell>
                       <TableCell align="center">{row.unit}</TableCell>
                       <TableCell align="center">{row.date}</TableCell>
+                      <TableCell align="center">
+                        <Option
+                          options={[
+                            { label: "Chấp nhận", onClick: () => {} },
+                            { label: "Huỷ", onClick: () => {}, className: "text-red-500" },
+                          ]}
+                        />
+                      </TableCell>
                       {/* <TableCell align="center">{row.status}</TableCell> */}
                       <TableCell align="center"></TableCell>
                     </TableRow>

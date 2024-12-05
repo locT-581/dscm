@@ -124,27 +124,24 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
               process: get().processes?.find((p) => p.id == process.processID) as Process,
               supplier: get().suppliers?.find((s) => s.id == process.supplierID) as Supplier,
               status: process.status,
+              expectedFinishDate: process.expectedFinishDate,
+              actualFinishDate: process.actualFinishDate,
             })) ?? [],
           statusProcess: get().processes?.find((p) => p.id == orderOffChain?.statusProcessID) ?? null,
         };
+
+        console.log("🚀 ~ getOrders: ~ newOrder:", newOrder);
 
         orders.push(newOrder);
       }
 
       let filterOrder: Order[] = [];
       if (user?.role == "Supplier") {
-        filterOrder = orders.filter((order) => {
-          // Check if process of product of order has supplier is current user
-          const listProcess = order?.product?.process.map((p) => p.id);
-          const processOfUser = user.productsProcesses.map((p) => p.id);
-          return (
-            order.process.find((process) => process.supplier?.id == user.id) ||
-            listProcess?.some((p) => processOfUser.includes(p))
-          );
-        });
+        filterOrder = orders.filter((order) => order.process.some((p) => p.supplier?.id == user?.id));
       } else if (user?.role == "Focal company") {
         filterOrder = orders;
       }
+      console.log("🚀 ~ getOrders: ~ filterOrder:", filterOrder);
       set(() => ({ loading: false }));
       set(() => ({ orders: filterOrder }));
     },

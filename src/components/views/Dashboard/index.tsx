@@ -9,10 +9,12 @@ import { ShipType } from "@/types/common";
 import Tabs from "@/UI/Tabs";
 import EnhancedTable from "@/UI/Table";
 import { Backdrop } from "@mui/material";
-import TableShipment from "@/UI/TableShipment";
+// import TableShipment from "@/UI/TableShipment";
+import formatDate from "@/utils/formatDate";
 
 export default function Dashboard() {
-  const { shipments, orders, processes } = useWeb3Store((state) => state);
+  const { shipments, orders, processes, user } = useWeb3Store((state) => state);
+  console.log("🚀 ~ Dashboard ~ shipments:", user, orders);
 
   const [shipType, setShipType] = useState<ShipType>("Send");
 
@@ -44,7 +46,7 @@ export default function Dashboard() {
       </header>
 
       {/* <Shipment shipments={shipments} orders={orders} /> */}
-      <Tabs>
+      {/* <Tabs>
         {[
           {
             title: "Danh sách đơn hàng",
@@ -78,6 +80,103 @@ export default function Dashboard() {
                     processes: processes.find((process) => process.id === shipment?.process?.id)?.name ?? "Rỗng",
                     image: shipment?.product?.image ?? "",
                     imageProcess: processes.find((process) => process.id === shipment?.process?.id)?.image ?? "",
+                  }))}
+              />
+            ),
+          },
+        ]}
+      </Tabs> */}
+
+      <Tabs>
+        {[
+          {
+            title: "Chờ xác nhận",
+            element: (
+              <EnhancedTable
+                rowList={orders
+                  .filter((o) => !!o.product)
+                  .filter((o) => o.process.some((p) => p.status === "WaitingConfirm"))
+                  .map((order) => ({
+                    quantity: order.quantity,
+                    unit: order.unit,
+                    name: order?.product?.name ?? "Rỗng",
+                    id: +order.id,
+                    status: "Processing",
+                    image: order?.product?.image ?? "",
+                    date: order?.process.find((p) => p.supplier?.id == user?.id)?.expectedFinishDate ?? "",
+                    dateCreate: formatDate(order.date),
+                  }))}
+              />
+            ),
+          },
+          {
+            title: "Đang chờ",
+            element: (
+              <EnhancedTable
+                rowList={orders
+                  .filter((o) => !!o.product)
+                  .filter((o) => o.process.some((p) => p.status === "Waiting"))
+                  .map((order) => ({
+                    ...order,
+                    name: order?.product?.name ?? "Rỗng",
+                    image: order?.product?.image ?? "",
+                    status: "Done",
+                    id: +order.id,
+                    dateCreate: formatDate(order.date),
+                  }))}
+              />
+            ),
+          },
+          {
+            title: "Đang thực hiện",
+            element: (
+              <EnhancedTable
+                rowList={orders
+                  .filter((o) => !!o.product)
+                  .filter((o) => o.process.some((p) => p.status === "Processing"))
+                  .map((order) => ({
+                    ...order,
+                    name: order?.product?.name ?? "Rỗng",
+                    image: order?.product?.image ?? "",
+                    status: "Done",
+                    id: +order.id,
+                    dateCreate: formatDate(order.date),
+                  }))}
+              />
+            ),
+          },
+          {
+            title: "Hoàn thành",
+            element: (
+              <EnhancedTable
+                rowList={orders
+                  .filter((o) => !!o.product)
+                  .filter((o) => o.process.some((p) => p.status === "Done" || p.status === "Late"))
+                  .map((order) => ({
+                    ...order,
+                    name: order?.product?.name ?? "Rỗng",
+                    image: order?.product?.image ?? "",
+                    status: "Done",
+                    id: +order.id,
+                    dateCreate: formatDate(order.date),
+                  }))}
+              />
+            ),
+          },
+          {
+            title: "Huỷ",
+            element: (
+              <EnhancedTable
+                rowList={orders
+                  .filter((o) => !!o.product)
+                  .filter((o) => o.process.some((p) => p.status === "Cancel"))
+                  .map((order) => ({
+                    ...order,
+                    name: order?.product?.name ?? "Rỗng",
+                    image: order?.product?.image ?? "",
+                    status: "Done",
+                    id: +order.id,
+                    dateCreate: formatDate(order.date),
                   }))}
               />
             ),

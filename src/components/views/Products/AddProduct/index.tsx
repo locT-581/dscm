@@ -54,7 +54,8 @@ export default function AddProduct() {
   const [d, setD] = useState("");
 
   useEffect(() => {
-    const date = getDate();
+    // const date = getDate();
+    const date = new Date().toISOString();
     setDate(date);
   }, [d]);
 

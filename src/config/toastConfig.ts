@@ -12,7 +12,6 @@ export function toastConfig(params?: ToastOptions): ToastOptions {
     closeButton: true,
 
     style: {
-      height: "fit-content",
       // fontSize: "17px",
       // fontWeight: 700,
       padding: "0px 12px",

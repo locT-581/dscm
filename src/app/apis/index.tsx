@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebase";
-import { OrderFireStore } from "@/types/order";
+import { OrderFireStore, OrderStatus } from "@/types/order";
 import Process from "@/types/process";
 import Product, { ProductOffChain } from "@/types/product";
 import Supplier from "@/types/supplier";
@@ -87,8 +87,8 @@ export const getSupplierByAddress = async (id: string): Promise<Supplier | null>
  * @returns {Promise} - Promise<DocumentData>
  */
 export const updateSupplier = async (supplier: Supplier): Promise<void> => {
-  const userDocRef = doc(db, "supplier", supplier.id); 
-  await updateDoc(userDocRef, {...supplier}); 
+  const userDocRef = doc(db, "supplier", supplier.id);
+  await updateDoc(userDocRef, { ...supplier });
 };
 
 /**
@@ -234,6 +234,16 @@ export const getAllProcesses = async (): Promise<Process[]> => {
 };
 
 /**
+ * Update process in fire store
+ * @param process - Process
+ * @returns {Promise} - Promise<DocumentData>
+ */
+export const updateProcess = async (process: Process): Promise<void> => {
+  const docRef = doc(db, "product-process", process.id);
+  return await updateDoc(docRef, { ...process });
+};
+
+/**
  * Get all Orders from fire store
  */
 export const getAllOrders = async (): Promise<OrderFireStore[]> => {
@@ -270,4 +280,15 @@ export const addOrder = async (order: OrderFireStore, id: string): Promise<void>
     ...order,
     createdAt: serverTimestamp(),
   });
+};
+
+/**
+ * Update order status
+ * @param id - string
+ * @param status - string
+ * @returns {Promise} - Promise<void>
+ */
+export const updateOrderStatus = async (id: string, status: OrderStatus): Promise<void> => {
+  const docRef = doc(db, "order", id);
+  return await updateDoc(docRef, { "process.$.status": status });
 };

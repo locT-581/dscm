@@ -3,6 +3,7 @@ import Product from "./product";
 import Supplier from "./supplier";
 import Unit from "./unit";
 
+export type OrderStatus = "Done" | "Processing" | "Waiting" | "Cancel" | "Late" | "WaitingConfirm";
 export interface OrderOnChain {
   id: string;
   /**
@@ -34,7 +35,9 @@ export interface OrderFireStore {
   process: {
     processID: string;
     supplierID?: string | null;
-    status: "Done" | "Processing";
+    status: OrderStatus;
+    expectedFinishDate: string;
+    actualFinishDate: string | null;
   }[];
   quantity: number;
   date: string;
@@ -49,7 +52,9 @@ export default interface Order {
   process: {
     process: Process;
     supplier?: Supplier | null;
-    status: "Done" | "Processing";
+    status: OrderStatus;
+    expectedFinishDate: string;
+    actualFinishDate: string | null;
   }[];
   quantity: number;
   date: string;
