@@ -21,6 +21,12 @@ export const SidebarData: {
     isShow: false,
   },
   {
+    title: "Giao nhận hàng",
+    path: "/quan-ly-giao-nhan-hang",
+    icon: "LocalShippingIcon",
+    isShow: true,
+  },
+  {
     title: "Sản phẩm",
     path: "/san-pham",
     icon: "ProductionQuantityLimitsIcon",
@@ -116,6 +122,7 @@ export const units: Unit[] = [
   { id: "kg", name: "kg" },
   { id: "liter", name: "lít" },
   { id: "items", name: "cái" },
+  { id: "pair", name: "đôi" },
 ];
 
 export const SupplierType = [{ id: "" }];

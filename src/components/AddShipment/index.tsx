@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import Select from "react-select";
 import makeAnimated from "react-select/animated";
 
-import getDate from "@/utils/getDate";
 import { GeocodeResponse, Position, ShipType } from "@/types/common";
 import axiosClient from "@/services/axiosClient";
 import { useWeb3Store } from "@/stores/storeProvider";
@@ -14,12 +13,14 @@ import CustomizedSteppers from "../HorizontalStepper";
 import Button from "@/UI/Button";
 import CloseIcon from "@mui/icons-material/Close";
 import useToast from "@/hook/useToast";
+import { updateOrderProcessStatus, updateOrderStatus } from "@/app/apis";
 export interface IAddShipmentProps {
   shipType: ShipType;
   onShipAdd: () => void;
+  initOrder?: Order;
 }
 
-export default function AddShipment({ shipType: _shipType, onShipAdd }: IAddShipmentProps) {
+export default function AddShipment({ shipType: _shipType, onShipAdd, initOrder }: IAddShipmentProps) {
   const { orders, contract, account, user, getShipments, getOrders } = useWeb3Store((state) => state);
 
   const { notify, update } = useToast();
@@ -33,7 +34,11 @@ export default function AddShipment({ shipType: _shipType, onShipAdd }: IAddShip
 
   // address of the current location
   const [place, setPlace] = useState<string>("");
-  const [order, setOrder] = useState<Order>();
+  const [order, setOrder] = useState<Order | undefined>(initOrder ?? undefined);
+
+  useEffect(() => {
+    if (initOrder) setOrder(initOrder);
+  }, [initOrder]);
 
   const [shipmentCount, setShipmentCount] = useState<number>(0);
 
@@ -48,7 +53,7 @@ export default function AddShipment({ shipType: _shipType, onShipAdd }: IAddShip
   // const orderName = orders?.filter((obj) => obj.id.toString().includes(product)).map((order) => order.name);
 
   useEffect(() => {
-    setDate(getDate());
+    setDate(new Date().toLocaleString());
     getLocation();
   }, [d]);
 
@@ -85,7 +90,7 @@ export default function AddShipment({ shipType: _shipType, onShipAdd }: IAddShip
     }
   };
 
-  const addShipment = ({
+  const addShipment = async ({
     shipType,
     place,
     latlong,
@@ -102,10 +107,38 @@ export default function AddShipment({ shipType: _shipType, onShipAdd }: IAddShip
     account?: string;
   }) => {
     notify("Đang thêm...");
-    contract?.methods
+    await contract?.methods
       .addShipment(shipType, place, latlong, date, product, process)
       .send({ from: account })
       .once("receipt", async () => {
+        if (_shipType === "Send") {
+          await updateOrderProcessStatus(
+            order?.id ?? "",
+            order?.process.map((p) =>
+              p.supplier?.id == user?.id
+                ? { ...p, processID: p.process.id, status: "Done", actualFinishDate: new Date(date).toISOString() }
+                : { ...p, processID: p.process.id }
+            ) ?? null
+          );
+
+          const index = order?.process.findIndex((p) => p.supplier?.id == user?.id);
+          await updateOrderStatus(order?.id ?? "", index == (order?.process.length ?? 0) - 1 ? "Done" : process);
+        } else {
+          await updateOrderProcessStatus(
+            order?.id ?? "",
+            order?.process.map((p) =>
+              p.supplier?.id == user?.id
+                ? {
+                    ...p,
+                    processID: p.process.id,
+                    status: "Processing",
+                    expectedFinishDate: new Date(date).toISOString(),
+                  }
+                : { ...p, processID: p.process.id }
+            ) ?? null
+          );
+          await updateOrderStatus(order?.id ?? "", process);
+        }
         await getShipments();
         await getOrders();
         update(true, "Thêm thành công");
@@ -168,17 +201,31 @@ export default function AddShipment({ shipType: _shipType, onShipAdd }: IAddShip
             </label>
 
             <Select
+              placeholder="Chọn đơn hàng"
+              defaultValue={
+                order ? { value: order.id, label: `Đơn hàng #${order.id}: ${order.product?.name}` } : undefined
+              }
               className="!z-[999]"
               required
+              value={order ? { value: order.id, label: `Đơn hàng #${order.id}: ${order.product?.name}` } : undefined}
               closeMenuOnSelect={true}
               components={animatedComponents}
               onChange={(e) => {
                 setOrder(orders?.find((order) => order.id === (e as { value: string; label: string })?.value));
               }}
-              options={orders
-                ?.filter((o) => !!o.product)
-                ?.map((order) => ({ value: order.id, label: `Đơn hàng #${order.id}: ${order.product?.name}` }))
-                .filter(Boolean)}
+              options={
+                _shipType === "Send"
+                  ? orders
+                      ?.filter(
+                        (order) => order.process.find((p) => p.supplier?.id === user?.id)?.status == "Processing"
+                      )
+                      ?.map((order) => ({ value: order.id, label: `Đơn hàng #${order.id}: ${order.product?.name}` }))
+                      .filter(Boolean)
+                  : orders
+                      ?.filter((order) => order.process.find((p) => p.supplier?.id === user?.id)?.status == "Waiting")
+                      ?.map((order) => ({ value: order.id, label: `Đơn hàng #${order.id}: ${order.product?.name}` }))
+                      .filter(Boolean)
+              }
             />
           </div>
           {order && (
@@ -188,10 +235,10 @@ export default function AddShipment({ shipType: _shipType, onShipAdd }: IAddShip
               </label>
 
               <CustomizedSteppers
-                steps={order.process.map((s) => ({
-                  icon: s.process.image,
-                  label: s.process.name,
-                  des: s.supplier?.name ?? "",
+                steps={order?.process.map((s) => ({
+                  icon: s?.process?.image,
+                  label: s?.process?.name,
+                  des: s?.supplier?.name ?? "",
                 }))}
                 activeStep={
                   order.process.findIndex((p) => p.supplier?.id === user?.id) === -1

@@ -3,7 +3,7 @@ import Product from "./product";
 import Supplier from "./supplier";
 import Unit from "./unit";
 
-export type OrderStatus = "Done" | "Processing" | "Waiting" | "Cancel" | "Late" | "WaitingConfirm";
+export type OrderStatus = "Done" | "Processing" | "Waiting" | "Late" | "WaitingReceive";
 export interface OrderOnChain {
   id: string;
   /**
@@ -33,8 +33,8 @@ export interface OrderFireStore {
   id: string;
   productID: string;
   process: {
-    processID: string;
-    supplierID?: string | null;
+    process: Process;
+    supplier?: Supplier | null;
     status: OrderStatus;
     expectedFinishDate: string;
     actualFinishDate: string | null;

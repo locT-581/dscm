@@ -31,6 +31,8 @@ export type StoreState = {
   LCIs: Assessment[] | undefined;
   enviros: Assessment[] | undefined;
   socials: Assessment[] | undefined;
+
+  tempInitOrder: Order | undefined;
 };
 
 export type StoreAction = {
@@ -39,6 +41,7 @@ export type StoreAction = {
   setNetWorkId: (networkId: StoreState["networkId"]) => void;
   setContract: (contract: StoreState["contract"]) => void;
   setAssessmentContract: (contract: StoreState["assessmentContract"]) => void;
+  setTempInitOrder: (order: StoreState["tempInitOrder"]) => void;
 
   setOrders: (orders: StoreState["orders"]) => void;
   setShipments: (shipments: StoreState["shipments"]) => void;
@@ -65,6 +68,7 @@ export const defaultInitState: StoreState = {
   account: undefined,
   networkId: undefined,
   contract: undefined,
+  tempInitOrder: undefined,
 
   user: undefined,
 
@@ -88,7 +92,7 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
     setNetWorkId: (networkId: number | undefined) => set(() => ({ networkId })),
     setContract: (contract: Contract<OriginAbi> | undefined) => set(() => ({ contract })),
     setAssessmentContract: (contract: Contract<OriginAbi> | undefined) => set(() => ({ assessmentContract: contract })),
-
+    setTempInitOrder: (order: Order | undefined) => set(() => ({ tempInitOrder: order })),
     setOrders: (orders: Order[] | undefined) => set(() => ({ orders })),
     setShipments: (shipments: Shipment[] | undefined) => set(() => ({ shipments })),
     setProducts: (products: Product[] | undefined) => set(() => ({ products })),
@@ -121,23 +125,30 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
           product: products?.find((product) => product.id == orderBlockchain.name) as Product,
           process:
             orderOffChain?.process.map((process) => ({
-              process: get().processes?.find((p) => p.id == process.processID) as Process,
-              supplier: get().suppliers?.find((s) => s.id == process.supplierID) as Supplier,
+              process: process.process,
+              supplier: process.supplier,
               status: process.status,
               expectedFinishDate: process.expectedFinishDate,
               actualFinishDate: process.actualFinishDate,
             })) ?? [],
-          statusProcess: get().processes?.find((p) => p.id == orderOffChain?.statusProcessID) ?? null,
+          statusProcess:
+            orderOffChain?.statusProcessID != "Done"
+              ? get().processes?.find((p) => p.id == orderOffChain?.statusProcessID) ?? null
+              : "Done",
         };
 
-        console.log("🚀 ~ getOrders: ~ newOrder:", newOrder);
-
-        orders.push(newOrder);
+        if (!!orderOffChain) {
+          orders.push(newOrder);
+        }
       }
 
       let filterOrder: Order[] = [];
       if (user?.role == "Supplier") {
-        filterOrder = orders.filter((order) => order.process.some((p) => p.supplier?.id == user?.id));
+        filterOrder = orders.filter((order) =>
+          order.process.some((p) => {
+            return p.supplier?.id == user?.id;
+          })
+        );
       } else if (user?.role == "Focal company") {
         filterOrder = orders;
       }
@@ -212,6 +223,7 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
 
         products.push(newProduct);
       }
+      console.log("🚀 ~ getProducts: ~ products:", products);
       set(() => ({ products: products.filter((p) => p.process.length != 0 && p.name != "45") }));
     },
 

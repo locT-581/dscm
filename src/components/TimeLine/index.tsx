@@ -29,7 +29,7 @@ export default function TimeLine({ shipments, product }: ITimeLineProps) {
                     date={e.date}
                     iconStyle={{ background: "black", color: "#fff" }}
                     icon={
-                      <img src={e.process?.image} className="w-full h-full m-1 rounded-full object-cover" alt="icon" />
+                      <img src={e.process?.image} className="w-full h-full  rounded-full object-cover" alt="icon" />
                     }
                   >
                     <div className="time-title">

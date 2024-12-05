@@ -9,23 +9,23 @@ import { ShipType } from "@/types/common";
 import Tabs from "@/UI/Tabs";
 import EnhancedTable from "@/UI/Table";
 import { Backdrop } from "@mui/material";
+import Option from "@/components/Option";
 // import TableShipment from "@/UI/TableShipment";
-import formatDate from "@/utils/formatDate";
 
 export default function Dashboard() {
-  const { shipments, orders, processes, user } = useWeb3Store((state) => state);
-  console.log("🚀 ~ Dashboard ~ shipments:", user, orders);
-
+  const { shipments, orders, processes, user, tempInitOrder } = useWeb3Store((state) => state);
   const [shipType, setShipType] = useState<ShipType>("Send");
 
   const [showCreateShip, setShowCreateShip] = useState(false);
+
+  const ordersFilter = orders?.filter((o) => o.process.find((p) => p.supplier?.id == user?.id));
 
   if (!!!orders || !!!shipments || !!!processes) return <>Loading...</>;
 
   return (
     <>
-      <header className="">
-        <div className="shipment-btns">
+      {user?.role == "Supplier" && (
+        <div className="shipment-btns flex gap-4 items-end justify-end">
           <Button
             onClick={() => {
               setShowCreateShip(!showCreateShip);
@@ -43,146 +43,178 @@ export default function Dashboard() {
             text="Nhận hàng"
           />
         </div>
-      </header>
+      )}
 
+      <>
+        {user?.role == "Supplier" ? (
+          <Tabs>
+            {[
+              {
+                title: "Đang chờ",
+                element: (
+                  <EnhancedTable
+                    dateTitle="Ngày hoàn thành dự kiến"
+                    option={
+                      <Option
+                        disabled={
+                          tempInitOrder?.process?.[
+                            tempInitOrder?.process.findIndex((p) => p.supplier?.id == user?.id) - 1 ?? 0
+                          ].status != "Done"
+                        }
+                        options={[
+                          {
+                            label: "Nhận hàng",
+                            onClick: () => {
+                              setShowCreateShip(!showCreateShip);
+                              setShipType("Receive");
+                            },
+                          },
+                        ]}
+                      />
+                    }
+                    rowList={
+                      ordersFilter
+                        ?.filter((o) => o.process.find((p) => p.supplier?.id == user?.id)?.status === "Waiting")
+                        .map((order) => ({
+                          ...order,
+                          name: order?.product?.name ?? "Rỗng",
+                          image: order?.product?.image ?? "",
+                          status: "Done",
+                          id: +order.id,
+                          dateCreate: new Date(
+                            order.process.find((p) => p.supplier?.id == user?.id)?.expectedFinishDate ?? ""
+                          ).getTime(),
+                          rawId: order.id,
+                          process: order.process.find((p) => p.supplier?.id == user?.id),
+                          date: new Date(
+                            order.process.find((p) => p.supplier?.id == user?.id)?.expectedFinishDate ?? ""
+                          ).getTime(),
+                        })) ?? []
+                    }
+                  />
+                ),
+              },
+              {
+                title: "Đang thực hiện",
+                element: (
+                  <EnhancedTable
+                    dateTitle="Ngày hoàn thành dự kiến"
+                    option={
+                      <Option
+                        options={[
+                          {
+                            label: "Gửi hàng",
+                            onClick: () => {
+                              setShowCreateShip(!showCreateShip);
+                              setShipType("Send");
+                            },
+                          },
+                        ]}
+                      />
+                    }
+                    rowList={
+                      ordersFilter
+                        ?.filter((o) => o.process.find((p) => p.supplier?.id == user?.id)?.status === "Processing")
+                        .map((order) => ({
+                          ...order,
+                          name: order?.product?.name ?? "Rỗng",
+                          image: order?.product?.image ?? "",
+                          status: "Done",
+                          id: +order.id,
+                          dateCreate: new Date(
+                            order.process.find((p) => p.supplier?.id == user?.id)?.expectedFinishDate ?? ""
+                          ).getTime(),
+                          rawId: order.id,
+                          process: order.process.find((p) => p.supplier?.id == user?.id),
+                          date: new Date(
+                            order.process.find((p) => p.supplier?.id == user?.id)?.expectedFinishDate ?? ""
+                          ).getTime(),
+                        })) ?? []
+                    }
+                  />
+                ),
+              },
+              {
+                title: "Hoàn thành",
+                element: (
+                  <EnhancedTable
+                    dateTitle="Ngày hoàn thành thưc tế"
+                    rowList={
+                      ordersFilter
+                        ?.filter((o) => {
+                          return o.process.find((p) => p.supplier?.id == user?.id)?.status === "Done";
+                        })
+                        .map((order) => ({
+                          ...order,
+                          name: order?.product?.name ?? "Rỗng",
+                          image: order?.product?.image ?? "",
+                          status: "Done",
+                          id: +order.id,
+                          dateCreate: new Date(
+                            order.process.find((p) => p.supplier?.id == user?.id)?.actualFinishDate ?? ""
+                          ).getTime(),
+                          rawId: order.id,
+                          process: order.process.find((p) => p.supplier?.id == user?.id),
+                          date: new Date(
+                            order.process.find((p) => p.supplier?.id == user?.id)?.actualFinishDate ?? ""
+                          ).getTime(),
+                        })) ?? []
+                    }
+                  />
+                ),
+              },
+            ]}
+          </Tabs>
+        ) : (
+          <Tabs>
+            {[
+              {
+                title: "Đang thực hiện",
+                element: (
+                  <EnhancedTable
+                    dateTitle="Ngày tạo đơn hàng"
+                    rowList={orders
+                      .filter((o) => o.statusProcess !== "Done")
+                      .map((order) => ({
+                        ...order,
+                        name: order?.product?.name ?? "Rỗng",
+                        image: order?.product?.image ?? "",
+                        status: "Done",
+                        id: +order.id,
+                        dateCreate: new Date(order.date).getTime(),
+                        rawId: order.id,
+                        process: order.process.find((p) => p.supplier?.id == user?.id),
+                        date: new Date(order.date).getTime(),
+                      }))}
+                  />
+                ),
+              },
+              {
+                title: "Hoàn thành",
+                element: (
+                  <EnhancedTable
+                    dateTitle="Ngày hoàn thành thưc tế"
+                    rowList={orders
+                      .filter((o) => o.statusProcess == "Done")
+                      .map((order) => ({
+                        ...order,
+                        name: order?.product?.name ?? "Rỗng",
+                        image: order?.product?.image ?? "",
+                        status: "Done",
+                        id: +order.id,
+                        dateCreate: new Date(order.date).getTime(),
+                        rawId: order.id,
+                        process: order.process.find((p) => p.supplier?.id == user?.id),
+                        date: new Date(order.date).getTime(),
+                      }))}
+                  />
+                ),
+              },
+            ]}
+          </Tabs>
+        )}
+      </>
       {/* <Shipment shipments={shipments} orders={orders} /> */}
-      {/* <Tabs>
-        {[
-          {
-            title: "Danh sách đơn hàng",
-            element: (
-              <EnhancedTable
-                rowList={orders
-                  .filter((o) => !!o.product)
-                  .map((order) => ({
-                    ...order,
-                    name: order?.product?.name ?? "Rỗng",
-                    id: +order.id,
-                    status: "Processing",
-                    image: order?.product?.image ?? "",
-                  }))}
-              />
-            ),
-          },
-          {
-            title: "Danh sách vận chuyển",
-            element: (
-              <TableShipment
-                rowList={shipments
-                  .filter((o) => !!o.process)
-                  .map((shipment) => ({
-                    shipmentStatus: shipment.shipType == "Send" ? "Đã gửi" : "Đã nhận",
-                    shippedOrder: shipment?.product?.name ?? "Rỗng",
-                    name: shipment?.product?.name ?? "Rỗng",
-                    location: shipment?.place ?? "Rỗng",
-                    dated: shipment?.date ?? "Rỗng",
-                    addBy: shipment?.supplier?.name ?? "Rỗng",
-                    processes: processes.find((process) => process.id === shipment?.process?.id)?.name ?? "Rỗng",
-                    image: shipment?.product?.image ?? "",
-                    imageProcess: processes.find((process) => process.id === shipment?.process?.id)?.image ?? "",
-                  }))}
-              />
-            ),
-          },
-        ]}
-      </Tabs> */}
-
-      <Tabs>
-        {[
-          {
-            title: "Chờ xác nhận",
-            element: (
-              <EnhancedTable
-                rowList={orders
-                  .filter((o) => !!o.product)
-                  .filter((o) => o.process.some((p) => p.status === "WaitingConfirm"))
-                  .map((order) => ({
-                    quantity: order.quantity,
-                    unit: order.unit,
-                    name: order?.product?.name ?? "Rỗng",
-                    id: +order.id,
-                    status: "Processing",
-                    image: order?.product?.image ?? "",
-                    date: order?.process.find((p) => p.supplier?.id == user?.id)?.expectedFinishDate ?? "",
-                    dateCreate: formatDate(order.date),
-                  }))}
-              />
-            ),
-          },
-          {
-            title: "Đang chờ",
-            element: (
-              <EnhancedTable
-                rowList={orders
-                  .filter((o) => !!o.product)
-                  .filter((o) => o.process.some((p) => p.status === "Waiting"))
-                  .map((order) => ({
-                    ...order,
-                    name: order?.product?.name ?? "Rỗng",
-                    image: order?.product?.image ?? "",
-                    status: "Done",
-                    id: +order.id,
-                    dateCreate: formatDate(order.date),
-                  }))}
-              />
-            ),
-          },
-          {
-            title: "Đang thực hiện",
-            element: (
-              <EnhancedTable
-                rowList={orders
-                  .filter((o) => !!o.product)
-                  .filter((o) => o.process.some((p) => p.status === "Processing"))
-                  .map((order) => ({
-                    ...order,
-                    name: order?.product?.name ?? "Rỗng",
-                    image: order?.product?.image ?? "",
-                    status: "Done",
-                    id: +order.id,
-                    dateCreate: formatDate(order.date),
-                  }))}
-              />
-            ),
-          },
-          {
-            title: "Hoàn thành",
-            element: (
-              <EnhancedTable
-                rowList={orders
-                  .filter((o) => !!o.product)
-                  .filter((o) => o.process.some((p) => p.status === "Done" || p.status === "Late"))
-                  .map((order) => ({
-                    ...order,
-                    name: order?.product?.name ?? "Rỗng",
-                    image: order?.product?.image ?? "",
-                    status: "Done",
-                    id: +order.id,
-                    dateCreate: formatDate(order.date),
-                  }))}
-              />
-            ),
-          },
-          {
-            title: "Huỷ",
-            element: (
-              <EnhancedTable
-                rowList={orders
-                  .filter((o) => !!o.product)
-                  .filter((o) => o.process.some((p) => p.status === "Cancel"))
-                  .map((order) => ({
-                    ...order,
-                    name: order?.product?.name ?? "Rỗng",
-                    image: order?.product?.image ?? "",
-                    status: "Done",
-                    id: +order.id,
-                    dateCreate: formatDate(order.date),
-                  }))}
-              />
-            ),
-          },
-        ]}
-      </Tabs>
 
       <Backdrop
         sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
@@ -199,6 +231,7 @@ export default function Dashboard() {
             onShipAdd={() => {
               setShowCreateShip(false);
             }}
+            initOrder={tempInitOrder}
           />
         </div>
       </Backdrop>

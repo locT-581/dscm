@@ -16,6 +16,7 @@ import Paper from "@mui/material/Paper";
 import Unit from "@/types/unit";
 import Link from "next/link";
 import Button from "../Button";
+import formatDate from "@/utils/formatDate";
 
 interface Data {
   id: string;
@@ -23,10 +24,10 @@ interface Data {
   name: string;
   processes: string[];
   unit: Unit;
-  date: string;
+  date: number;
 }
 
-function createData(id: string, image: string, name: string, processes: string[], unit: Unit, date: string): Data {
+function createData(id: string, image: string, name: string, processes: string[], unit: Unit, date: number): Data {
   return {
     id,
     name,
@@ -156,7 +157,7 @@ export default function TableProduct({ rowList }: { rowList: Data[] }) {
   const [rows] = React.useState(
     rowList.map((row) => createData(row.id, row.image, row.name, row.processes, row.unit, row.date))
   );
-  const [order, setOrder] = React.useState<Order>("desc");
+  const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<keyof Data>("date");
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -231,7 +232,7 @@ export default function TableProduct({ rowList }: { rowList: Data[] }) {
                     <TableCell align="center">{row.name}</TableCell>
                     <TableCell align="center">{row.processes}</TableCell>
                     <TableCell align="center">{row.unit}</TableCell>
-                    <TableCell align="center">{row.date}</TableCell>
+                    <TableCell align="center">{formatDate(new Date(row.date).toISOString())}</TableCell>
                   </TableRow>
                 );
               })}

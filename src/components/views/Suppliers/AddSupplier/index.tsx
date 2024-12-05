@@ -42,7 +42,7 @@ export default function AddSupplier({ supplier }: { supplier?: Supplier }) {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    console.log("selectedProcesses", supplier);
     if (supplier) {
       notify("Đang cập nhật nhà cung cấp...");
       updateSupplier({
@@ -247,7 +247,7 @@ export default function AddSupplier({ supplier }: { supplier?: Supplier }) {
         </div>
 
         <div className="w-full flex justify-end py-4">
-          <Button>Xác nhận</Button>
+          <Button type="submit">Xác nhận</Button>
         </div>
       </form>
     </div>

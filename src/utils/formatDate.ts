@@ -2,15 +2,20 @@ import { format } from "date-fns";
 export default function formatDate(
   dateString: string,
   showHour = true,
-  type?: "dd-mm" | "dd-mm-yy" | "dd-short-yy" | "hh-mm" | "mm-dd" | "mm-dd-hh-mm"
+  type: "dd-mm" | "dd-mm-yy" | "dd-short-yy" | "hh-mm" | "mm-dd" | "mm-dd-hh-mm" = "dd-mm"
 ) {
   try {
     const timestamp = Date.parse(dateString);
     const date = new Date(timestamp);
     if (type === "dd-mm") {
       return date.toLocaleDateString("vi-VN", {
+        year: "numeric",
         day: "2-digit",
         month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
       });
     }
     if (type === "mm-dd") {

@@ -17,6 +17,7 @@ import Link from "next/link";
 import Button from "../Button";
 import Option from "@/components/Option";
 import { useRouter } from "next/navigation";
+import formatDate from "@/utils/formatDate";
 
 interface Data {
   id: string;
@@ -24,10 +25,10 @@ interface Data {
   image: string;
   name: string;
   description: string;
-  date: string;
+  date: number;
 }
 
-function createData(id: string, _id: string, image: string, name: string, description: string, date: string): Data {
+function createData(id: string, _id: string, image: string, name: string, description: string, date: number): Data {
   return {
     id,
     _id,
@@ -225,13 +226,17 @@ export default function TableProcesses({ rowList }: { rowList: Data[] }) {
                     </TableCell>
                     <TableCell align="center">{row.name}</TableCell>
                     <TableCell align="center">{row.description}</TableCell>
-                    <TableCell align="center">{row.date}</TableCell>
+                    <TableCell align="center">{formatDate(new Date(row.date).toISOString())}</TableCell>
                     <TableCell align="center">
                       <Option
-                        onDelete={() => {}}
-                        onEdit={() => {
-                          router.push(`/san-pham/sua-quy-trinh?id=${row._id}`);
-                        }}
+                        options={[
+                          {
+                            label: "Sửa",
+                            onClick: () => {
+                              router.push(`/san-pham/sua-quy-trinh?id=${row._id}`);
+                            },
+                          },
+                        ]}
                       />
                     </TableCell>
                   </TableRow>

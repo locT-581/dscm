@@ -19,8 +19,11 @@ import Button from "../Button";
 import { useWeb3Store } from "@/stores/storeProvider";
 import Process from "@/types/process";
 import { Backdrop } from "@mui/material";
-import Option from "@/components/Option";
+import OrderType from "@/types/order";
+import AddOrder from "@/components/views/Dashboard/AddOrder";
 // import { visuallyHidden } from "@mui/utils";
+import CloseIcon from "@mui/icons-material/Close";
+import formatDate from "@/utils/formatDate";
 
 interface Data {
   id: number;
@@ -28,9 +31,10 @@ interface Data {
   image: string;
   quantity: number;
   unit: Unit;
-  date: string;
-  dateCreate: string;
+  date: number;
+  dateCreate: number;
   status: "Done" | "Processing" | Process;
+  rawId: string;
 }
 
 function createData(
@@ -39,9 +43,10 @@ function createData(
   name: string,
   quantity: number,
   unit: Unit,
-  date: string,
+  date: number,
   status: "Done" | "Processing" | Process,
-  dateCreate: string
+  dateCreate: number,
+  rawId: string
 ): Data {
   return {
     id,
@@ -52,6 +57,7 @@ function createData(
     status,
     image,
     dateCreate,
+    rawId,
   };
 }
 
@@ -134,10 +140,12 @@ interface EnhancedTableProps {
   order: Order;
   orderBy: string;
   isAdmin: boolean;
+  dateTitle: string;
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
-  const { order, orderBy, onRequestSort, isAdmin } = props;
+  const { order, orderBy, onRequestSort, isAdmin, dateTitle } = props;
+  console.log("🚀 ~ EnhancedTableHead ~ isAdmin:", isAdmin);
   const createSortHandler = (property: keyof Data) => (event: React.MouseEvent<unknown>) => {
     onRequestSort(event, property);
   };
@@ -157,7 +165,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
               direction={orderBy === headCell.id ? order : "asc"}
               onClick={createSortHandler(headCell.id)}
             >
-              {headCell.id == "date" ? (isAdmin ? "Ngày tạo" : "Ngày giao hàng dự kiến") : headCell.label}
+              {headCell.id == "date" ? dateTitle : headCell.label}
               {/* {orderBy === headCell.id ? (
                 // <Box component="span" sx={visuallyHidden}>
                 <Box component="span">{order === "desc" ? "Giảm dần" : "sorted ascending"}</Box>
@@ -172,6 +180,8 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 export default function EnhancedTable({
   rowList,
+  dateTitle,
+  option,
 }: {
   rowList: {
     image: string;
@@ -179,23 +189,27 @@ export default function EnhancedTable({
     name: string;
     quantity: number;
     unit: Unit;
-    date: string;
-    dateCreate: string;
+    date: number;
+    dateCreate: number;
     status: "Done" | "Processing" | Process;
+    rawId: string;
   }[];
+  dateTitle: string;
+  option?: React.ReactNode;
 }) {
-  const { user } = useWeb3Store((state) => state);
+  const { user, orders, setTempInitOrder } = useWeb3Store((state) => state);
   const [rows] = React.useState(
     rowList.map((row) =>
-      createData(row.id, row.image, row.name, row.quantity, row.unit, row.date, row.status, row.dateCreate)
+      createData(row.id, row.image, row.name, row.quantity, row.unit, row.date, row.status, row.dateCreate, row.rawId)
     )
   );
-  const [order, setOrder] = React.useState<Order>("asc");
-  const [orderBy, setOrderBy] = React.useState<keyof Data>("id");
+
+  const [order, setOrder] = React.useState<Order>("desc");
+  const [orderBy, setOrderBy] = React.useState<keyof Data>("date");
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
-  const [showDetail, setShowDetail] = React.useState(false);
+  const [showDetail, setShowDetail] = React.useState<OrderType | null>(null);
 
   const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof Data) => {
     const isAsc = orderBy === property && order === "asc";
@@ -212,6 +226,8 @@ export default function EnhancedTable({
     setPage(0);
   };
 
+  // const [showDetail, setShowDetail] = React.useState(false);
+
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
@@ -221,6 +237,8 @@ export default function EnhancedTable({
         ...row,
         unit: row.unit.name,
         status: typeof row.status === "string" ? row.status : row.status?.name ?? "",
+        rawId: row.rawId,
+        date: row.dateCreate,
       }))
       .sort(getComparator(order, orderBy))
       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -252,6 +270,7 @@ export default function EnhancedTable({
           <TableContainer>
             <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={"medium"}>
               <EnhancedTableHead
+                dateTitle={dateTitle}
                 isAdmin={user?.role == "Focal company"}
                 order={order}
                 orderBy={orderBy}
@@ -263,6 +282,9 @@ export default function EnhancedTable({
 
                   return (
                     <TableRow
+                      onClick={() => {
+                        setShowDetail(orders?.find((o) => o.id == row.rawId) ?? null);
+                      }}
                       hover
                       role="row"
                       tabIndex={-1}
@@ -270,7 +292,7 @@ export default function EnhancedTable({
                       sx={{ cursor: "pointer", paddingBlock: "12px" }}
                     >
                       <TableCell component="th" align="center" id={labelId} scope="row" className="!w-[20%]">
-                        {row.id}
+                        #{row.id}
                       </TableCell>
                       <TableCell align="center" className="overflow-hidden !flex !justify-center !items-center">
                         <img
@@ -285,17 +307,18 @@ export default function EnhancedTable({
                       <TableCell align="center">{row.name}</TableCell>
                       <TableCell align="center">{row.quantity}</TableCell>
                       <TableCell align="center">{row.unit}</TableCell>
-                      <TableCell align="center">{row.date}</TableCell>
-                      <TableCell align="center">
-                        <Option
-                          options={[
-                            { label: "Chấp nhận", onClick: () => {} },
-                            { label: "Huỷ", onClick: () => {}, className: "text-red-500" },
-                          ]}
-                        />
-                      </TableCell>
-                      {/* <TableCell align="center">{row.status}</TableCell> */}
-                      <TableCell align="center"></TableCell>
+                      <TableCell align="center">{formatDate(new Date(row.date).toISOString())}</TableCell>
+                      {user?.role == "Supplier" && (
+                        <TableCell
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setTempInitOrder(orders?.find((o) => o.id == row.rawId));
+                          }}
+                          align="center"
+                        >
+                          {option}
+                        </TableCell>
+                      )}
                     </TableRow>
                   );
                 })}
@@ -326,63 +349,24 @@ export default function EnhancedTable({
 
       <Backdrop
         sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
-        open={showDetail}
-        onClick={() => setShowDetail(false)}
+        open={!!showDetail}
+        onClick={() => setShowDetail(null)}
       >
         <div
-          className="w-[70vw] h-[50v] flex flex-col gap-2"
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
+          className="max-w-[75vw] max-h-[75vh] flex flex-col items-center justify-center bg-slate-200 rounded-md text-[#023047] overflow-y-auto p-4 gap-4"
+          onClick={(e) => e.stopPropagation()}
         >
-          <h1>Chi tiết đơn hàng</h1>
-          <div className="flex gap-4">
-            <div className="flex flex-col gap-3 w-[60%]">
-              <label htmlFor="processes-product" className="font-semibold">
-                Chọn sản phẩm
-              </label>
-              <input type="text" className="rounded-md p-2 h-[36px]" placeholder="Nhập tên sản phẩm" />
-            </div>
-            <div className="flex flex-col gap-3 w-[30%]">
-              <label htmlFor="name-product" className="font-semibold">
-                Số lượng
-              </label>
-              <input type="number" className="rounded-md p-2 h-[36px]" placeholder="Nhập số lượng" />
-            </div>
+          <div className="w-full flex justify-between items-center">
+            <h4 className="text-3xl font-semibold">{`Chi tiết đơn hàng`}</h4>
+            <CloseIcon
+              className="cursor-pointer"
+              fontSize="small"
+              onClick={() => {
+                setShowDetail(null);
+              }}
+            />
           </div>
-          <div className="flex gap-4">
-            <div className="flex flex-col gap-3 w-[60%]">
-              <label htmlFor="processes-product" className="font-semibold">
-                Chọn sản phẩm
-              </label>
-              <input type="text" className="rounded-md p-2 h-[36px]" placeholder="Nhập tên sản phẩm" />
-            </div>
-            <div className="flex flex-col gap-3 w-[30%]">
-              <label htmlFor="name-product" className="font-semibold">
-                Số lượng
-              </label>
-              <input type="number" className="rounded-md p-2 h-[36px]" placeholder="Nhập số lượng" />
-            </div>
-          </div>
-          <div className="flex gap-4">
-            <div className="flex flex-col gap-3 w-[60%]">
-              <label htmlFor="processes-product" className="font-semibold">
-                Chọn sản phẩm
-              </label>
-              <input type="text" className="rounded-md p-2 h-[36px]" placeholder="Nhập tên sản phẩm" />
-            </div>
-            <div className="flex flex-col gap-3 w-[30%]">
-              <label htmlFor="name-product" className="font-semibold">
-                Số lượng
-              </label>
-              <input type="number" className="rounded-md p-2 h-[36px]" placeholder="Nhập số lượng" />
-            </div>
-          </div>
-          <div className=" flex justify-end">
-            {/* <Button onClick={() => setShowDetail(false)}>Đóng</Button>
-
-            <Button onClick={() => {}}>Lưu</Button> */}
-          </div>
+          <AddOrder initOrder={showDetail == null ? undefined : showDetail} allowEdit={false} />
         </div>
       </Backdrop>
     </>

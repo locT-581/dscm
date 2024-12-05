@@ -22,7 +22,7 @@ export default function Products() {
                   id: p.id,
                   name: p.name,
                   image: p.image,
-                  date: p.date,
+                  date: new Date(p.date).getTime(),
                   processes: p.process.map((process) => process.name),
                   unit: p.unit,
                 }))}
@@ -38,7 +38,7 @@ export default function Products() {
                   name: p.name,
                   image: p.image,
                   description: p.description ?? "",
-                  date: p.date,
+                  date: new Date(p.date).getTime(),
                   _id: p.id,
                 }))}
               />

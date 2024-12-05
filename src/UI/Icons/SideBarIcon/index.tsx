@@ -8,6 +8,7 @@ import RecyclingIcon from "@mui/icons-material/Recycling";
 import ForestIcon from "@mui/icons-material/Forest";
 import Groups2Icon from "@mui/icons-material/Groups2";
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 export interface ISideBarIconProps {
   keyIcon:
     | "DashboardIcon"
@@ -19,7 +20,8 @@ export interface ISideBarIconProps {
     | "RecyclingIcon"
     | "ForestIcon"
     | "Groups2Icon"
-    | "ShoppingBasketIcon";
+    | "ShoppingBasketIcon"
+    | "LocalShippingIcon";
   width?: number | string;
 }
 
@@ -45,6 +47,8 @@ export default function SideBarIcon({ keyIcon, width = 36 }: ISideBarIconProps) 
       return <Groups2Icon color="inherit" sx={{ fontSize: width }} />;
     case "ShoppingBasketIcon":
       return <ShoppingBasketIcon color="inherit" sx={{ fontSize: width }} />;
+    case "LocalShippingIcon":
+      return <LocalShippingIcon color="inherit" sx={{ fontSize: width }} />;
     default:
       return null;
   }

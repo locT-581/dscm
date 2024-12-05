@@ -271,7 +271,8 @@ export const getAllOrders = async (): Promise<OrderFireStore[]> => {
  * @param id - string
  * @returns {Promise} - Promise<void>
  */
-export const addOrder = async (order: OrderFireStore, id: string): Promise<void> => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const addOrder = async (order: any, id: string): Promise<void> => {
   if (!id) {
     throw new Error("ID is required to add a product");
   }
@@ -288,7 +289,32 @@ export const addOrder = async (order: OrderFireStore, id: string): Promise<void>
  * @param status - string
  * @returns {Promise} - Promise<void>
  */
-export const updateOrderStatus = async (id: string, status: OrderStatus): Promise<void> => {
+export const updateOrderProcessStatus = async (
+  id: string,
+  process:
+    | {
+        processID: string;
+        supplierID?: string | null;
+        status: OrderStatus;
+        expectedFinishDate: string;
+        actualFinishDate: string | null;
+      }[]
+    | null
+): Promise<void> => {
+  if (!process) return;
+
   const docRef = doc(db, "order", id);
-  return await updateDoc(docRef, { "process.$.status": status });
+  return await updateDoc(docRef, {
+    process,
+  });
+};
+
+/*Update order status
+ * @param id - string
+ * @param status - string
+ * @returns {Promise} - Promise<void>
+ */
+export const updateOrderStatus = async (id: string, statusProcessID: string): Promise<void> => {
+  const docRef = doc(db, "order", id);
+  return await updateDoc(docRef, { statusProcessID });
 };

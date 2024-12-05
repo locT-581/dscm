@@ -12,9 +12,11 @@ export interface IOptionProps {
     onClick: () => void;
     className?: string;
   }[];
+  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
+  disabled?: boolean;
 }
 
-export default function Option({ options }: IOptionProps) {
+export default function Option({ options, onClick, disabled }: IOptionProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -24,7 +26,7 @@ export default function Option({ options }: IOptionProps) {
     setAnchorEl(null);
   };
   return (
-    <div>
+    <div onClick={onClick}>
       <IconButton
         aria-label="more"
         id="long-button"
@@ -51,8 +53,16 @@ export default function Option({ options }: IOptionProps) {
           },
         }}
       >
-        {options.map((option) => (
-          <MenuItem key={option.label} onClick={option.onClick} className={option.className}>
+        {options?.map((option) => (
+          <MenuItem
+            disabled={disabled}
+            key={option.label}
+            onClick={() => {
+              handleClose();
+              option.onClick();
+            }}
+            className={option.className}
+          >
             {option.label}
           </MenuItem>
         ))}
