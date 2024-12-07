@@ -1,4 +1,4 @@
-import Origin from "../../build/contracts/Origin.json";
+import Origin from "@/abis/contracts/Origin.json";
 
 export interface Position {
   coords: {
