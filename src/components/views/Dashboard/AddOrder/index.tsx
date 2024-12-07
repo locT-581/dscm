@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
@@ -84,7 +85,7 @@ export default function AddOrder({ initOrder, allowEdit = true }: { initOrder?: 
     contract?.methods
       .addOrder(name, quantity.toString(), unit, date)
       .send({ from: account })
-      .once("receipt", async (e) => {
+      .once("receipt", async (e: any) => {
         const id = Number(e.events?.OrderAdded.returnValues.id).toString() ?? (orders?.length ?? 1) - 1;
 
         await addOrderToFireStore(
