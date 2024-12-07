@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import getDate from "@/utils/getDate";
@@ -81,7 +82,7 @@ export default function AddProduct({ addProduct, onAdd }: IAddProductProps) {
               required
               placeholder="Nhập tên sản phẩm"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e: any) => setName(e.target.value)}
             />
           </div>
           <h3>Quy trình sản xuất</h3>

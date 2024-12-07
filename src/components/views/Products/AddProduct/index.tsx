@@ -88,7 +88,7 @@ export default function AddProduct() {
         await getProducts();
         update(true, "Thêm sản phẩm thành công!");
       })
-      .once("error", (e) => {
+      .once("error", (e: any) => {
         update(false, "Thêm sản phẩm thất bại!" + e.message);
       });
   };
