@@ -119,7 +119,7 @@ export default function AddOrder({ initOrder, allowEdit = true }: { initOrder?: 
         update(true, "Đã tạo đơn hàng thành công!");
         setDisabled(false);
       })
-      .once("error", async (e) => {
+      .once("error", async (e: any) => {
         await getOrders();
         update(true, "Đã xảy ra lỗi khi tạo đơn hàng! - " + e.message);
       });
