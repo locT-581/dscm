@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
@@ -73,7 +74,7 @@ export default function AddProduct() {
     contract?.methods
       .addProduct(name, image, process, date)
       .send({ from: account })
-      .once("receipt", async (e) => {
+      .once("receipt", async (e: any) => {
         await addProductToFireStore(
           {
             offChainId: Number(e.events?.ProductAdded.returnValues.id).toString() ?? (products!.length - 1).toString(),
