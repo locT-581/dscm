@@ -14,6 +14,7 @@ import Option from "@/components/Option";
 
 export default function Dashboard() {
   const { shipments, orders, processes, user, tempInitOrder } = useWeb3Store((state) => state);
+  console.log("🚀 ~ Dashboard ~ orders:", orders);
   const [shipType, setShipType] = useState<ShipType>("Send");
 
   const [showCreateShip, setShowCreateShip] = useState(false);
@@ -58,8 +59,8 @@ export default function Dashboard() {
                       <Option
                         disabled={
                           tempInitOrder?.process?.[
-                            tempInitOrder?.process.findIndex((p) => p.supplier?.id == user?.id) - 1 ?? 0
-                          ].status != "Done"
+                            tempInitOrder?.process.findIndex((p) => p.supplier?.id == user?.id) - 1
+                          ]?.status != "Done"
                         }
                         options={[
                           {
@@ -75,21 +76,23 @@ export default function Dashboard() {
                     rowList={
                       ordersFilter
                         ?.filter((o) => o.process.find((p) => p.supplier?.id == user?.id)?.status === "Waiting")
-                        .map((order) => ({
-                          ...order,
-                          name: order?.product?.name ?? "Rỗng",
-                          image: order?.product?.image ?? "",
-                          status: "Done",
-                          id: +order.id,
-                          dateCreate: new Date(
-                            order.process.find((p) => p.supplier?.id == user?.id)?.expectedFinishDate ?? ""
-                          ).getTime(),
-                          rawId: order.id,
-                          process: order.process.find((p) => p.supplier?.id == user?.id),
-                          date: new Date(
-                            order.process.find((p) => p.supplier?.id == user?.id)?.expectedFinishDate ?? ""
-                          ).getTime(),
-                        })) ?? []
+                        .map((order) => {
+                          return {
+                            ...order,
+                            name: order?.product?.name ?? "Rỗng",
+                            image: order?.product?.image ?? "",
+                            status: "Done",
+                            id: +order.id,
+                            dateCreate: new Date(
+                              order.process.find((p) => p.supplier?.id == user?.id)?.expectedFinishDate ?? new Date()
+                            ).getTime(),
+                            rawId: order.id,
+                            process: order.process.find((p) => p.supplier?.id == user?.id),
+                            date: new Date(
+                              order.process.find((p) => p.supplier?.id == user?.id)?.expectedFinishDate ?? new Date()
+                            ).getTime(),
+                          };
+                        }) ?? []
                     }
                   />
                 ),
@@ -122,12 +125,12 @@ export default function Dashboard() {
                           status: "Done",
                           id: +order.id,
                           dateCreate: new Date(
-                            order.process.find((p) => p.supplier?.id == user?.id)?.expectedFinishDate ?? ""
+                            order.process.find((p) => p.supplier?.id == user?.id)?.expectedFinishDate ?? new Date()
                           ).getTime(),
                           rawId: order.id,
                           process: order.process.find((p) => p.supplier?.id == user?.id),
                           date: new Date(
-                            order.process.find((p) => p.supplier?.id == user?.id)?.expectedFinishDate ?? ""
+                            order.process.find((p) => p.supplier?.id == user?.id)?.expectedFinishDate ?? new Date()
                           ).getTime(),
                         })) ?? []
                     }
@@ -151,12 +154,12 @@ export default function Dashboard() {
                           status: "Done",
                           id: +order.id,
                           dateCreate: new Date(
-                            order.process.find((p) => p.supplier?.id == user?.id)?.actualFinishDate ?? ""
+                            order.process.find((p) => p.supplier?.id == user?.id)?.actualFinishDate ?? new Date()
                           ).getTime(),
                           rawId: order.id,
                           process: order.process.find((p) => p.supplier?.id == user?.id),
                           date: new Date(
-                            order.process.find((p) => p.supplier?.id == user?.id)?.actualFinishDate ?? ""
+                            order.process.find((p) => p.supplier?.id == user?.id)?.actualFinishDate ?? new Date()
                           ).getTime(),
                         })) ?? []
                     }
@@ -184,7 +187,7 @@ export default function Dashboard() {
                         dateCreate: new Date(order.date).getTime(),
                         rawId: order.id,
                         process: order.process.find((p) => p.supplier?.id == user?.id),
-                        date: new Date(order.date).getTime(),
+                        date: new Date(order.date ?? new Date()).getTime(),
                       }))}
                   />
                 ),
@@ -205,7 +208,7 @@ export default function Dashboard() {
                         dateCreate: new Date(order.date).getTime(),
                         rawId: order.id,
                         process: order.process.find((p) => p.supplier?.id == user?.id),
-                        date: new Date(order.date).getTime(),
+                        date: new Date(order.date ?? new Date()).getTime(),
                       }))}
                   />
                 ),

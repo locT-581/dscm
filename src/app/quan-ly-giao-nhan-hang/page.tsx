@@ -5,6 +5,7 @@ import TableShipment from "@/UI/TableShipment";
 
 export default function App() {
   const { shipments, processes } = useWeb3Store((state) => state);
+  console.log("🚀 ~ App ~ shipments:", shipments);
   return (
     <TableShipment
       rowList={
@@ -13,7 +14,7 @@ export default function App() {
           shippedOrder: shipment?.product?.name ?? "Rỗng",
           name: shipment?.product?.name ?? "Rỗng",
           location: shipment?.place ?? "Rỗng",
-          dated: shipment?.date ?? "Rỗng",
+          dated: new Date(shipment?.date ?? new Date()).getTime(),
           addBy: shipment?.supplier?.name ?? "Rỗng",
           processes: processes?.find((process) => process.id === shipment?.process?.id)?.name ?? "Rỗng",
           image: shipment?.product?.image ?? "",

@@ -224,7 +224,7 @@ export const SocialList = ({ assessments }: { assessments: Assessment[] }) =>
                 Chuẩn mực xã hội <GrIcons.GrCertificate />
               </th>
               <th>Sự tồn tại của các chứng nhận bên ngoài về tiêu chuẩn xã hội</th>
-              <td>{(+(a.document as SocialFormType).socialstand + " ").replace(/,/g, ", ")}</td>
+              <td>{((a.document as SocialFormType).socialstand + " ").replace(/,/g, ", ")}</td>
               <td></td>
             </tr>
             <tr>

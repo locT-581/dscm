@@ -27,7 +27,7 @@ export default function Assessments() {
                 }
                 rowList={LCIs.map((i) => ({
                   id: i.id,
-                  dated: i.date,
+                  dated: new Date(i.date).getTime(),
                   account: i.account?.name ?? "Rỗng",
                   period: `${i.month} ${i.year}`,
                   href: `danh-gia/lci?date=${i.date}`,
@@ -47,7 +47,7 @@ export default function Assessments() {
                 }
                 rowList={enviros.map((i) => ({
                   id: i.id,
-                  dated: i.date,
+                  dated: new Date(i.date).getTime(),
                   account: i.account?.name ?? "Rỗng",
                   period: `${i.month} ${i.year}`,
                   href: `danh-gia/moi-truong?date=${i.date}&account=${i.account.id}`,
@@ -67,7 +67,7 @@ export default function Assessments() {
                 }
                 rowList={socials.map((i) => ({
                   id: i.id,
-                  dated: i.date,
+                  dated: new Date(i.date).getTime(),
                   account: i.account?.name ?? "Rỗng",
                   period: `${i.month} ${i.year}`,
                   href: `danh-gia/xa-hoi?date=${i.date}`,

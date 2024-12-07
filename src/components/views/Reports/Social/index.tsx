@@ -220,7 +220,7 @@ export default function SocialReport() {
           y: {
             title: {
               display: true,
-              text: "Tiền bạc (TL)",
+              text: "Tiền tệ (₫)",
             },
           },
         },

@@ -13,13 +13,14 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
+import formatDate from "@/utils/formatDate";
 
 interface Data {
   shipmentStatus: string;
   shippedOrder: string;
   processes: string;
   location: string;
-  dated: string;
+  dated: number;
   addBy: string;
   image: string;
   imageProcess: string;
@@ -227,7 +228,7 @@ export default function TableShipment({ rowList }: { rowList: Data[] }) {
                       {row.processes}
                     </TableCell>
                     <TableCell align="center">{row.location}</TableCell>
-                    <TableCell align="center">{row.dated}</TableCell>
+                    <TableCell align="center">{formatDate(new Date(row.dated).toLocaleDateString())}</TableCell>
                     <TableCell align="center">{row.addBy}</TableCell>
                   </TableRow>
                 );

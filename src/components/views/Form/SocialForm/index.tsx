@@ -249,7 +249,7 @@ const SocialForm = () => {
                   value={empwage}
                   onChange={(e) => setEmpwage(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> TL</label>
+                <label className="wrap_text"> ₫</label>
                 <div className="py-2 w-full"></div>
                 <label className="form-label">
                   6 - Tổng số nhân viên toàn thời gian có thu nhập dưới mức lương tối thiểu
@@ -283,7 +283,7 @@ const SocialForm = () => {
                   value={femwage}
                   onChange={(e) => setFemwage(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> TL</label>
+                <label className="wrap_text"> ₫</label>
                 <div className="py-2 w-full"></div>
                 <label className="form-label">9 - Mức lương trung bình của nhân viên nam</label>
                 <input
@@ -294,7 +294,7 @@ const SocialForm = () => {
                   value={malwage}
                   onChange={(e) => setMalwage(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> TL</label>
+                <label className="wrap_text"> ₫</label>
                 <div className="py-2 w-full"></div>
                 <label className="form-label">10 - Tổng số lao động nữ</label>
                 <input
@@ -449,7 +449,7 @@ const SocialForm = () => {
                 />
                 <div className="py-2 w-full"></div>
                 <label className="form-label">
-                  {"7 - Choose the external certification(s) regarding social standards and supplier's code of conduct"}
+                  {"7 - Chọn (các) chứng nhận bên ngoài về tiêu chuẩn xã hội và quy tắc ứng xử của nhà cung cấp"}
                 </label>
                 <div className="py-2 w-full"></div>
                 <input
@@ -467,17 +467,17 @@ const SocialForm = () => {
                 <div className="py-2 w-full"></div>
                 <input
                   type="radio"
-                  value="Yes"
+                  value="Có"
                   name="ilo"
-                  checked={ilo === "Yes"}
+                  checked={ilo === "Có"}
                   onChange={(e) => setIlo(e.target.value)}
                 />
                 <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
-                  value="No"
+                  value="Không"
                   name="ilo"
-                  checked={ilo === "No"}
+                  checked={ilo === "Không"}
                   onChange={(e) => setIlo(e.target.value)}
                 />
                 <label className="wrap_text"> Không</label>
@@ -486,17 +486,17 @@ const SocialForm = () => {
                 <div className="py-2 w-full"></div>
                 <input
                   type="radio"
-                  value="Yes"
+                  value="Có"
                   name="fire"
-                  checked={fire === "Yes"}
+                  checked={fire === "Có"}
                   onChange={(e) => setFire(e.target.value)}
                 />
                 <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
-                  value="No"
+                  value="Không"
                   name="fire"
-                  checked={fire === "No"}
+                  checked={fire === "Không"}
                   onChange={(e) => setFire(e.target.value)}
                 />
                 <label className="wrap_text"> Không</label>
@@ -505,17 +505,17 @@ const SocialForm = () => {
                 <div className="py-2 w-full"></div>
                 <input
                   type="radio"
-                  value="Yes"
+                  value="Có"
                   name="medical"
-                  checked={medical === "Yes"}
+                  checked={medical === "Có"}
                   onChange={(e) => setMedical(e.target.value)}
                 />
                 <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
-                  value="No"
+                  value="Không"
                   name="medical"
-                  checked={medical === "No"}
+                  checked={medical === "Không"}
                   onChange={(e) => setMedical(e.target.value)}
                 />
                 <label className="wrap_text"> Không</label>
@@ -524,17 +524,17 @@ const SocialForm = () => {
                 <div className="py-2 w-full"></div>
                 <input
                   type="radio"
-                  value="Yes"
+                  value="Có"
                   name="sanitation"
-                  checked={sanitation === "Yes"}
+                  checked={sanitation === "Có"}
                   onChange={(e) => setSanitation(e.target.value)}
                 />
                 <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
-                  value="No"
+                  value="Không"
                   name="sanitation"
-                  checked={sanitation === "No"}
+                  checked={sanitation === "Không"}
                   onChange={(e) => setSanitation(e.target.value)}
                 />
                 <label className="wrap_text"> Không</label>
@@ -543,17 +543,17 @@ const SocialForm = () => {
                 <div className="py-2 w-full"></div>
                 <input
                   type="radio"
-                  value="Yes"
+                  value="Có"
                   name="gear"
-                  checked={gear === "Yes"}
+                  checked={gear === "Có"}
                   onChange={(e) => setGear(e.target.value)}
                 />
                 <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
-                  value="No"
+                  value="Không"
                   name="gear"
-                  checked={gear === "No"}
+                  checked={gear === "Không"}
                   onChange={(e) => setGear(e.target.value)}
                 />
                 <label className="wrap_text"> Không</label>
@@ -579,9 +579,9 @@ const SocialForm = () => {
                 <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
-                  value="No"
+                  value="Không"
                   name="union"
-                  checked={union === "No"}
+                  checked={union === "Không"}
                   onChange={(e) => setUnion(e.target.value)}
                 />
                 <label className="wrap_text"> Không</label>
@@ -654,7 +654,7 @@ const SocialForm = () => {
                   value={donation}
                   onChange={(e) => setDonation(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> TL</label>
+                <label className="wrap_text"> ₫</label>
                 <div className="py-2 w-full"></div>
                 <label className="form-label">22 -Tổng thu nhập trước thuế mỗi năm</label>
                 <input
@@ -665,7 +665,7 @@ const SocialForm = () => {
                   value={earning}
                   onChange={(e) => setEarning(e.target.value)}
                 />{" "}
-                <label className="wrap_text"> TL</label>
+                <label className="wrap_text"> ₫</label>
                 <div className="py-2 w-full"></div>
                 <label className="form-label">23 - Tổng số vụ tham nhũng mỗi năm</label>
                 <input

@@ -12,9 +12,9 @@ export default function formatDate(
         year: "numeric",
         day: "2-digit",
         month: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
+        hour: showHour ? "2-digit" : undefined,
+        minute: showHour ? "2-digit" : undefined,
+        second: showHour ? "2-digit" : undefined,
         hour12: false,
       });
     }

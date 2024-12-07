@@ -8,7 +8,6 @@ import AddIcon from "@mui/icons-material/Add";
 import { useEffect, useRef, useState } from "react";
 import Button from "@/UI/Button";
 import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
-import getDate from "@/utils/getDate";
 import useToast from "@/hook/useToast";
 import { useWeb3Store } from "@/stores/storeProvider";
 // import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -334,7 +333,7 @@ export default function AddProduct() {
         </div>
 
         <div className="w-[40%] h-full flex flex-col gap-3">
-          <div className="border border-[#f00] rounded-xl flex flex-col gap-4 p-4 max-h-[50vh] min-h-[35vh] h-full">
+          <div className="border border-[#ab9797] rounded-xl flex flex-col gap-4 p-4 max-h-[50vh] min-h-[35vh] h-full">
             <h4 className="text-xl font-semibold">Hình ảnh</h4>
 
             <div

@@ -246,7 +246,7 @@ export default function EnviroForm() {
                   value={ghg}
                   onChange={(e) => setGhg(e.target.value)}
                 />
-                <label className="wrap_text"> tấn of CO2e/ tháng</label>
+                <label className="wrap_text"> tấn CO2/ tháng</label>
                 <div className="py-2 w-full"></div>
                 <label className="form-label">8 - Tổng lượng ô nhiễm nước phát sinh mỗi tháng</label>
                 <input
@@ -262,30 +262,30 @@ export default function EnviroForm() {
                 <label className="form-label">9 - Chọn (các) loại ô nhiễm nước</label>
                 <input
                   type="checkbox"
-                  name="Oil"
+                  name="Dầu"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
                 <label className="wrap_text"> Dầu</label>
                 <input
                   type="checkbox"
-                  name="Fuel"
+                  name="Nhiên liệu"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
                 <label className="wrap_text"> Nhiên liệu</label>
                 <input
                   type="checkbox"
-                  name="Wastes"
+                  name="Chất thải"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
                 <label className="wrap_text"> Chất thải</label>
                 <input
                   type="checkbox"
-                  name="Chemical"
+                  name="Hóa chất"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
                 <label className="wrap_text"> Hóa chất</label>
                 <div className="py-2 w-full"></div>
-                <label className="form-label">10 - Total amount of land pollution generated per month</label>
+                <label className="form-label">10 - Tổng lượng ô nhiễm đất phát sinh mỗi tháng</label>
                 <input
                   type="number"
                   min="0"
@@ -299,25 +299,25 @@ export default function EnviroForm() {
                 <label className="form-label">11 - Chọn (các) loại ô nhiễm đất</label>
                 <input
                   type="checkbox"
-                  name="Oil"
+                  name="Dầu"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setLandpoltype)}
                 />
                 <label className="wrap_text"> Dầu</label>
                 <input
                   type="checkbox"
-                  name="Fuel"
+                  name="Nhiên liệu"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setLandpoltype)}
                 />
                 <label className="wrap_text"> Nhiên liệu</label>
                 <input
                   type="checkbox"
-                  name="Wastes"
+                  name="Chất thải"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setLandpoltype)}
                 />
                 <label className="wrap_text"> Chất thải</label>
                 <input
                   type="checkbox"
-                  name="Chemical"
+                  name="Hóa chất"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setLandpoltype)}
                 />
                 <label className="wrap_text"> Hóa chất</label>
@@ -384,37 +384,37 @@ export default function EnviroForm() {
                 <div className="py-2 w-full"></div>
                 <input
                   type="checkbox"
-                  name="Recycling"
+                  name="Tái chế"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
                 <label className="wrap_text"> Tái chế</label>
                 <input
                   type="checkbox"
-                  name="Reuse"
+                  name="Tái sử dụng"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
                 <label className="wrap_text"> Tái sử dụng</label>
                 <input
                   type="checkbox"
-                  name="Recovery"
+                  name="Sự hồi phục"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
                 <label className="wrap_text"> Sự hồi phục</label>
                 <input
                   type="checkbox"
-                  name="Incineration"
+                  name="Thiêu đốt"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
                 <label className="wrap_text"> Thiêu đốt</label>
                 <input
                   type="checkbox"
-                  name="Landfilling"
+                  name="Chôn lấp"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
                 <label className="wrap_text"> Chôn lấp</label>
                 <input
                   type="checkbox"
-                  name="Composting"
+                  name="Ủ phân"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
                 <label className="wrap_text"> Ủ phân</label>
@@ -445,37 +445,37 @@ export default function EnviroForm() {
                 <div className="py-2 w-full"></div>
                 <input
                   type="checkbox"
-                  name="Recycling"
+                  name="Tái chế"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
                 <label className="wrap_text"> Tái chế</label>
                 <input
                   type="checkbox"
-                  name="Reuse"
+                  name="Tái sử dụng"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
                 <label className="wrap_text"> Tái sử dụng</label>
                 <input
                   type="checkbox"
-                  name="Recovery"
+                  name="Sự hồi phục"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
                 <label className="wrap_text"> Sự hồi phục</label>
                 <input
                   type="checkbox"
-                  name="Incineration"
+                  name="Thiêu đốt"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
                 <label className="wrap_text"> Thiêu đốt</label>
                 <input
                   type="checkbox"
-                  name="Landfilling"
+                  name="Chôn lấp"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
                 <label className="wrap_text"> Chôn lấp</label>
                 <input
                   type="checkbox"
-                  name="Composting"
+                  name="Ủ phân"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
                 <label className="wrap_text"> Ủ phân</label>
@@ -533,17 +533,17 @@ export default function EnviroForm() {
                 <div className="py-2 w-full"></div>
                 <input
                   type="radio"
-                  value="Yes"
+                  value="Có"
                   name="bio"
-                  checked={bio === "Yes"}
+                  checked={bio === "Có"}
                   onChange={(e) => setBio(e.target.value)}
                 />
                 <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
-                  value="No"
+                  value="Không"
                   name="bio"
-                  checked={bio === "No"}
+                  checked={bio === "Không"}
                   onChange={(e) => setBio(e.target.value)}
                 />
                 <label className="wrap_text"> Không</label>
@@ -556,17 +556,17 @@ export default function EnviroForm() {
                 <div className="py-2 w-full"></div>
                 <input
                   type="radio"
-                  value="Yes"
+                  value="Có"
                   name="sensitive"
-                  checked={sensitive === "Yes"}
+                  checked={sensitive === "Có"}
                   onChange={(e) => setSensitive(e.target.value)}
                 />
                 <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
-                  value="No"
+                  value="Không"
                   name="sensitive"
-                  checked={sensitive === "No"}
+                  checked={sensitive === "Không"}
                   onChange={(e) => setSensitive(e.target.value)}
                 />
                 <label className="wrap_text"> không</label>
@@ -575,17 +575,17 @@ export default function EnviroForm() {
                 <div className="py-2 w-full"></div>
                 <input
                   type="radio"
-                  value="Yes"
+                  value="Có"
                   name="envirostand"
-                  checked={envirostand === "Yes"}
+                  checked={envirostand === "Có"}
                   onChange={(e) => setEnvirostand(e.target.value)}
                 />
                 <label className="wrap_text"> Có</label>
                 <input
                   type="radio"
-                  value="No"
+                  value="Không"
                   name="envirostand"
-                  checked={envirostand === "No"}
+                  checked={envirostand === "Không"}
                   onChange={(e) => setEnvirostand(e.target.value)}
                 />
                 <label className="wrap_text"> Không</label>
@@ -594,44 +594,44 @@ export default function EnviroForm() {
                 <div className="py-2 w-full"></div>
                 <input
                   type="checkbox"
-                  name="Recycling"
+                  name="Tái chế"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
                 />
                 <label className="wrap_text"> Tái chế</label>
                 <input
                   type="checkbox"
-                  name="Renewable energy"
+                  name="Năng lượng tái tạo"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
                 />
                 <label className="wrap_text"> Năng lượng tái tạo</label>
                 <input
                   type="checkbox"
-                  name="Green transportation"
+                  name="Giao thông xanh"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
                 />
                 <label className="wrap_text"> Giao thông xanh</label>
                 <input
                   type="checkbox"
-                  name="Electric motors"
+                  name="Động cơ điện"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
                 />
                 <label className="wrap_text"> Động cơ điện</label>
                 <div className="py-2 w-full"></div>
                 <input
                   type="checkbox"
-                  name="Green chemistry"
+                  name="Hóa học xanh"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
                 />
                 <label className="wrap_text">Hóa học xanh</label>
                 <input
                   type="checkbox"
-                  name="Green lighting"
+                  name="Chiếu sáng xanh"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
                 />
                 <label className="wrap_text"> Chiếu sáng xanh</label>
                 <input
                   type="checkbox"
-                  name="Grey water"
+                  name="Nước xám"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setClean)}
                 />
                 <label className="wrap_text"> Nước xám</label>

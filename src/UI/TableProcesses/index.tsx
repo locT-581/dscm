@@ -226,7 +226,18 @@ export default function TableProcesses({ rowList }: { rowList: Data[] }) {
                     </TableCell>
                     <TableCell align="center">{row.name}</TableCell>
                     <TableCell align="center">{row.description}</TableCell>
-                    <TableCell align="center">{formatDate(new Date(row.date).toISOString())}</TableCell>
+                    <TableCell align="center">
+                      <>
+                        {(() => {
+                          try {
+                            return formatDate(new Date(row.date).toISOString());
+                          } catch (e) {
+                            console.log("🚀 ~ {visibleRows.map ~ e:", e);
+                            return row.date;
+                          }
+                        })()}
+                      </>
+                    </TableCell>
                     <TableCell align="center">
                       <Option
                         options={[

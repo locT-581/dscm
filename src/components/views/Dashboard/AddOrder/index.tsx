@@ -21,7 +21,7 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import Order from "@/types/order";
 import formatDate from "@/utils/formatDate";
 
-export default function AddOrder({ initOrder, allowEdit = true }: { initOrder?: Order; allowEdit: boolean }) {
+export default function AddOrder({ initOrder, allowEdit = true }: { initOrder?: Order; allowEdit?: boolean }) {
   console.log("🚀 ~ AddOrder ~ initOrder:", initOrder);
   const { update, notify, _toast } = useToast();
   const { contract, account } = useWeb3Store((state) => state);

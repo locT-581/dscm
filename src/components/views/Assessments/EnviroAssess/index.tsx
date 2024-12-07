@@ -22,8 +22,8 @@ export const AssessList = ({
   assessments: Assessment[];
   energy: string[];
   material: string[];
-}) =>
-  assessments.map((a) => (
+}) => {
+  return assessments.map((a) => (
     <tr key={a.id}>
       <table className="LCI-table">
         <caption>
@@ -60,36 +60,41 @@ export const AssessList = ({
               +energy[+(a.document as EnviroFormType).id - 2] > 0 &&
               +energy[+(a.document as EnviroFormType).id - 1] > 0
                 ? +energy[+(a.document as EnviroFormType).id - 2] - +energy[+(a.document as EnviroFormType).id - 1]
-                : null}
+                : 0}
             </td>
             <td>kWh/tháng</td>
           </tr>
           <tr>
             <th>Phần trăm năng lượng giảm mỗi tháng</th>
             <td>
-              {+(a.document as EnviroFormType).id > 1 &&
-              +energy[+(a.document as EnviroFormType).id - 2] > 0 &&
-              +energy[+(a.document as EnviroFormType).id - 1] > 0
-                ? ((+energy[+(a.document as EnviroFormType).id - 2] - +energy[+(a.document as EnviroFormType).id - 1]) *
-                    100) /
-                  +energy[+(a.document as EnviroFormType).id - 2]
-                : 0 % 1 !== 0
-                ? (+(a.document as EnviroFormType).id > 1 &&
-                  +energy[+(a.document as EnviroFormType).id - 2] > 0 &&
-                  +energy[+(a.document as EnviroFormType).id - 1] > 0
-                    ? ((+energy[+(a.document as EnviroFormType).id - 2] -
-                        +energy[+(a.document as EnviroFormType).id - 1]) *
-                        100) /
-                      +energy[+(a.document as EnviroFormType).id - 2]
-                    : 0
-                  ).toFixed(1)
-                : +(a.document as EnviroFormType).id > 1 &&
-                  +energy[+(a.document as EnviroFormType).id - 2] > 0 &&
-                  +energy[+(a.document as EnviroFormType).id - 1] > 0
-                ? ((+energy[+(a.document as EnviroFormType).id - 2] - +energy[+(a.document as EnviroFormType).id - 1]) *
-                    100) /
-                  +energy[+(a.document as EnviroFormType).id - 2]
-                : 0}
+              {(() => {
+                // Kiểm tra xem có đủ dữ liệu để tính toán không
+                const hasEnoughData =
+                  +(a.document as EnviroFormType).id >= 1 &&
+                  energy[+(a.document as EnviroFormType).id - 2] !== undefined &&
+                  energy[+(a.document as EnviroFormType).id - 1] !== undefined;
+
+                if (!hasEnoughData) {
+                  console.log(
+                    "Không đủ dữ liệu để tính % giảm năng lượng",
+                    energy[+(a.document as EnviroFormType).id - 2],
+                    energy[+(a.document as EnviroFormType).id - 1]
+                  );
+                  return 0;
+                }
+
+                const prevEnergy = +energy[+(a.document as EnviroFormType).id - 2];
+                const currEnergy = +energy[+(a.document as EnviroFormType).id - 1];
+
+                if (prevEnergy <= 0) {
+                  console.log("Năng lượng tháng trước = 0, không thể tính % giảm");
+                  return 0;
+                }
+
+                const percentChange = ((prevEnergy - currEnergy) * 100) / prevEnergy;
+
+                return percentChange % 1 !== 0 ? percentChange.toFixed(1) : percentChange;
+              })()}
             </td>
             <td>%</td>
           </tr>
@@ -232,7 +237,7 @@ export const AssessList = ({
               <GiIcons.GiCircleForest />
             </th>
             <th>Sự tồn tại của chính sách đa dạng sinh học</th>
-            <td>{+(a.document as EnviroFormType).bio}</td>
+            <td>{(a.document as EnviroFormType).bio}</td>
             <td></td>
           </tr>
           <tr>
@@ -240,7 +245,7 @@ export const AssessList = ({
               Sự tồn tại của các hoạt động và hoạt động trên các khu vực được bảo vệ và nhạy cảm (ví dụ: khu vực được
               bảo vệ của IUCN loại 1–4, di sản thế giới và khu dự trữ sinh quyển)
             </th>
-            <td>{+(a.document as EnviroFormType).sensitive}</td>
+            <td>{(a.document as EnviroFormType).sensitive}</td>
             <td></td>
           </tr>
           <tr>
@@ -274,7 +279,7 @@ export const AssessList = ({
           </tr>
           <tr>
             <th>Loại ô nhiễm nước </th>
-            <td>{(+(a.document as EnviroFormType).waterpoltype + " ").replace(/,/g, ", ")}</td>
+            <td>{((a.document as EnviroFormType).waterpoltype + " ").replace(/,/g, ", ")}</td>
             <td></td>
           </tr>
           <tr>
@@ -288,7 +293,7 @@ export const AssessList = ({
           </tr>
           <tr>
             <th>Loại ô nhiễm đất</th>
-            <td>{(+(a.document as EnviroFormType).landpoltype + " ").replace(/,/g, ", ")}</td>
+            <td>{((a.document as EnviroFormType).landpoltype + " ").replace(/,/g, ", ")}</td>
             <td></td>
           </tr>
           <tr>
@@ -339,7 +344,7 @@ export const AssessList = ({
           </tr>
           <tr>
             <th>Loại điểm đến chất thải rắn </th>
-            <td>{(+(a.document as EnviroFormType).solidwastedes + " ").replace(/,/g, ", ")}</td>
+            <td>{((a.document as EnviroFormType).solidwastedes + " ").replace(/,/g, ", ")}</td>
             <td></td>
           </tr>
           <tr>
@@ -372,7 +377,7 @@ export const AssessList = ({
           </tr>
           <tr>
             <th>Loại nơi xử lý nước thải</th>
-            <td>{(+(a.document as EnviroFormType).waterwastedes + " ").replace(/,/g, ", ")}</td>
+            <td>{((a.document as EnviroFormType).waterwastedes + " ").replace(/,/g, ", ")}</td>
             <td></td>
           </tr>
           <tr>
@@ -415,7 +420,7 @@ export const AssessList = ({
               <GrIcons.GrCertificate />
             </th>
             <th>Sự tồn tại của các chứng nhận bên ngoài về tiêu chuẩn môi trường</th>
-            <td>{+(a.document as EnviroFormType).envirostand}</td>
+            <td>{(a.document as EnviroFormType).envirostand}</td>
             <td></td>
           </tr>
           <tr>
@@ -424,7 +429,7 @@ export const AssessList = ({
               <FaIcons.FaSeedling />
             </th>
             <th>Loại công nghệ sạch được sử dụng</th>
-            <td>{(+(a.document as EnviroFormType).clean + " ").replace(/,/g, ", ")}</td>
+            <td>{((a.document as EnviroFormType).clean + " ").replace(/,/g, ", ")}</td>
             <td></td>
           </tr>
           <tr>
@@ -447,6 +452,7 @@ export const AssessList = ({
       </table>
     </tr>
   ));
+};
 
 export default function EnviroAssess() {
   const { enviros } = useWeb3Store((state) => state);
@@ -470,6 +476,7 @@ export default function EnviroAssess() {
   const energy = enviros
     ?.filter((obj) => obj.account.id.includes(account ?? ""))
     .map((obj) => (obj.document as EnviroFormType).energy);
+  console.log("🚀 ~ EnviroAssess ~ energy:", energy);
 
   return (
     <>

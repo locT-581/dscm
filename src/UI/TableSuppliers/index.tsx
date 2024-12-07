@@ -208,11 +208,12 @@ export default function TableSuppliers({ rowList }: { rowList: Data[] }) {
                     <TableCell align="center">{row.phoneNumber}</TableCell>
                     <TableCell align="center">
                       <Option
-                        onEdit={() => {
-                          console.log(row.id);
-                          router.push("/nha-cung-cap/chinh-sua?id=" + row.id);
-                        }}
-                        onDelete={() => {}}
+                        options={[
+                          {
+                            label: "Chỉnh sửa",
+                            onClick: () => router.push(`/nha-cung-cap/them-nha-cung-cap?id=${row.id}`),
+                          },
+                        ]}
                       />
                     </TableCell>
                   </TableRow>

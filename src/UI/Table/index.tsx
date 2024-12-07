@@ -307,7 +307,18 @@ export default function EnhancedTable({
                       <TableCell align="center">{row.name}</TableCell>
                       <TableCell align="center">{row.quantity}</TableCell>
                       <TableCell align="center">{row.unit}</TableCell>
-                      <TableCell align="center">{formatDate(new Date(row.date).toISOString())}</TableCell>
+                      <TableCell align="center">
+                        <>
+                          {(() => {
+                            try {
+                              return formatDate(new Date(row.date).toISOString());
+                            } catch (e) {
+                              console.log("🚀 ~ {visibleRows.map ~ e:", e);
+                              return row.date;
+                            }
+                          })()}
+                        </>
+                      </TableCell>
                       {user?.role == "Supplier" && (
                         <TableCell
                           onClick={(e) => {

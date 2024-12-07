@@ -21,7 +21,7 @@ export const SidebarData: {
     isShow: false,
   },
   {
-    title: "Giao nhận hàng",
+    title: "Giao hàng",
     path: "/quan-ly-giao-nhan-hang",
     icon: "LocalShippingIcon",
     isShow: true,
@@ -51,6 +51,7 @@ export const SidebarData: {
     path: "/bao-cao",
     icon: "SummarizeIcon",
     isShow: true,
+    onlyAdmin: true,
   },
   {
     title: "Vận chuyển",
@@ -77,6 +78,27 @@ export const SidebarData: {
     icon: "Groups2Icon",
     isShow: false,
     onlyAdmin: true,
+  },
+  {
+    title: "Đánh giá LCI",
+    path: "/bieu-mau/lci",
+    icon: "RecyclingIcon",
+    isShow: false,
+    onlyAdmin: false,
+  },
+  {
+    title: "Đánh giá Môi trường",
+    path: "/bieu-mau/moi-truong",
+    icon: "RecyclingIcon",
+    isShow: false,
+    onlyAdmin: false,
+  },
+  {
+    title: "Đánh giá Xã hội",
+    path: "/bieu-mau/xa-hoi",
+    icon: "RecyclingIcon",
+    isShow: false,
+    onlyAdmin: false,
   },
   {
     title: "LCI",

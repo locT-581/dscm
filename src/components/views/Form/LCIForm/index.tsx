@@ -27,7 +27,7 @@ export default function LCIForm() {
   const [month, setMonth] = useState("");
   const [year, setYear] = useState("");
   const [energy, setEnergy] = useState("");
-  const [lô, setlô] = useState("");
+  const [batch, setBatch] = useState("");
   const [renewenergy, setRenewenergy] = useState("");
   const [water, setWater] = useState("");
   const [waterrec, setWaterrec] = useState("");
@@ -74,7 +74,7 @@ export default function LCIForm() {
     const LCIForm = {
       id: LCIs.length + 1,
       product: product?.id,
-      lô: lô,
+      batch: batch,
       energy: energy,
       renewenergy: renewenergy,
       water: water,
@@ -196,8 +196,8 @@ export default function LCIForm() {
                   min="0"
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   step=".001"
-                  value={lô}
-                  onChange={(e) => setlô(e.target.value)}
+                  value={batch}
+                  onChange={(e) => setBatch(e.target.value)}
                 />
                 <label className="wrap_text">{product?.unit.name}</label>
                 <div className="w-full my-2"></div>
@@ -304,25 +304,25 @@ export default function LCIForm() {
                 <label className="form-label">10 - Chọn (các) loại ô nhiễm nước cho mỗi lô</label>
                 <input
                   type="checkbox"
-                  name="Oil"
+                  name="Dầu"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
                 <label className="wrap_text"> Dầu</label>
                 <input
                   type="checkbox"
-                  name="Fuel"
+                  name="Nhiên liệu"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
                 <label className="wrap_text"> Nhiên liệu</label>
                 <input
                   type="checkbox"
-                  name="Wastes"
+                  name="Rác thải"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
                 <label className="wrap_text"> Rác thải</label>
                 <input
                   type="checkbox"
-                  name="Chemical"
+                  name="Hóa chất"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterpoltype)}
                 />
                 <label className="wrap_text"> Hoá chất</label>
@@ -342,25 +342,25 @@ export default function LCIForm() {
                 <label className="form-label">12 - Chọn (các) loại ô nhiễm đất cho mỗi lô</label>
                 <input
                   type="checkbox"
-                  name="Oil"
+                  name="Dầu"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setLandpoltype)}
                 />
                 <label className="wrap_text"> Dầu</label>
                 <input
                   type="checkbox"
-                  name="Fuel"
+                  name="Nhiên liệu"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setLandpoltype)}
                 />
                 <label className="wrap_text"> Nhiên liệu</label>
                 <input
                   type="checkbox"
-                  name="Wastes"
+                  name="Chất thải"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setLandpoltype)}
                 />
                 <label className="wrap_text"> Chất thải</label>
                 <input
                   type="checkbox"
-                  name="Chemical"
+                  name="Hóa chất"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setLandpoltype)}
                 />
                 <label className="wrap_text"> Hóa chất</label>
@@ -429,37 +429,37 @@ export default function LCIForm() {
                 <div className="w-full my-2"></div>
                 <input
                   type="checkbox"
-                  name="Recycling"
+                  name="Tái chế"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
                 <label className="wrap_text"> Tái chế</label>
                 <input
                   type="checkbox"
-                  name="Reuse"
+                  name="Tái sử dụng"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
                 <label className="wrap_text"> Tái sử dụng</label>
                 <input
                   type="checkbox"
-                  name="Recovery"
+                  name="Phục hồi"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
                 <label className="wrap_text"> Phục hồi</label>
                 <input
                   type="checkbox"
-                  name="Incineration"
+                  name="Đốt cháy"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
                 <label className="wrap_text"> Đốt cháy</label>
                 <input
                   type="checkbox"
-                  name="Landfilling"
+                  name="Chôn lấp"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
                 <label className="wrap_text"> Chôn lấp</label>
                 <input
                   type="checkbox"
-                  name="Composting"
+                  name="Ủ phân"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setSolidwastedes)}
                 />
                 <label className="wrap_text"> Ủ phân</label>
@@ -492,37 +492,37 @@ export default function LCIForm() {
                 <div className="w-full my-2"></div>
                 <input
                   type="checkbox"
-                  name="Recycling"
+                  name="Tái chế"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
                 <label className="wrap_text"> Tái chế</label>
                 <input
                   type="checkbox"
-                  name="Reuse"
+                  name="Tái sử dụng"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
                 <label className="wrap_text"> Tái sử dụng</label>
                 <input
                   type="checkbox"
-                  name="Recovery"
+                  name="Hồi phục"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
                 <label className="wrap_text"> Hồi phục</label>
                 <input
                   type="checkbox"
-                  name="Incineration"
+                  name="Đốt cháy"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
                 <label className="wrap_text"> Đốt cháy</label>
                 <input
                   type="checkbox"
-                  name="Landfilling"
+                  name="Chôn lấp"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
                 <label className="wrap_text"> Chôn lấp</label>
                 <input
                   type="checkbox"
-                  name="Composting"
+                  name="Ủ phân"
                   onChange={(e) => handleChange(e.target.name, e.target.checked, setWaterwastedes)}
                 />
                 <label className="wrap_text"> Ủ phân</label>
@@ -531,16 +531,16 @@ export default function LCIForm() {
                 <input
                   required
                   type="radio"
-                  value="Yes"
-                  checked={productrec === "Yes"}
+                  value="Có"
+                  checked={productrec === "Có"}
                   onChange={(e) => setProductrec(e.target.value)}
                 />
                 <label className="wrap_text"> Có</label>
                 <input
                   required
                   type="radio"
-                  value="No"
-                  checked={productrec === "No"}
+                  value="Không"
+                  checked={productrec === "Không"}
                   onChange={(e) => setProductrec(e.target.value)}
                 />
                 <label className="wrap_text"> Không</label>
@@ -551,16 +551,16 @@ export default function LCIForm() {
                 <input
                   required
                   type="radio"
-                  value="Yes"
-                  checked={ecolabel === "Yes"}
+                  value="Có"
+                  checked={ecolabel === "Có"}
                   onChange={(e) => setEcolabel(e.target.value)}
                 />
                 <label className="wrap_text"> Có</label>
                 <input
                   required
                   type="radio"
-                  value="No"
-                  checked={ecolabel === "No"}
+                  value="Không"
+                  checked={ecolabel === "Không"}
                   onChange={(e) => setEcolabel(e.target.value)}
                 />
                 <label className="wrap_text"> không</label>

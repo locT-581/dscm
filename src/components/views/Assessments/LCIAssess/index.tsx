@@ -187,7 +187,7 @@ const AssessList = ({ assessments }: { assessments: Assessment[] }) =>
             </tr>
             <tr>
               <th>Loại ô nhiễm nước</th>
-              <td>{(+(a.document as CLIFormType).waterpoltype + " ").replace(/,/g, ", ")}</td>
+              <td>{((a.document as CLIFormType).waterpoltype + " ").replace(/,/g, ", ")}</td>
               <td></td>
             </tr>
             <tr>
@@ -205,7 +205,7 @@ const AssessList = ({ assessments }: { assessments: Assessment[] }) =>
             </tr>
             <tr>
               <th>Loại ô nhiễm đất</th>
-              <td>{(+(a.document as CLIFormType).landpoltype + " ").replace(/,/g, ", ")}</td>
+              <td>{((a.document as CLIFormType).landpoltype + " ").replace(/,/g, ", ")}</td>
               <td></td>
             </tr>
             <tr>
@@ -267,7 +267,7 @@ const AssessList = ({ assessments }: { assessments: Assessment[] }) =>
             </tr>
             <tr>
               <th>Loại điểm đến chất thải rắn </th>
-              <td>{(+(a.document as CLIFormType).solidwastedes + " ").replace(/,/g, ", ")}</td>
+              <td>{((a.document as CLIFormType).solidwastedes + " ").replace(/,/g, ", ")}</td>
               <td></td>
             </tr>
             <tr>
@@ -303,7 +303,7 @@ const AssessList = ({ assessments }: { assessments: Assessment[] }) =>
             </tr>
             <tr>
               <th>Loại nơi xử lý nước thải</th>
-              <td>{(+(a.document as CLIFormType).waterwastedes + " ").replace(/,/g, ", ")}</td>
+              <td>{((a.document as CLIFormType).waterwastedes + " ").replace(/,/g, ", ")}</td>
               <td></td>
             </tr>
             <tr>
@@ -312,7 +312,7 @@ const AssessList = ({ assessments }: { assessments: Assessment[] }) =>
                 <RiIcons.RiRecycleFill />
               </th>
               <th>Sản phẩm được sản xuất có thể tái chế hoặc tái sử dụng được hay không</th>
-              <td>{+(a.document as CLIFormType).productrec}</td>
+              <td>{(a.document as CLIFormType).productrec}</td>
               <td></td>
             </tr>
             <tr>
@@ -321,7 +321,7 @@ const AssessList = ({ assessments }: { assessments: Assessment[] }) =>
                 <BiIcons.BiPackage />
               </th>
               <th>Sản phẩm có bao bì và nhãn mác thân thiện với môi trường hay không</th>
-              <td>{+(a.document as CLIFormType).ecolabel}</td>
+              <td>{(a.document as CLIFormType).ecolabel}</td>
               <td></td>
             </tr>
           </tbody>

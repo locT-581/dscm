@@ -53,7 +53,7 @@ export default function AddShipment({ shipType: _shipType, onShipAdd, initOrder 
   // const orderName = orders?.filter((obj) => obj.id.toString().includes(product)).map((order) => order.name);
 
   useEffect(() => {
-    setDate(new Date().toLocaleString());
+    setDate(new Date().toISOString());
     getLocation();
   }, [d]);
 
@@ -107,6 +107,7 @@ export default function AddShipment({ shipType: _shipType, onShipAdd, initOrder 
     account?: string;
   }) => {
     notify("Đang thêm...");
+
     await contract?.methods
       .addShipment(shipType, place, latlong, date, product, process)
       .send({ from: account })

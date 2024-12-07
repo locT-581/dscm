@@ -9,8 +9,9 @@ import TimeLine from "@/components/TimeLine";
 import Product from "@/types/product";
 
 import "leaflet/dist/leaflet.css";
-import Map from "@/components/Map";
+const Map = dynamic(() => import("@/components/Map"), { ssr: false });
 import { useWeb3Store } from "@/stores/storeProvider";
+import dynamic from "next/dynamic";
 
 const Journey = () => {
   const { shipments, products } = useWeb3Store((state) => state);

@@ -180,20 +180,8 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
       }
 
       if (user?.role == "Supplier") {
-        // Những đơn hàng có sự tham gia của nhà cung cấp -> orders
-        // lọc những shipment có product thuộc orders
-
-        // từ 1 process của supplier -> lấy các product có process đó -> vói mỗi product -> lấy tất cả process của product đó
-        // với mỗi process -> lấy tất cả shipment có process đó
-        const listProductHaveProcessOfSupplier = products?.filter((p) => {
-          const listIDOfProcess = user?.productsProcesses.map((p) => p.id);
-          return p.process.some((p) => listIDOfProcess?.includes(p.id));
-        });
-
         set(() => ({
-          shipments: shipments.filter((sh) => {
-            return listProductHaveProcessOfSupplier?.map((p) => p.id).includes(sh?.product?.id);
-          }),
+          shipments: shipments.filter((sh) => sh.supplier.id == user.id),
         }));
       } else {
         set(() => ({ shipments }));
@@ -239,7 +227,7 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
     },
 
     getCLIs: async () => {
-      const { assessmentContract } = get();
+      const { assessmentContract, user } = get();
       if (!assessmentContract) return;
 
       const LCICount: number = await assessmentContract.methods.LCICount().call();
@@ -252,6 +240,7 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
           id: Number(newLCI.id).toString(),
           document: {
             ...JSON.parse(newLCI.document),
+            batch: JSON.parse(newLCI.document).batch ?? JSON.parse(newLCI.document)["lô"],
             product: get().products?.find((p) => p.id == JSON.parse(newLCI.document).product),
           },
           assessType: newLCI.assessType as AssessmentType,
@@ -261,11 +250,23 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
           ) as Supplier,
         });
       }
-      set(() => ({ LCIs }));
+
+      let temp;
+      if (user?.role == "Supplier") {
+        temp = LCIs.filter((lci) => {
+          console.log("lsls000", lci, lci.account.account.toLowerCase(), user?.account?.toLowerCase());
+          return lci.account.account.toLowerCase() === user?.account?.toLowerCase();
+        });
+      } else {
+        temp = LCIs;
+      }
+
+      console.log("🚀 ~ getCLIs: ~ LCIs:", LCIs);
+      set(() => ({ LCIs: temp }));
     },
 
     getEnviros: async () => {
-      const { assessmentContract } = get();
+      const { assessmentContract, user } = get();
       if (!assessmentContract) return;
 
       const enviroCount: number = await assessmentContract.methods.enviroCount().call();
@@ -276,7 +277,10 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
         enviros.push({
           ...newEnviro,
           id: Number(newEnviro.id).toString(),
-          document: JSON.parse(newEnviro.document),
+          document: {
+            ...JSON.parse(newEnviro.document),
+            batch: JSON.parse(newEnviro.document).batch ?? JSON.parse(newEnviro.document)["lô"],
+          },
           assessType: newEnviro.assessType as AssessmentType,
           process: get().processes?.find((p) => p.id == newEnviro.process) as Process,
           account: get().suppliers?.find(
@@ -284,10 +288,17 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
           ) as Supplier,
         });
       }
-      set(() => ({ enviros }));
+
+      let temp;
+      if (user?.role == "Supplier") {
+        temp = enviros.filter((enviro) => enviro.account.account.toLowerCase() === user?.account?.toLowerCase());
+      } else {
+        temp = enviros;
+      }
+      set(() => ({ enviros: temp }));
     },
     getSocials: async () => {
-      const { assessmentContract } = get();
+      const { assessmentContract, user } = get();
       if (!assessmentContract) return;
 
       const socialCount: number = await assessmentContract.methods.socialCount().call();
@@ -302,6 +313,7 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
             ...JSON.parse(newSocial.document),
             product: get().products?.find((p) => p.id == JSON.parse(newSocial.document).product),
             suppliers: get().suppliers?.find((s) => s.id == JSON.parse(newSocial.document).suppliers),
+            batch: JSON.parse(newSocial.document).batch ?? JSON.parse(newSocial.document)["lô"],
           },
           assessType: newSocial.assessType as AssessmentType,
           process: get().processes?.find((p) => p.id == newSocial.process) as Process,
@@ -310,7 +322,14 @@ export const createWeb3Store = (initState: StoreState = defaultInitState) => {
           ) as Supplier,
         });
       }
-      set(() => ({ socials }));
+
+      let temp;
+      if (user?.role == "Supplier") {
+        temp = socials.filter((social) => social.account.account.toLowerCase() === user?.account?.toLowerCase());
+      } else {
+        temp = socials;
+      }
+      set(() => ({ socials: temp }));
     },
   }));
 };

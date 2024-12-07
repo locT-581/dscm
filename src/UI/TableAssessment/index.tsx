@@ -15,11 +15,12 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import Link from "next/link";
+import formatDate from "@/utils/formatDate";
 interface Data {
   id: string;
   account: string;
   period: string;
-  dated: string;
+  dated: number;
   href: string;
 }
 
@@ -195,7 +196,16 @@ export default function TableAssessment({
                     </TableCell>
                     <TableCell align="center">{row.account}</TableCell>
                     <TableCell align="center">{row.period}</TableCell>
-                    <TableCell align="center">{row.dated}</TableCell>
+                    <TableCell align="center">
+                      {(() => {
+                        try {
+                          return formatDate(new Date(row.dated).toLocaleDateString(), false);
+                        } catch (e) {
+                          console.log("🚀 ~ {visibleRows.map ~ e:", e);
+                          return row.dated;
+                        }
+                      })()}
+                    </TableCell>
                   </TableRow>
                 );
               })}
